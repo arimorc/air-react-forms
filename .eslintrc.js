@@ -26,6 +26,7 @@ module.exports = {
 		},
 	},
 	rules: {
+		'import/no-unresolved': [2, { ignore: ['^air-react-forms$'] }],
 		'arrow-parens': [ 'error', 'always' ],
 		'comma-dangle': [ 'error', {
 			'arrays': 'always-multiline',
