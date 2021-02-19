@@ -13,6 +13,7 @@ export default {
 	plugins: [
 		external(),
 		babel({
+			babelHelpers: 'bundled',
 			exclude: 'node_modules/**',
 		}),
 		del({ targets: ['dist/*'] }),
