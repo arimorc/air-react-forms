@@ -1,12 +1,17 @@
 {
 	"name": "air-react-forms",
-	"files": [
-		"./dist"
-	],
+	"author": "RolRom",
 	"version": "0.1.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/arimorc/air-react-forms/"
+	  },
 	"main": "dist/index.cjs.js",
 	"module": "dist/index.esm.js",
 	"source": "src/index.js",
+	"files": [
+		"./dist"
+	],
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org"
 	},
@@ -72,5 +77,9 @@
 	},
 	"peerDependencies": {
 		"react": "^16.8.3 || ^17.0.0-0"
-	}
+	},
+	"license": "MIT",
+	"keywords": [
+		"react", "forms", "react-forms", "rolrom"
+	]
 }
