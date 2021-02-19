@@ -1,0 +1,6 @@
+{
+    "branch": "main",
+    "preview": "true",
+	"yarn": true,
+	"contents": "dist"
+}
