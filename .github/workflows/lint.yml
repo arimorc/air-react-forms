@@ -20,11 +20,10 @@ jobs:
             with:
                 path: |
                     **/node_modules
-                    .eslintcache
                 key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
           - name: Install modules
-            run: yarn install --frozen-lockfile
+            run: yarn run install-all
 
           - name: Run ESLint
             run: yarn run eslint

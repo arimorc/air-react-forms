@@ -10,7 +10,7 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v2
 
-          - name: Set up Node.js ${{ matrix.node-version }}
+          - name: Set up Node.js
             uses: actions/setup-node@v2
             with:
                 node-version: '15'
@@ -23,7 +23,7 @@ jobs:
                 key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
           - name: Install modules
-            run: yarn install --frozen-lockfile
+            run: yarn run install-all
 
           - name: Run tests
             run: yarn test
