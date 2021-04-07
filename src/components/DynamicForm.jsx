@@ -1,52 +1,61 @@
-import { useState } from 'react';
+import { Children, createElement, useRef } from 'react';
+import PropTypes from 'prop-types';
 import DynamicInput from './DynamicInput';
+import { HANDLED_FORM_INPUT_TYPES } from '../constants';
 
 /**
  * @name DynamicForm
  */
-const DynamicForm = () => {
-	const [inputs, setInputs] = useState([
-		{ id: 'abcd', name: 'firstname', type: 'text', value: '' },
-		{ id: 'efgh', name: 'lastname', type: 'text', value: '' },
-	]);
+const DynamicForm = ({ children }) => {
+	// @TODO: ref wrapper using useEffect hook
+	const inputsRef = useRef({});
 
 	/**
 	 * @function
-	 * @name onInputChange
-	 * @description Updates the input state with the new value.
+	 * @name handleSubmit
+	 * @description A handler used to apply validation to each controlled input of the form.
 	 *
 	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} event : The "form submit" event to handle.
 	 */
-	const onInputChange = ({ target: { id: inputId, value } }) => {
-		const inputIndex = inputs.findIndex(({ id }) => id === inputId);
-		if (inputIndex < 0) {
-			return;
-		}
-
-		setInputs([
-			...inputs.slice(0, inputIndex),
-			{ ...inputs[inputIndex], value },
-			...inputs.slice(inputIndex + 1),
-		]);
+	const handleSubmit = (event) => {
+		event.preventDefault();
+		Object.values(inputsRef.current).forEach(({ name, value }) => console.log(`${name}: ${value}`));
 	};
 
 	return (
 		<div>
-			<form>
-				{inputs.map(({ id, name, type, value }) => (
-					<DynamicInput
-						id={id}
-						key={id}
-						name={name}
-						onChange={onInputChange}
-						type={type}
-						value={value}
-					/>
+			<form onSubmit={handleSubmit}>
+				{Children.map(children, (child) => (
+					child.props.name && HANDLED_FORM_INPUT_TYPES.includes(child.type)
+						? createElement(child.type, {
+							...child.props,
+							ref: (element) => { inputsRef.current[child.props.id] = element; },
+						})
+						: child
 				))}
+				<button type="submit">submit</button>
 			</form>
-			<pre>{ JSON.stringify(inputs, null, 2) }</pre>
 		</div>
 	);
+};
+
+DynamicForm.propTypes = {
+	children: PropTypes.oneOfType([
+		PropTypes.element,
+		PropTypes.elementType,
+		PropTypes.node,
+		PropTypes.arrayOf(
+			PropTypes.oneOfType(
+				[
+					PropTypes.element,
+					PropTypes.elementType,
+					PropTypes.node,
+				]
+			),
+		),
+	]).isRequired,
 };
 
 export default DynamicForm;
