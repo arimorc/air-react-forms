@@ -1,4 +1,4 @@
-import { Children, createElement, useRef } from 'react';
+import { Children, createElement, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import FormFieldWrapper from './FormFieldWrapper';
 
@@ -18,7 +18,8 @@ const DynamicForm = ({ children }) => {
 	 * @returns {object}
 	 */
 	const getFormValues = () => {
-		const formValues = Object.values(inputsRef.current).map(({ element: { getName, getValue } }) => ([getName(), getValue()]));
+		const formValues = Object.values(inputsRef.current)
+			.map(({ element: { value }, name }) => ([name, value]));
 
 		return Object.fromEntries(formValues);
 	};
@@ -38,16 +39,43 @@ const DynamicForm = ({ children }) => {
 		Object.values(inputsRef.current)[0]?.element?.focus();
 	};
 
+	/**
+	 * @function
+	 * @name registerFormField
+	 * @description A callback method used by controlled form fields to register themselves to the form.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} formFieldRef: The ref to register.
+	 */
+	const registerFormField = useCallback((formFieldRef) => {
+		inputsRef.current[formFieldRef.name] = formFieldRef;
+	}, [inputsRef]);
+
+	/**
+	 * @function
+	 * @name unRegisterFormField
+	 * @description A callback method used by controlled form fields to unregister themselves to the form.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} formFieldRefName: The name under which the ref has been registered.
+	 */
+	const unregisterFormField = useCallback((formFieldRefName) => {
+		if (inputsRef.current[formFieldRefName]) {
+			delete inputsRef.current[formFieldRefName];
+		}
+	}, [inputsRef]);
+
 	return (
 		<div>
 			<form onSubmit={handleSubmit}>
-				{Children.map(children, (child) => (
+				{Children.map(children.filter((child) => child), (child) => (
 					child.type?.displayName === FormFieldWrapper.displayName
 						? createElement(child.type, {
 							...child.props,
-							ref: (element) => {
-								inputsRef.current[child.props.name] = ({ element, ...child.props });
-							},
+							registerFormField,
+							unregisterFormField,
 						})
 						: child
 				))}
