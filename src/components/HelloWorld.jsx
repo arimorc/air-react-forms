@@ -62,6 +62,7 @@ const HelloWorld = () => {
 						<option value="yes">yes</option>
 						<option value="no">No</option>
 						<option value="maybe">Maybe</option>
+						{/* eslint-disable-next-line react/no-unescaped-entities */}
 						<option value="I don't know">I don't know...</option>
 						<option value="Can you repeat the question ?">Can you repeat the question ?</option>
 					</select>
