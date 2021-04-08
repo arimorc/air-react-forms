@@ -11,8 +11,8 @@ import { HANDLED_FORM_INPUT_TYPES } from '../constants';
  * @param {*}		children			: The element to wrap.
  * @param {string}	name				: The name of the form field to wrap.
  * @param {object}	[rules]				: Optional validation rules to apply to the input.
- * @param {func}	registerFormField	: Calback method provided by the DynamicForm component to register field refs.
- * @param {func}	unregisterFormField	: Calback method provided by the DynamicForm component to unregister field refs.
+ * @param {func}	registerFormField	: Calback method provided by the useForm hook to register field refs.
+ * @param {func}	unregisterFormField	: Calback method provided by the useForm hook to unregister field refs.
  */
 const FormFieldWrapper = ({ children, name, rules, registerFormField, unregisterFormField }) => {
 	const inputRef = useRef();
@@ -50,14 +50,12 @@ FormFieldWrapper.propTypes = {
 	]).isRequired,
 	name: PropTypes.string.isRequired,
 	rules: PropTypes.object,
-	registerFormField: PropTypes.func,
-	unregisterFormField: PropTypes.func,
+	registerFormField: PropTypes.func.isRequired,
+	unregisterFormField: PropTypes.func.isRequired,
 };
 
 FormFieldWrapper.defaultProps = {
 	rules: {},
-	registerFormField: () => {},
-	unregisterFormField: () => {},
 };
 
 export default FormFieldWrapper;

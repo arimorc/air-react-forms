@@ -4,15 +4,21 @@ import FormFieldWrapper from '../../src/components/FormFieldWrapper';
 
 describe('FormFieldWrapper component', () => {
 	describe('Ref registration behavior', () => {
+		let registerFormField;
+		let unregisterFormField;
+
+		beforeEach(() => {
+			unregisterFormField = jest.fn();
+			registerFormField = jest.fn();
+		});
+
 		afterEach(() => {
 			jest.restoreAllMocks();
 		});
 
 		it('should call the registerFormField prop function on mount.', () => {
-			const registerFormField = jest.fn();
-
 			const wrapper = mount(
-				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField}>
+				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField} unregisterFormField={unregisterFormField}>
 					<input type="text" name="dummy_form_field" />
 				</FormFieldWrapper>
 			);
@@ -22,10 +28,8 @@ describe('FormFieldWrapper component', () => {
 		});
 
 		it('should pass its input reference along the name and rules props to the registerFormField prop function.', () => {
-			const registerFormField = jest.fn();
-
 			const wrapper = mount(
-				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField}>
+				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField} unregisterFormField={unregisterFormField}>
 					<input name="dummy_form_field" type="text" />
 				</FormFieldWrapper>
 			);
@@ -41,10 +45,10 @@ describe('FormFieldWrapper component', () => {
 		it('should only create reference for input typed children.', () => {
 			let inputReference = null;
 
-			const registerFormField = jest.fn().mockImplementation(({ element }) => { inputReference = element; });
+			registerFormField.mockImplementation(({ element }) => { inputReference = element; });
 
 			const wrapper = mount(
-				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField}>
+				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField} unregisterFormField={unregisterFormField}>
 					<label htmlFor="dummy_form_field_id">Dummy label</label>
 					<input id="dummy_form_field_id" name="dummy_form_field" type="text" />
 				</FormFieldWrapper>
@@ -60,10 +64,8 @@ describe('FormFieldWrapper component', () => {
 		});
 
 		it('should call the unregisterFormField prop function on component unmount.', () => {
-			const unregisterFormField = jest.fn();
-
 			const { unmount } = render(
-				<FormFieldWrapper name="dummy_form_field" unregisterFormField={unregisterFormField}>
+				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField} unregisterFormField={unregisterFormField}>
 					<input type="text" name="dummy_form_field" />
 				</FormFieldWrapper>
 			);
