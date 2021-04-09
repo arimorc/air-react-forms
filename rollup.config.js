@@ -1,4 +1,5 @@
 import babel from '@rollup/plugin-babel';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import external from 'rollup-plugin-peer-deps-external';
 import del from 'rollup-plugin-delete';
 import extensions from 'rollup-plugin-extensions';
@@ -11,10 +12,13 @@ export default {
 		{ file: pkg.module, format: 'esm', sourcemap: true },
 	],
 	plugins: [
+		nodeResolve(),
 		external(),
 		babel({
 			babelHelpers: 'bundled',
-			exclude: 'node_modules/**',
+			exclude: [
+				'node_modules/**',
+			],
 		}),
 		del({ targets: ['dist/*'] }),
 		extensions({

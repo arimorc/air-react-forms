@@ -1,5 +1,6 @@
 import useForm from '../../src/hooks/useForm';
 import testHook from './hookTestUtils';
+import logger from '../../src/utils/logger';
 
 describe('useForm hook', () => {
 	let sut;
@@ -14,33 +15,78 @@ describe('useForm hook', () => {
 		jest.restoreAllMocks();
 	});
 
+	describe('registerWrapper', () => {
+		it('should return an object containing a name string attribute along with a registerFormField and unregisterFormField methods when provided a non-empty string.', () => {
+			const result = sut.registerWrapper('valid-name');
+
+			expect(result).toMatchObject({
+				name: expect.any(String),
+				registerFormField: expect.any(Function),
+				unregisterFormField: expect.any(Function),
+			});
+		});
+
+		it('should throw an error when called with an undefined parameter', () => {
+			expect(() => {
+				sut.registerWrapper(undefined);
+			}).toThrow();
+		});
+
+		it('should throw an error when called with an empty string parameter', () => {
+			expect(() => {
+				sut.registerWrapper('');
+			}).toThrow();
+		});
+
+		it('should throw an error when called with a space-only string parameter', () => {
+			expect(() => {
+				sut.registerWrapper('     ');
+			}).toThrow();
+		});
+	});
+
 	describe('registerFormField', () => {
-		afterEach(() => {
-			jest.restoreAllMocks();
+		let loggerWarnSpy = null;
+
+		beforeEach(() => {
+			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
 		});
 
 		it('should add new a ref to the ref list when called with a new field name.', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
 
-			sut.registerFormField(dummyFieldRef);
+			registerFormField(dummyFieldRef);
 
 			expect(sut.getFieldsRefs()).toEqual({ [dummyFieldRef.name]: dummyFieldRef });
 		});
 
 		it('should ignore the call if the provided ref doesn\'t have a name attribute.', () => {
 			const invalidDummyFieldRef = { rules: {}, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper('test');
 
-			sut.registerFormField(invalidDummyFieldRef);
+			registerFormField(invalidDummyFieldRef);
 
 			expect(sut.getFieldsRefs()).toEqual({});
 		});
 
+		it('should add a console warning if the provided ref doesn\'t have a name attribute.', () => {
+			const invalidDummyFieldRef = { rules: {}, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper('test');
+
+			registerFormField(invalidDummyFieldRef);
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+		});
+
+
 		it('should replace an existing ref with the provided value if its name is already in the list.', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, element: { value: '' } };
 			const updatedFieldRef = { ...dummyFieldRef, rules: { required: 'Please provide a value' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
 
-			sut.registerFormField(dummyFieldRef);
-			sut.registerFormField(updatedFieldRef);
+			registerFormField(dummyFieldRef);
+			registerFormField(updatedFieldRef);
 
 			expect(sut.getFieldsRefs()).toEqual({ [dummyFieldRef.name]: updatedFieldRef });
 		});
@@ -49,21 +95,23 @@ describe('useForm hook', () => {
 	describe('unregisterFormField', () => {
 		it('should remove the reference linked to the provided name if it exists in the list.', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, element: { value: '' } };
+			const { registerFormField, unregisterFormField } = sut.registerWrapper(dummyFieldRef.name);
 
-			sut.registerFormField(dummyFieldRef);
+			registerFormField(dummyFieldRef);
 			expect(sut.getFieldsRefs()).toEqual({ [dummyFieldRef.name]: dummyFieldRef });
 
-			sut.unregisterFormField(dummyFieldRef.name);
+			unregisterFormField(dummyFieldRef.name);
 			expect(sut.getFieldsRefs()).toEqual({});
 		});
 
 		it('should ignore the call if the provided name is absent from the ref list.', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, element: { value: '' } };
+			const { registerFormField, unregisterFormField } = sut.registerWrapper(dummyFieldRef.name);
 
-			sut.registerFormField(dummyFieldRef);
+			registerFormField(dummyFieldRef);
 			expect(sut.getFieldsRefs()).toEqual({ [dummyFieldRef.name]: dummyFieldRef });
 
-			sut.unregisterFormField('an_unknown_ref_name');
+			unregisterFormField('an_unknown_ref_name');
 			expect(sut.getFieldsRefs()).toEqual({ [dummyFieldRef.name]: dummyFieldRef });
 		});
 	});
@@ -76,7 +124,10 @@ describe('useForm hook', () => {
 				{ name: 'age', rules: {}, element: { value: 35 } },
 				{ name: 'unfilledInput', rules: {}, element: { value: '' } },
 			];
-			dummyFormFieldsRefs.forEach((fieldRef) => sut.registerFormField(fieldRef));
+
+			dummyFormFieldsRefs.forEach((fieldRef) => {
+				sut.registerWrapper(fieldRef.name).registerFormField(fieldRef);
+			});
 
 			const expectedResult = {
 				firstname: 'john',
@@ -111,7 +162,7 @@ describe('useForm hook', () => {
 				{ name: 'age', rules: {}, element: { value: 35 } },
 				{ name: 'unfilledInput', rules: {}, element: { value: '' } },
 			];
-			dummyFormFieldsRefs.forEach((fieldRef) => sut.registerFormField(fieldRef));
+			dummyFormFieldsRefs.forEach((fieldRef) => sut.registerWrapper(fieldRef.name).registerFormField(fieldRef));
 
 			expect(sut.handleSubmit(event)).toEqual(sut.getFormValues());
 		});
@@ -131,7 +182,7 @@ describe('useForm hook', () => {
 				lastname: dummyFormFieldsRefs[1],
 			};
 
-			dummyFormFieldsRefs.forEach((fieldRef) => sut.registerFormField(fieldRef));
+			dummyFormFieldsRefs.forEach((fieldRef) => sut.registerWrapper(fieldRef.name).registerFormField(fieldRef));
 
 			expect(sut.getFieldsRefs()).toEqual(expectedResult);
 			expect(sut.getFieldsRefs()).not.toMatchObject({ [nonReferencedFieldRef.name]: nonReferencedFieldRef });

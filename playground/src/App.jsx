@@ -1,4 +1,5 @@
-import { HelloWorld } from 'air-react-forms';
+import { useState } from 'react';
+import { useForm, FormFieldWrapper } from 'air-react-forms';
 
 /**
  * @name App
@@ -6,6 +7,62 @@ import { HelloWorld } from 'air-react-forms';
  *
  * @author Yann Hodiesne
  */
-const App = () => <HelloWorld />;
+const App = () => {
+	const { handleSubmit, registerWrapper } = useForm();
+	const [formData, setFormData] = useState({});
+	const [toggle, setToggle] = useState(false);
+
+	return (
+		<div>
+			<form onSubmit={(e) => setFormData(handleSubmit(e))}>
+				<h1>useForm hook example</h1>
+				{toggle && (
+					<FormFieldWrapper {...registerWrapper('firstName')}>
+						<label htmlFor="firstName">First name</label>
+						<input
+							id="firstName"
+							name="firstName"
+							type="text"
+							defaultValue="john"
+							rules={{
+								required: 'This field is required',
+							}}
+						/>
+					</FormFieldWrapper>
+				)}
+				<button type="button" onClick={() => setToggle(!toggle)}>toggle</button>
+				<FormFieldWrapper {...registerWrapper('lastName')}>
+					<label htmlFor="lastName">Last name</label>
+					<input
+						id="lastName"
+						name="lastName"
+						type="text"
+						defaultValue="doe"
+						rules={{
+							required: 'This field is required',
+						}}
+					/>
+				</FormFieldWrapper>
+				<FormFieldWrapper {...registerWrapper('hasUsedHooks')}>
+					<label htmlFor="hasUsedHooks">Ever used hooks before ?</label>
+					<select
+						id="hasUsedHooks"
+						name="hasUsedHooks"
+					>
+						<option value="">Select a value</option>
+						<option value="yes">yes</option>
+						<option value="no">No</option>
+						<option value="maybe">Maybe</option>
+						{/* eslint-disable-next-line react/no-unescaped-entities */}
+						<option value="I don't know">I don't know...</option>
+						<option value="Can you repeat the question ?">Can you repeat the question ?</option>
+					</select>
+				</FormFieldWrapper>
+				<button type="submit">Submit</button>
+			</form>
+			<pre>{JSON.stringify(formData, null, 2)}</pre>
+		</div>
+	);
+};
 
 export default App;

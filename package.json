@@ -6,7 +6,7 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/arimorc/air-react-forms/"
-	  },
+	},
 	"main": "dist/index.cjs.js",
 	"module": "dist/index.esm.js",
 	"source": "src/index.js",
@@ -20,6 +20,7 @@
 		"@testing-library/jest-dom": "^5.11.4",
 		"@testing-library/react": "^11.1.0",
 		"@testing-library/user-event": "^12.1.10",
+		"core-js": "^3.10.1",
 		"prop-types": "^15.7.2",
 		"react-scripts": "4.0.2"
 	},
@@ -57,6 +58,7 @@
 		"@babel/preset-env": "^7.12.17",
 		"@babel/preset-react": "^7.12.13",
 		"@rollup/plugin-babel": "^5.3.0",
+		"@rollup/plugin-node-resolve": "^11.2.1",
 		"@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
 		"enzyme": "^3.11.0",
 		"enzyme-to-json": "^3.6.1",
@@ -81,6 +83,9 @@
 	},
 	"license": "MIT",
 	"keywords": [
-		"react", "forms", "react-forms", "rolrom"
+		"react",
+		"forms",
+		"react-forms",
+		"rolrom"
 	]
 }

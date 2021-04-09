@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import logger from '../utils/logger';
 
 /**
  * @name useForm
@@ -37,13 +38,15 @@ const useForm = () => {
 	const registerFormField = useCallback((formFieldRef) => {
 		if (formFieldRef.name) {
 			inputsRefs.current[formFieldRef.name] = formFieldRef;
+		} else {
+			logger.warn('attempting to register a form without a name property.');
 		}
 	}, [inputsRefs]);
 
 	/**
 	 * @function
 	 * @name unRegisterFormField
-	 * @description A callback method used by controlled form fields to unregister themselves to the form.
+	 * @description A callback method used by controlled form fields to unregister themselves from the form.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
@@ -54,6 +57,31 @@ const useForm = () => {
 			delete inputsRefs.current[formFieldRefName];
 		}
 	}, [inputsRefs]);
+
+	/**
+	 * @function
+	 * @name registerWrapper
+	 * @description Convenience method to be passed to any form field wrapper, providing them with necessary methods and information as components props.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @example <FormFieldWrapper {...registerWrapper('name')}> ... </FormFieldWrapper>
+	 *
+	 * @param {string} wrapperName : The name under which the wrapped input will be named.
+	 *
+	 * @returns {object}
+	 */
+	const registerWrapper = (wrapperName) => {
+		if (!wrapperName || wrapperName.trim().length === 0) {
+			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
+		}
+
+		return {
+			name: wrapperName,
+			registerFormField,
+			unregisterFormField,
+		};
+	};
 
 	/**
 	 * @function
@@ -84,9 +112,8 @@ const useForm = () => {
 	return {
 		getFieldsRefs,
 		getFormValues,
-		registerFormField,
-		unregisterFormField,
 		handleSubmit,
+		registerWrapper,
 	};
 };
 
