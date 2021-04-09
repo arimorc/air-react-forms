@@ -79,7 +79,6 @@ describe('useForm hook', () => {
 			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
 		});
 
-
 		it('should replace an existing ref with the provided value if its name is already in the list.', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, element: { value: '' } };
 			const updatedFieldRef = { ...dummyFieldRef, rules: { required: 'Please provide a value' } };
