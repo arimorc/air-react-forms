@@ -15,7 +15,7 @@ export default {
 		nodeResolve(),
 		external(),
 		babel({
-			babelHelpers: 'bundled',
+			babelHelpers: 'runtime',
 			exclude: [
 				'node_modules/**',
 			],
