@@ -168,6 +168,7 @@ const useForm = () => {
 		getFormValues,
 		handleSubmit,
 		registerWrapper,
+		validateField,
 	};
 };
 

@@ -25,10 +25,11 @@ const FormFieldWrapper = ({ children, name, rules, registerFormField, unregister
 
 	return (
 		<>
-			{Children.map(children.filter((child) => child), (child) => (
+			{Children.toArray(children).map((child) => (
 				child.props.name && HANDLED_FORM_INPUT_TYPES.includes(child.type)
 					? createElement(child.type, {
 						...child.props,
+						key: child.props.name,
 						ref: inputRef,
 					})
 					: child
