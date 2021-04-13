@@ -14,7 +14,6 @@ const App = () => {
 
 	return (
 		<div>
-			<p>{JSON.stringify(errors)}</p>
 			<form onSubmit={(e) => setFormData(handleSubmit(e))}>
 				<h1>useForm hook example</h1>
 				{toggle && (
@@ -31,9 +30,6 @@ const App = () => {
 							name="firstName"
 							type="text"
 							defaultValue="john"
-							rules={{
-								required: 'This field is required',
-							}}
 						/>
 						{errors.firstName?.required && <span>{errors.firstName.required}</span>}
 						{errors.firstName?.maxLength && <span>{errors.firstName.maxLength}</span>}
@@ -79,7 +75,11 @@ const App = () => {
 				</FormFieldWrapper>
 				<button type="submit">Submit</button>
 			</form>
+			<h3>Form data</h3>
 			<pre>{JSON.stringify(formData, null, 2)}</pre>
+
+			<h3>Form validation errors</h3>
+			<pre>{JSON.stringify(errors, null, 2)}</pre>
 		</div>
 	);
 };
