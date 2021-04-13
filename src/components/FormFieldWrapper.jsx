@@ -21,11 +21,11 @@ const FormFieldWrapper = ({ children, name, rules, registerFormField, unregister
 		registerFormField({ element: inputRef.current, name, rules });
 
 		return () => unregisterFormField(name);
-	}, [inputRef, name, registerFormField, unregisterFormField]);
+	}, [inputRef, name, rules, registerFormField, unregisterFormField]);
 
 	return (
 		<>
-			{Children.map(children, (child) => (
+			{Children.map(children.filter((child) => child), (child) => (
 				child.props.name && HANDLED_FORM_INPUT_TYPES.includes(child.type)
 					? createElement(child.type, {
 						...child.props,
@@ -55,7 +55,7 @@ FormFieldWrapper.propTypes = {
 };
 
 FormFieldWrapper.defaultProps = {
-	rules: {},
+	rules: undefined,
 };
 
 export default FormFieldWrapper;

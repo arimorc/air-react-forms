@@ -9,6 +9,10 @@ import logger from '../utils/logger';
  */
 const useForm = () => {
 	const inputsRefs = useRef({});
+	const formState = useRef({
+		errors: {},
+		isDirty: false,
+	});
 
 	/**
 	 * @function
@@ -28,16 +32,34 @@ const useForm = () => {
 
 	/**
 	 * @function
+	 * @name validateForm
+	 * @description Performs a validation check on each registered input.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	const validateForm = () => {
+		Object.values(inputsRefs.current).forEach(({ element: { value }, name, rules }) => {
+			if (rules) {
+				Object.entries(rules).forEach(([rule, validator]) => {
+					formState.current.errors[name] = { ...formState.current.errors[name], [rule]: validator(value) };
+				});
+			}
+		});
+	};
+
+	/**
+	 * @function
 	 * @name registerFormField
 	 * @description A callback method used by controlled form fields to register themselves to the form.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} formFieldRef: The ref to register.
+	 * @param {object} formFieldRef The ref to register.
 	 */
 	const registerFormField = useCallback((formFieldRef) => {
 		if (formFieldRef.name) {
 			inputsRefs.current[formFieldRef.name] = formFieldRef;
+			formState.current.errors[formFieldRef.name] = {};
 		} else {
 			logger.warn('attempting to register a form without a name property.');
 		}
@@ -50,11 +72,12 @@ const useForm = () => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} formFieldRefName: The name under which the ref has been registered.
+	 * @param {object} formFieldRefName The name under which the ref has been registered.
 	 */
 	const unregisterFormField = useCallback((formFieldRefName) => {
 		if (inputsRefs.current[formFieldRefName]) {
 			delete inputsRefs.current[formFieldRefName];
+			delete formState.current.errors[formFieldRefName];
 		}
 	}, [inputsRefs]);
 
@@ -67,7 +90,7 @@ const useForm = () => {
 	 *
 	 * @example <FormFieldWrapper {...registerWrapper('name')}> ... </FormFieldWrapper>
 	 *
-	 * @param {string} wrapperName : The name under which the wrapped input will be named.
+	 * @param {string} wrapperName The name under which the wrapped input will be named.
 	 *
 	 * @returns {object}
 	 */
@@ -90,12 +113,13 @@ const useForm = () => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} event : The "form submit" event to handle.
+	 * @param {object} event The "form submit" event to handle.
 	 *
 	 * @returns {object}
 	 */
 	const handleSubmit = (event) => {
 		event.preventDefault();
+		validateForm();
 
 		return getFormValues();
 	};
@@ -110,6 +134,7 @@ const useForm = () => {
 	const getFieldsRefs = () => (inputsRefs.current);
 
 	return {
+		formState: formState.current,
 		getFieldsRefs,
 		getFormValues,
 		handleSubmit,
