@@ -14,10 +14,17 @@ const App = () => {
 
 	return (
 		<div>
+			<p>{JSON.stringify(errors)}</p>
 			<form onSubmit={(e) => setFormData(handleSubmit(e))}>
 				<h1>useForm hook example</h1>
 				{toggle && (
-					<FormFieldWrapper {...registerWrapper('firstName')}>
+					<FormFieldWrapper
+						{...registerWrapper('firstName')}
+						rules={{
+							required: Validators.isRequired('This field is required'),
+							maxLength: Validators.hasMaxLength(12, 'Please provide a value of 12 or less characters'),
+						}}
+					>
 						<label htmlFor="firstName">First name</label>
 						<input
 							id="firstName"
@@ -28,6 +35,8 @@ const App = () => {
 								required: 'This field is required',
 							}}
 						/>
+						{errors.firstName?.required && <span>{errors.firstName.required}</span>}
+						{errors.firstName?.maxLength && <span>{errors.firstName.maxLength}</span>}
 					</FormFieldWrapper>
 				)}
 				<button type="button" onClick={() => setToggle(!toggle)}>toggle</button>

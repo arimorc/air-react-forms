@@ -32,19 +32,49 @@ const useForm = () => {
 
 	/**
 	 * @function
+	 * @name validateField
+	 * @description Performs a validation check on the requested input.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {string} fieldName The name of the field to perform validation on.
+	 */
+	const validateField = (fieldName) => {
+		if (inputsRefs.current[fieldName]) {
+			const { element: { value }, rules } = inputsRefs.current[fieldName];
+			let validationResult;
+
+			if (rules) {
+				Object.entries(rules).forEach(([rule, validator]) => {
+					validationResult = validator(value);
+
+					if (validationResult) {
+						if (!formState.current.errors[fieldName]) {
+							formState.current.errors[fieldName] = { [rule]: validationResult };
+						} else {
+							formState.current.errors[fieldName][rule] = validationResult;
+						}
+					} else if (formState.current.errors[fieldName]) {
+						delete formState.current.errors[fieldName][rule];
+					}
+				});
+
+				if (formState.current.errors[fieldName] && Object.keys(formState.current.errors[fieldName]).length === 0) {
+					delete formState.current.errors[fieldName];
+				}
+			}
+		}
+	};
+
+	/**
+	 * @function
 	 * @name validateForm
 	 * @description Performs a validation check on each registered input.
 	 *
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = () => {
-		Object.values(inputsRefs.current).forEach(({ element: { value }, name, rules }) => {
-			if (rules) {
-				Object.entries(rules).forEach(([rule, validator]) => {
-					formState.current.errors[name] = { ...formState.current.errors[name], [rule]: validator(value) };
-				});
-			}
-		});
+		Object.values(inputsRefs.current).forEach(({ name }) => validateField(name));
 	};
 
 	/**
@@ -59,7 +89,6 @@ const useForm = () => {
 	const registerFormField = useCallback((formFieldRef) => {
 		if (formFieldRef.name) {
 			inputsRefs.current[formFieldRef.name] = formFieldRef;
-			formState.current.errors[formFieldRef.name] = {};
 		} else {
 			logger.warn('attempting to register a form without a name property.');
 		}

@@ -11,6 +11,6 @@
  *
  * @returns {string}
  */
-const hasMaxLength = (maxLength, message) => (value) => (value.trim().length <= maxLength ? message : '');
+const hasMaxLength = (maxLength, message) => (value) => (value.trim().length <= maxLength ? '' : message);
 
 export default hasMaxLength;
