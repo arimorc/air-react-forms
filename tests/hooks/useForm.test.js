@@ -197,7 +197,7 @@ describe('useForm hook', () => {
 		beforeEach(() => {
 			isRequiredValidator.mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
 			hasLengthValidator.mockImplementation((value) => (value.trim().length !== 4 ? 'should be 4 chars' : ''));
-			hasMaxLengthValidator.mockImplementation((value) => (value.trim().length > 6 ? 'must be less than 6 characters' : ''));	
+			hasMaxLengthValidator.mockImplementation((value) => (value.trim().length > 6 ? 'must be less than 6 characters' : ''));
 		});
 
 		it('should ignore fields without validation rules', () => {
