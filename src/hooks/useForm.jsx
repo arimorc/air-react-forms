@@ -42,27 +42,21 @@ const useForm = () => {
 	const validateField = (fieldName) => {
 		if (inputsRefs.current[fieldName]) {
 			const { element: { value }, rules } = inputsRefs.current[fieldName];
-			let validationResult;
 
 			if (rules) {
-				Object.entries(rules).forEach(([rule, validator]) => {
-					validationResult = validator(value);
-
-					if (validationResult) {
-						if (!formState.current.errors[fieldName]) {
-							formState.current.errors[fieldName] = { [rule]: validationResult };
-						} else {
-							formState.current.errors[fieldName][rule] = validationResult;
-						}
-					} else if (formState.current.errors[fieldName]) {
-						delete formState.current.errors[fieldName][rule];
-					}
-				});
-
-				if (formState.current.errors[fieldName] && Object.keys(formState.current.errors[fieldName]).length === 0) {
-					delete formState.current.errors[fieldName];
+				if (!formState.current.errors[fieldName]) {
+					formState.current.errors[fieldName] = {};
 				}
+
+				// We iterate over the rules object for the current formfield.
+				// For each rule, we store the validator method's return value inside de formstate's errors field.
+				// If said validator method returns an empty string, it means the validation was successful and we store undefined.
+				Object.entries(rules).forEach(([rule, validator]) => {
+					formState.current.errors[fieldName][rule] = validator(value) || undefined;
+				});
 			}
+		} else if (process.env.NODE_ENV !== 'production') {
+			logger.warn(`tried to apply form validation on unreference field ${fieldName}`);
 		}
 	};
 

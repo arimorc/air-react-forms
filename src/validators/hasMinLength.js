@@ -5,9 +5,9 @@
  *
  * @author Timothée Simon-Franza
  *
- * @param {string|number}	value		: The input's current value.
- * @param {number}			minLength	: The minimal required length.
- * @param {string}			message		: The message to return if the validation fails.
+ * @param {string|number}	value		The input's current value.
+ * @param {number}			minLength	The minimal required length.
+ * @param {string}			message		The message to return if the validation fails.
  *
  * @returns {string}
  */

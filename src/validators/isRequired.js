@@ -5,8 +5,8 @@
  *
  * @author Timothée Simon-Franza
  *
- * @param {string|number}	value	: The input's current value.
- * @param {string}			message	: The message to return if the validation fails.
+ * @param {string|number}	value	The input's current value.
+ * @param {string}			message	The message to return if the validation fails.
  *
  * @returns {string}
  */
