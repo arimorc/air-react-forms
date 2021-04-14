@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import logger from '../utils/logger';
 
 /**
@@ -9,10 +9,21 @@ import logger from '../utils/logger';
  */
 const useForm = () => {
 	const inputsRefs = useRef({});
-	const formState = useRef({
+	const formStateRef = useRef({
 		errors: {},
 		isDirty: false,
 	});
+
+	const [formState, setFormState] = useState({ errors: {} });
+
+	/**
+	 * @function
+	 * @name syncStateWithRef
+	 * @description Syncs the exported formState object with the current formStateRef value.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	const syncStateWithRef = () => setFormState({ ...formStateRef.current });
 
 	/**
 	 * @function
@@ -39,7 +50,7 @@ const useForm = () => {
 	 *
 	 * @param {string} fieldName The name of the field to perform validation on.
 	 */
-	const validateField = (fieldName) => {
+	const validateField = (shouldUpdateState = false) => (fieldName) => {
 		if (inputsRefs.current[fieldName]) {
 			const { element: { value }, rules } = inputsRefs.current[fieldName];
 
@@ -54,7 +65,11 @@ const useForm = () => {
 					fieldErrors[rule] = validator(value) || undefined;
 				});
 
-				formState.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
+				formStateRef.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
+
+				if (shouldUpdateState) {
+					syncStateWithRef();
+				}
 			}
 		} else if (process.env.NODE_ENV !== 'production') {
 			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
@@ -69,7 +84,8 @@ const useForm = () => {
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = () => {
-		Object.values(inputsRefs.current).forEach(({ name }) => validateField(name));
+		Object.values(inputsRefs.current).forEach(({ name }) => validateField(false)(name));
+		syncStateWithRef();
 	};
 
 	/**
@@ -84,6 +100,7 @@ const useForm = () => {
 	const registerFormField = useCallback((formFieldRef) => {
 		if (formFieldRef.name) {
 			inputsRefs.current[formFieldRef.name] = formFieldRef;
+			validateField(false)(formFieldRef.name);
 		} else {
 			logger.warn('attempting to register a form without a name property.');
 		}
@@ -101,7 +118,7 @@ const useForm = () => {
 	const unregisterFormField = useCallback((formFieldRefName) => {
 		if (inputsRefs.current[formFieldRefName]) {
 			delete inputsRefs.current[formFieldRefName];
-			delete formState.current.errors[formFieldRefName];
+			delete formStateRef.current.errors[formFieldRefName];
 		}
 	}, [inputsRefs]);
 
@@ -158,12 +175,12 @@ const useForm = () => {
 	const getFieldsRefs = () => (inputsRefs.current);
 
 	return {
-		formState: formState.current,
+		formState,
 		getFieldsRefs,
 		getFormValues,
 		handleSubmit,
 		registerWrapper,
-		validateField,
+		validateField: validateField(true),
 	};
 };
 
