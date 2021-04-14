@@ -44,19 +44,20 @@ const useForm = () => {
 			const { element: { value }, rules } = inputsRefs.current[fieldName];
 
 			if (rules) {
-				if (!formState.current.errors[fieldName]) {
-					formState.current.errors[fieldName] = {};
-				}
+				const fieldErrors = {};
 
 				// We iterate over the rules object for the current formfield.
-				// For each rule, we store the validator method's return value inside de formstate's errors field.
+				// For each rule, we store the validator method's return value inside the temporary fieldErrors object.
 				// If said validator method returns an empty string, it means the validation was successful and we store undefined.
+				// Undefined error keys are then filtered out of the temporary object, which is then stored in the formstate's errors field.
 				Object.entries(rules).forEach(([rule, validator]) => {
-					formState.current.errors[fieldName][rule] = validator(value) || undefined;
+					fieldErrors[rule] = validator(value) || undefined;
 				});
+
+				formState.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
 			}
 		} else if (process.env.NODE_ENV !== 'production') {
-			logger.warn(`tried to apply form validation on unreference field ${fieldName}`);
+			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
 		}
 	};
 

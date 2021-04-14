@@ -235,7 +235,7 @@ describe('useForm hook', () => {
 			sut.validateField('unreference_field');
 
 			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
-			expect(loggerWarnSpy).toHaveBeenNthCalledWith(1, 'tried to apply form validation on unreference field unreference_field');
+			expect(loggerWarnSpy).toHaveBeenNthCalledWith(1, 'tried to apply form validation on unreferenced field unreference_field');
 		});
 
 		it('should not trigger a console warning when called with an unreferenced field\'s name in production mode', () => {
