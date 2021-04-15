@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import useForm from '../../src/hooks/useForm';
 import testHook from './hookTestUtils';
 import logger from '../../src/utils/logger';
@@ -44,6 +44,34 @@ describe('useForm hook', () => {
 			expect(() => {
 				sut.registerWrapper('     ');
 			}).toThrow();
+		});
+
+		it('should return an additional onChange field if useForm is called with validateOnChange', () => {
+			testHook(() => {
+				sut = useForm({ validateOnChange: true });
+			});
+
+			const result = sut.registerWrapper('test');
+
+			expect(result).toMatchObject({
+				name: expect.any(String),
+				registerFormField: expect.any(Function),
+				unregisterFormField: expect.any(Function),
+				onChange: expect.any(Function),
+			});
+		});
+
+		it('should not return an onChange field if useForm is called without validateOnChange', () => {
+			const result = sut.registerWrapper('test');
+
+			expect(result).toMatchObject({
+				name: expect.any(String),
+				registerFormField: expect.any(Function),
+				unregisterFormField: expect.any(Function),
+			});
+			expect(result).not.toMatchObject({
+				onChange: expect.anything(),
+			});
 		});
 	});
 
@@ -205,9 +233,6 @@ describe('useForm hook', () => {
 
 		beforeEach(() => {
 			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
-		});
-
-		beforeEach(() => {
 			isRequiredValidator.mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
 			hasLengthValidator.mockImplementation((value) => (value.trim().length !== 4 ? 'should be 4 chars' : ''));
 			hasMaxLengthValidator.mockImplementation((value) => (value.trim().length > 6 ? 'must be less than 6 characters' : ''));
@@ -331,6 +356,28 @@ describe('useForm hook', () => {
 			});
 
 			expect(sut.formState.errors).not.toMatchObject({ [dummyFieldRef.name]: { isRequired: isRequiredValidator('') } });
+		});
+
+		it('should update the exported state if the shouldUpdateState param is true', async () => {
+			testHook(() => {
+				sut = useForm({ validateOnChange: true });
+			});
+
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator }, element: { value: 'dummy_value' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			act(() => {
+				registerFormField(dummyFieldRef);
+				sut.validateField('dummy_field');
+			});
+			expect(sut.formState).toEqual({ errors: { dummy_field: {} }, isDirty: false });
+
+			act(() => {
+				dummyFieldRef.element.value = '';
+				sut.validateField('dummy_field');
+			});
+
+			expect(sut.formState).toEqual({ errors: { dummy_field: { isRequired: 'required' } }, isDirty: false });
 		});
 	});
 });

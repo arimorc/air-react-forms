@@ -49,7 +49,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 *
 	 * @param {string} fieldName The name of the field to perform validation on.
 	 */
-	const validateField = useCallback((shouldUpdateState = false) => (fieldName) => {
+	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
 		if (inputsRefs.current[fieldName]) {
 			const { element: { value }, rules } = inputsRefs.current[fieldName];
 
@@ -139,12 +139,17 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
 		}
 
-		return {
+		const wrapperProps = {
 			name: wrapperName,
 			registerFormField,
 			unregisterFormField,
-			...(validateOnChange && { onChange: () => validateField(true)(wrapperName) }),
 		};
+
+		if (validateOnChange) {
+			wrapperProps.onChange = () => validateField(true)(wrapperName);
+		}
+
+		return wrapperProps;
 	}, [registerFormField, unregisterFormField, validateField, validateOnChange]);
 
 	/**
