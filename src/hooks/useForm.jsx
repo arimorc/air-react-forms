@@ -14,7 +14,7 @@ const useForm = () => {
 		isDirty: false,
 	});
 
-	const [formState, setFormState] = useState({ errors: {} });
+	const [formState, setFormState] = useState({ ...formStateRef.current });
 
 	/**
 	 * @function
@@ -23,7 +23,7 @@ const useForm = () => {
 	 *
 	 * @author Timothée Simon-Franza
 	 */
-	const syncStateWithRef = () => setFormState({ ...formStateRef.current });
+	const syncStateWithRef = useCallback(() => setFormState({ ...formStateRef.current }), [formStateRef]);
 
 	/**
 	 * @function
@@ -34,12 +34,12 @@ const useForm = () => {
 	 *
 	 * @returns {object}
 	 */
-	const getFormValues = () => {
+	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
 			.map(({ element: { value }, name }) => ([name, value]));
 
 		return Object.fromEntries(formValues);
-	};
+	}, [inputsRefs]);
 
 	/**
 	 * @function
@@ -50,7 +50,7 @@ const useForm = () => {
 	 *
 	 * @param {string} fieldName The name of the field to perform validation on.
 	 */
-	const validateField = (shouldUpdateState = false) => (fieldName) => {
+	const validateField = useCallback((shouldUpdateState = false) => (fieldName) => {
 		if (inputsRefs.current[fieldName]) {
 			const { element: { value }, rules } = inputsRefs.current[fieldName];
 
@@ -74,7 +74,7 @@ const useForm = () => {
 		} else if (process.env.NODE_ENV !== 'production') {
 			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
 		}
-	};
+	}, [syncStateWithRef]);
 
 	/**
 	 * @function
@@ -83,10 +83,10 @@ const useForm = () => {
 	 *
 	 * @author Timothée Simon-Franza
 	 */
-	const validateForm = () => {
+	const validateForm = useCallback(() => {
 		Object.values(inputsRefs.current).forEach(({ name }) => validateField(false)(name));
 		syncStateWithRef();
-	};
+	}, [syncStateWithRef, validateField]);
 
 	/**
 	 * @function
@@ -104,11 +104,11 @@ const useForm = () => {
 		} else {
 			logger.warn('attempting to register a form without a name property.');
 		}
-	}, [inputsRefs]);
+	}, [inputsRefs, validateField]);
 
 	/**
 	 * @function
-	 * @name unRegisterFormField
+	 * @name unregisterFormField
 	 * @description A callback method used by controlled form fields to unregister themselves from the form.
 	 *
 	 * @author Timothée Simon-Franza
@@ -135,7 +135,7 @@ const useForm = () => {
 	 *
 	 * @returns {object}
 	 */
-	const registerWrapper = (wrapperName) => {
+	const registerWrapper = useCallback((wrapperName) => {
 		if (!wrapperName || wrapperName.trim().length === 0) {
 			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
 		}
@@ -145,7 +145,7 @@ const useForm = () => {
 			registerFormField,
 			unregisterFormField,
 		};
-	};
+	}, [registerFormField, unregisterFormField]);
 
 	/**
 	 * @function
@@ -158,12 +158,12 @@ const useForm = () => {
 	 *
 	 * @returns {object}
 	 */
-	const handleSubmit = (event) => {
+	const handleSubmit = useCallback((event) => {
 		event.preventDefault();
 		validateForm();
 
 		return getFormValues();
-	};
+	}, [getFormValues, validateForm]);
 
 	/**
 	 * @function
@@ -172,7 +172,7 @@ const useForm = () => {
 	 *
 	 * @returns {object}
 	 */
-	const getFieldsRefs = () => (inputsRefs.current);
+	const getFieldsRefs = useCallback(() => (inputsRefs.current), [inputsRefs]);
 
 	return {
 		formState,
