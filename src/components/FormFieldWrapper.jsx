@@ -14,7 +14,7 @@ import { HANDLED_FORM_INPUT_TYPES } from '../constants';
  * @param {func}	registerFormField	: Callback method provided by the useForm hook to register field refs.
  * @param {func}	unregisterFormField	: Callback method provided by the useForm hook to unregister field refs.
  */
-const FormFieldWrapper = ({ children, name, rules, registerFormField, unregisterFormField }) => {
+const FormFieldWrapper = ({ children, name, rules, registerFormField, unregisterFormField, ...otherProps }) => {
 	const inputRef = useRef();
 
 	useEffect(() => {
@@ -29,6 +29,7 @@ const FormFieldWrapper = ({ children, name, rules, registerFormField, unregister
 				child.props.name && HANDLED_FORM_INPUT_TYPES.includes(child.type)
 					? createElement(child.type, {
 						...child.props,
+						...otherProps,
 						key: child.props.name,
 						ref: inputRef,
 					})

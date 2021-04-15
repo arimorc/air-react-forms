@@ -8,7 +8,7 @@ import { useForm, FormFieldWrapper, Validators } from 'air-react-forms';
  * @author Yann Hodiesne
  */
 const App = () => {
-	const { formState: { errors }, handleSubmit, registerWrapper } = useForm();
+	const { formState: { errors }, handleSubmit, registerWrapper } = useForm({ validateOnChange: true });
 	const [formData, setFormData] = useState({});
 	const [toggle, setToggle] = useState(false);
 
@@ -21,7 +21,7 @@ const App = () => {
 						{...registerWrapper('firstName')}
 						rules={{
 							required: Validators.isRequired('This field is required'),
-							maxLength: Validators.hasMaxLength(12, 'Please provide a value of 12 or less characters'),
+							maxLength: Validators.hasMaxLength(8, 'Please provide a value of 8 or less characters'),
 						}}
 					>
 						<label htmlFor="firstName">First name</label>

@@ -7,13 +7,12 @@ import logger from '../utils/logger';
  *
  * @author Timothée Simon-Franza
  */
-const useForm = () => {
+const useForm = ({ validateOnChange = false } = {}) => {
 	const inputsRefs = useRef({});
 	const formStateRef = useRef({
 		errors: {},
 		isDirty: false,
 	});
-
 	const [formState, setFormState] = useState({ ...formStateRef.current });
 
 	/**
@@ -144,8 +143,9 @@ const useForm = () => {
 			name: wrapperName,
 			registerFormField,
 			unregisterFormField,
+			...(validateOnChange && { onChange: () => validateField(true)(wrapperName) }),
 		};
-	}, [registerFormField, unregisterFormField]);
+	}, [registerFormField, unregisterFormField, validateField, validateOnChange]);
 
 	/**
 	 * @function
