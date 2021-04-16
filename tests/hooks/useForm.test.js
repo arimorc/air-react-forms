@@ -1,3 +1,4 @@
+import { act } from '@testing-library/react';
 import useForm from '../../src/hooks/useForm';
 import testHook from './hookTestUtils';
 import logger from '../../src/utils/logger';
@@ -12,6 +13,7 @@ describe('useForm hook', () => {
 	});
 
 	afterEach(() => {
+		jest.resetAllMocks();
 		jest.restoreAllMocks();
 	});
 
@@ -42,6 +44,34 @@ describe('useForm hook', () => {
 			expect(() => {
 				sut.registerWrapper('     ');
 			}).toThrow();
+		});
+
+		it('should return an additional onChange field if useForm is called with validateOnChange', () => {
+			testHook(() => {
+				sut = useForm({ validateOnChange: true });
+			});
+
+			const result = sut.registerWrapper('test');
+
+			expect(result).toMatchObject({
+				name: expect.any(String),
+				registerFormField: expect.any(Function),
+				unregisterFormField: expect.any(Function),
+				onChange: expect.any(Function),
+			});
+		});
+
+		it('should not return an onChange field if useForm is called without validateOnChange', () => {
+			const result = sut.registerWrapper('test');
+
+			expect(result).toMatchObject({
+				name: expect.any(String),
+				registerFormField: expect.any(Function),
+				unregisterFormField: expect.any(Function),
+			});
+			expect(result).not.toMatchObject({
+				onChange: expect.anything(),
+			});
 		});
 	});
 
@@ -81,7 +111,7 @@ describe('useForm hook', () => {
 
 		it('should replace an existing ref with the provided value if its name is already in the list.', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, element: { value: '' } };
-			const updatedFieldRef = { ...dummyFieldRef, rules: { required: 'Please provide a value' } };
+			const updatedFieldRef = { ...dummyFieldRef, rules: { required: jest.fn() } };
 			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
 
 			registerFormField(dummyFieldRef);
@@ -148,7 +178,9 @@ describe('useForm hook', () => {
 			const event = { preventDefault: () => {} };
 			const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
 
-			sut.handleSubmit(event);
+			act(() => {
+				sut.handleSubmit(event);
+			});
 
 			expect(preventDefaultSpy).toHaveBeenCalledTimes(1);
 		});
@@ -161,9 +193,14 @@ describe('useForm hook', () => {
 				{ name: 'age', rules: {}, element: { value: 35 } },
 				{ name: 'unfilledInput', rules: {}, element: { value: '' } },
 			];
-			dummyFormFieldsRefs.forEach((fieldRef) => sut.registerWrapper(fieldRef.name).registerFormField(fieldRef));
+			let submitResult;
 
-			expect(sut.handleSubmit(event)).toEqual(sut.getFormValues());
+			act(() => {
+				dummyFormFieldsRefs.forEach((fieldRef) => sut.registerWrapper(fieldRef.name).registerFormField(fieldRef));
+				submitResult = sut.handleSubmit(event);
+			});
+
+			expect(submitResult).toEqual(sut.getFormValues());
 		});
 	});
 
@@ -185,6 +222,162 @@ describe('useForm hook', () => {
 
 			expect(sut.getFieldsRefs()).toEqual(expectedResult);
 			expect(sut.getFieldsRefs()).not.toMatchObject({ [nonReferencedFieldRef.name]: nonReferencedFieldRef });
+		});
+	});
+
+	describe('validateField', () => {
+		const isRequiredValidator = jest.fn();
+		const hasLengthValidator = jest.fn();
+		const hasMaxLengthValidator = jest.fn();
+		let loggerWarnSpy = null;
+
+		beforeEach(() => {
+			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+			isRequiredValidator.mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			hasLengthValidator.mockImplementation((value) => (value.trim().length !== 4 ? 'should be 4 chars' : ''));
+			hasMaxLengthValidator.mockImplementation((value) => (value.trim().length > 6 ? 'must be less than 6 characters' : ''));
+		});
+
+		it('should ignore fields without validation rules', () => {
+			const dummyFieldRef = { name: 'dummy_field', element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			registerFormField(dummyFieldRef);
+			sut.validateField('dummy_field');
+
+			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
+			expect(hasLengthValidator).toHaveBeenCalledTimes(0);
+			expect(hasMaxLengthValidator).toHaveBeenCalledTimes(0);
+		});
+
+		it('should ignore calls with unreferenced field names', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator }, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			registerFormField(dummyFieldRef);
+			isRequiredValidator.mockReset(); // Obligatory since registerFormField will call a validation on received field.
+			sut.validateField('unreference_field');
+
+			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
+		});
+
+		it('should trigger a console warning when called with an unreferenced field\'s name in non-production mode', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator }, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			registerFormField(dummyFieldRef);
+			isRequiredValidator.mockReset(); // Obligatory since registerFormField will call a validation on received field.
+			sut.validateField('unreference_field');
+
+			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
+			expect(loggerWarnSpy).toHaveBeenNthCalledWith(1, 'tried to apply form validation on unreferenced field unreference_field');
+		});
+
+		it('should not trigger a console warning when called with an unreferenced field\'s name in production mode', () => {
+			const initialNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'production';
+
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator }, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			registerFormField(dummyFieldRef);
+			isRequiredValidator.mockReset(); // Obligatory since registerFormField will call a validation on received field.
+			sut.validateField('unreference_field');
+
+			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
+			expect(loggerWarnSpy).not.toHaveBeenCalled();
+			process.env.NODE_ENV = initialNodeEnv;
+		});
+
+		it('should call the specified validation methods', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator, hasLength: hasLengthValidator }, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			act(() => {
+				registerFormField(dummyFieldRef);
+				sut.validateField('dummy_field');
+			});
+
+			// We expect two calls for each validation methods : one triggered by the registerFormField call, the other by the validateField call.
+			expect(isRequiredValidator).toHaveBeenCalledTimes(2);
+			expect(hasLengthValidator).toHaveBeenCalledTimes(2);
+		});
+
+		it('should only fill the formState\'s error field with failed validators\' messages', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator, maxLength: hasMaxLengthValidator }, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			act(() => {
+				registerFormField(dummyFieldRef);
+				sut.validateField('dummy_field');
+			});
+
+			// We expect two calls for each validation methods : one triggered by the registerFormField call, the other by the validateField call.
+			expect(isRequiredValidator).toHaveBeenCalledTimes(2);
+			expect(hasMaxLengthValidator).toHaveBeenCalledTimes(2);
+
+			expect(sut.formState.errors).toMatchObject({ [dummyFieldRef.name]: { isRequired: isRequiredValidator('') } });
+			expect(sut.formState.errors).not.toMatchObject({ [dummyFieldRef.name]: { maxLength: isRequiredValidator('valueWithMoreThanSixChars') } });
+		});
+
+		it('should create the fieldname\'s errors field in the formstate if it does not already exist', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator }, element: { value: 'dummy_value' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			expect(sut.formState.errors).not.toMatchObject({ [dummyFieldRef.name]: expect.anything() });
+
+			act(() => {
+				registerFormField(dummyFieldRef);
+				sut.validateField('dummy_field');
+			});
+
+			expect(sut.formState.errors).toMatchObject({ [dummyFieldRef.name]: expect.anything() });
+		});
+
+		it('should remove obsolete errors when fixed', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator, maxLength: hasMaxLengthValidator }, element: { value: '' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			registerFormField(dummyFieldRef);
+
+			act(() => {
+				sut.validateField('dummy_field');
+			});
+
+			// We expect two calls for each validation methods : one triggered by the registerFormField call, the other by the validateField call.
+			expect(isRequiredValidator).toHaveBeenCalledTimes(2);
+			expect(hasMaxLengthValidator).toHaveBeenCalledTimes(2);
+
+			expect(sut.formState.errors).toMatchObject({ [dummyFieldRef.name]: { isRequired: isRequiredValidator('') } });
+
+			act(() => {
+				dummyFieldRef.element.value = 'abcd';
+				sut.validateField('dummy_field');
+			});
+
+			expect(sut.formState.errors).not.toMatchObject({ [dummyFieldRef.name]: { isRequired: isRequiredValidator('') } });
+		});
+
+		it('should update the exported state if the shouldUpdateState param is true', async () => {
+			testHook(() => {
+				sut = useForm({ validateOnChange: true });
+			});
+
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator }, element: { value: 'dummy_value' } };
+			const { registerFormField } = sut.registerWrapper(dummyFieldRef.name);
+
+			act(() => {
+				registerFormField(dummyFieldRef);
+				sut.validateField('dummy_field');
+			});
+			expect(sut.formState).toEqual({ errors: { dummy_field: {} }, isDirty: false });
+
+			act(() => {
+				dummyFieldRef.element.value = '';
+				sut.validateField('dummy_field');
+			});
+
+			expect(sut.formState).toEqual({ errors: { dummy_field: { isRequired: 'required' } }, isDirty: false });
 		});
 	});
 });

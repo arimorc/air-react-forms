@@ -29,7 +29,7 @@ describe('FormFieldWrapper component', () => {
 
 		it('should pass its input reference along the name and rules props to the registerFormField prop function.', () => {
 			const wrapper = mount(
-				<FormFieldWrapper name="dummy_form_field" registerFormField={registerFormField} unregisterFormField={unregisterFormField}>
+				<FormFieldWrapper name="dummy_form_field" rules={{}} registerFormField={registerFormField} unregisterFormField={unregisterFormField}>
 					<input name="dummy_form_field" type="text" />
 				</FormFieldWrapper>
 			);
