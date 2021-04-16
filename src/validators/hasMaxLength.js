@@ -1,6 +1,6 @@
 /**
  * @function
- * @name hasMinLength
+ * @name hasMaxLength
  * @description A validation method used to check if the field has a maximal length of n.
  *
  * @author Timothée Simon-Franza
