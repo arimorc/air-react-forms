@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import logger from '../utils/logger';
 
 /**
@@ -7,8 +7,22 @@ import logger from '../utils/logger';
  *
  * @author Timothée Simon-Franza
  */
-const useForm = () => {
+const useForm = ({ validateOnChange = false } = {}) => {
 	const inputsRefs = useRef({});
+	const formStateRef = useRef({
+		errors: {},
+		isDirty: false,
+	});
+	const [formState, setFormState] = useState({ ...formStateRef.current });
+
+	/**
+	 * @function
+	 * @name syncStateWithRef
+	 * @description Syncs the exported formState object with the current formStateRef value.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	const syncStateWithRef = useCallback(() => setFormState({ ...formStateRef.current }), [formStateRef]);
 
 	/**
 	 * @function
@@ -19,12 +33,59 @@ const useForm = () => {
 	 *
 	 * @returns {object}
 	 */
-	const getFormValues = () => {
+	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
 			.map(({ element: { value }, name }) => ([name, value]));
 
 		return Object.fromEntries(formValues);
-	};
+	}, [inputsRefs]);
+
+	/**
+	 * @function
+	 * @name validateField
+	 * @description Performs a validation check on the requested input.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {string} fieldName The name of the field to perform validation on.
+	 */
+	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
+		if (inputsRefs.current[fieldName]) {
+			const { element: { value }, rules } = inputsRefs.current[fieldName];
+
+			if (rules) {
+				const fieldErrors = {};
+
+				// We iterate over the rules object for the current formfield.
+				// For each rule, we store the validator method's return value inside the temporary fieldErrors object.
+				// If said validator method returns an empty string, it means the validation was successful and we store undefined.
+				// Undefined error keys are then filtered out of the temporary object, which is then stored in the formstate's errors field.
+				Object.entries(rules).forEach(([rule, validator]) => {
+					fieldErrors[rule] = validator(value) || undefined;
+				});
+
+				formStateRef.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
+
+				if (shouldUpdateState) {
+					syncStateWithRef();
+				}
+			}
+		} else if (process.env.NODE_ENV !== 'production') {
+			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
+		}
+	}, [syncStateWithRef]);
+
+	/**
+	 * @function
+	 * @name validateForm
+	 * @description Performs a validation check on each registered input.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	const validateForm = useCallback(() => {
+		Object.values(inputsRefs.current).forEach(({ name }) => validateField(false)(name));
+		syncStateWithRef();
+	}, [syncStateWithRef, validateField]);
 
 	/**
 	 * @function
@@ -33,28 +94,30 @@ const useForm = () => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} formFieldRef: The ref to register.
+	 * @param {object} formFieldRef The ref to register.
 	 */
 	const registerFormField = useCallback((formFieldRef) => {
 		if (formFieldRef.name) {
 			inputsRefs.current[formFieldRef.name] = formFieldRef;
+			validateField(false)(formFieldRef.name);
 		} else {
 			logger.warn('attempting to register a form without a name property.');
 		}
-	}, [inputsRefs]);
+	}, [inputsRefs, validateField]);
 
 	/**
 	 * @function
-	 * @name unRegisterFormField
+	 * @name unregisterFormField
 	 * @description A callback method used by controlled form fields to unregister themselves from the form.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} formFieldRefName: The name under which the ref has been registered.
+	 * @param {object} formFieldRefName The name under which the ref has been registered.
 	 */
 	const unregisterFormField = useCallback((formFieldRefName) => {
 		if (inputsRefs.current[formFieldRefName]) {
 			delete inputsRefs.current[formFieldRefName];
+			delete formStateRef.current.errors[formFieldRefName];
 		}
 	}, [inputsRefs]);
 
@@ -67,21 +130,27 @@ const useForm = () => {
 	 *
 	 * @example <FormFieldWrapper {...registerWrapper('name')}> ... </FormFieldWrapper>
 	 *
-	 * @param {string} wrapperName : The name under which the wrapped input will be named.
+	 * @param {string} wrapperName The name under which the wrapped input will be named.
 	 *
 	 * @returns {object}
 	 */
-	const registerWrapper = (wrapperName) => {
+	const registerWrapper = useCallback((wrapperName) => {
 		if (!wrapperName || wrapperName.trim().length === 0) {
 			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
 		}
 
-		return {
+		const wrapperProps = {
 			name: wrapperName,
 			registerFormField,
 			unregisterFormField,
 		};
-	};
+
+		if (validateOnChange) {
+			wrapperProps.onChange = () => validateField(true)(wrapperName);
+		}
+
+		return wrapperProps;
+	}, [registerFormField, unregisterFormField, validateField, validateOnChange]);
 
 	/**
 	 * @function
@@ -90,15 +159,16 @@ const useForm = () => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} event : The "form submit" event to handle.
+	 * @param {object} event The "form submit" event to handle.
 	 *
 	 * @returns {object}
 	 */
-	const handleSubmit = (event) => {
+	const handleSubmit = useCallback((event) => {
 		event.preventDefault();
+		validateForm();
 
 		return getFormValues();
-	};
+	}, [getFormValues, validateForm]);
 
 	/**
 	 * @function
@@ -107,13 +177,15 @@ const useForm = () => {
 	 *
 	 * @returns {object}
 	 */
-	const getFieldsRefs = () => (inputsRefs.current);
+	const getFieldsRefs = useCallback(() => (inputsRefs.current), [inputsRefs]);
 
 	return {
+		formState,
 		getFieldsRefs,
 		getFormValues,
 		handleSubmit,
 		registerWrapper,
+		validateField: validateField(true),
 	};
 };
 

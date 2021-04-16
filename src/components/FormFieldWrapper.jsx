@@ -11,24 +11,26 @@ import { HANDLED_FORM_INPUT_TYPES } from '../constants';
  * @param {*}		children			: The element to wrap.
  * @param {string}	name				: The name of the form field to wrap.
  * @param {object}	[rules]				: Optional validation rules to apply to the input.
- * @param {func}	registerFormField	: Calback method provided by the useForm hook to register field refs.
- * @param {func}	unregisterFormField	: Calback method provided by the useForm hook to unregister field refs.
+ * @param {func}	registerFormField	: Callback method provided by the useForm hook to register field refs.
+ * @param {func}	unregisterFormField	: Callback method provided by the useForm hook to unregister field refs.
  */
-const FormFieldWrapper = ({ children, name, rules, registerFormField, unregisterFormField }) => {
+const FormFieldWrapper = ({ children, name, rules, registerFormField, unregisterFormField, ...otherProps }) => {
 	const inputRef = useRef();
 
 	useEffect(() => {
 		registerFormField({ element: inputRef.current, name, rules });
 
 		return () => unregisterFormField(name);
-	}, [inputRef, name, registerFormField, unregisterFormField]);
+	}, [inputRef, name, rules, registerFormField, unregisterFormField]);
 
 	return (
 		<>
-			{Children.map(children, (child) => (
+			{Children.toArray(children).map((child) => (
 				child.props.name && HANDLED_FORM_INPUT_TYPES.includes(child.type)
 					? createElement(child.type, {
 						...child.props,
+						...otherProps,
+						key: child.props.name,
 						ref: inputRef,
 					})
 					: child
@@ -55,7 +57,7 @@ FormFieldWrapper.propTypes = {
 };
 
 FormFieldWrapper.defaultProps = {
-	rules: {},
+	rules: undefined,
 };
 
 export default FormFieldWrapper;
