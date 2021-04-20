@@ -35,7 +35,8 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
-			.map(({ element: { value }, name }) => ([name, value]));
+			.filter((ref) => ref)
+			.map(({ ref: { value }, name }) => ([name, value]));
 
 		return Object.fromEntries(formValues);
 	}, [inputsRefs]);
@@ -51,7 +52,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
 		if (inputsRefs.current[fieldName]) {
-			const { element: { value }, rules } = inputsRefs.current[fieldName];
+			const { ref: { value }, rules } = inputsRefs.current[fieldName];
 
 			if (rules) {
 				const fieldErrors = {};
@@ -94,14 +95,12 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} formFieldRef The ref to register.
+	 * @param {object} fieldRef The ref to register.
 	 */
-	const registerFormField = useCallback((formFieldRef) => {
-		if (formFieldRef.name) {
-			inputsRefs.current[formFieldRef.name] = formFieldRef;
-			validateField(false)(formFieldRef.name);
-		} else {
-			logger.warn('attempting to register a form without a name property.');
+	const registerFormField = useCallback((fieldRef) => {
+		if (fieldRef.name) {
+			inputsRefs.current[fieldRef.name] = fieldRef;
+			validateField(false)(fieldRef.name);
 		}
 	}, [inputsRefs, validateField]);
 
@@ -123,33 +122,56 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
-	 * @name registerWrapper
-	 * @description Convenience method to be passed to any form field wrapper, providing them with necessary methods and information as components props.
+	 * @name register
+	 * @description Method used to register an input to its parent form. It will return its name, options and ref callback method.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @example <FormFieldWrapper {...registerWrapper('name')}> ... </FormFieldWrapper>
+	 * @param {string}	name	The input's name.
+	 * @param {object}	[rules]	Optional validation methods to apply to the input.
 	 *
-	 * @param {string} wrapperName The name under which the wrapped input will be named.
-	 *
-	 * @returns {object}
+	 * @throws Will throw an error if called without a name attribute.
 	 */
-	const registerWrapper = useCallback((wrapperName) => {
-		if (!wrapperName || wrapperName.trim().length === 0) {
+	const register = useCallback(({ name, rules = {}, ...options }) => {
+		if (!name || name.trim().length === 0) {
 			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
 		}
 
-		const wrapperProps = {
-			name: wrapperName,
-			registerFormField,
-			unregisterFormField,
+		/**
+		 * Saves the reference to the inputsRefs object.
+		 * If the input is registered for the first time, we
+		 * If it has already been registered (eg : the form has been re-rendered), we simply
+		 * 	update the reference of the input, without overriding the rest.
+		 */
+		const isInitialRegister = inputsRefs.current[name];
+
+		inputsRefs.current[name] = {
+			...(isInitialRegister
+				? { name }
+				: {
+					ref: (inputsRefs.current[name] || {}).ref,
+					...inputsRefs.current[name],
+				}),
+			name,
+			rules,
+			...options,
+		};
+
+		const fieldProps = {
+			name,
+			ref: (ref) => (ref
+				? registerFormField({ name, ref, rules, ...options })
+				: unregisterFormField(name)
+			),
+			...options,
 		};
 
 		if (validateOnChange) {
-			wrapperProps.onChange = () => validateField(true)(wrapperName);
+			// @TODO: handle select, checkbox and radio button onChange implementation.
+			fieldProps.onChange = () => validateField(true)(name);
 		}
 
-		return wrapperProps;
+		return fieldProps;
 	}, [registerFormField, unregisterFormField, validateField, validateOnChange]);
 
 	/**
@@ -184,7 +206,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		getFieldsRefs,
 		getFormValues,
 		handleSubmit,
-		registerWrapper,
+		register,
 		validateField: validateField(true),
 	};
 };

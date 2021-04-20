@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm, FormFieldWrapper, Validators } from 'air-react-forms';
+import { useForm, Validators } from 'air-react-forms';
 
 /**
  * @name App
@@ -8,59 +8,64 @@ import { useForm, FormFieldWrapper, Validators } from 'air-react-forms';
  * @author Yann Hodiesne
  */
 const App = () => {
-	const { formState: { errors }, handleSubmit, registerWrapper } = useForm({ validateOnChange: true });
+	const { formState: { errors }, handleSubmit, register } = useForm({ validateOnChange: true });
 	const [formData, setFormData] = useState({});
 	const [toggle, setToggle] = useState(false);
+
+	const formFields = {
+		firstName: {
+			name: 'firstName',
+			id: 'firstName',
+			defaultValue: 'john',
+			type: 'text',
+			rules: {
+				required: Validators.isRequired('This field is required'),
+				maxLength: Validators.hasMaxLength(8, 'Please provide a value of 8 or less characters'),
+			},
+		},
+		lastName: {
+			name: 'lastName',
+			id: 'lastName',
+			defaultValue: 'doe',
+			type: 'text',
+			rules: {
+				required: Validators.isRequired('This field is required'),
+			},
+		},
+		hasUsedHooks: {
+			name: 'hasUsedHooks',
+			id: 'hasUsedHooks',
+			rules: {
+				customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
+			},
+		},
+	};
 
 	return (
 		<div>
 			<form onSubmit={(e) => setFormData(handleSubmit(e))}>
 				<h1>useForm hook example</h1>
 				{toggle && (
-					<FormFieldWrapper
-						{...registerWrapper('firstName')}
-						rules={{
-							required: Validators.isRequired('This field is required'),
-							maxLength: Validators.hasMaxLength(8, 'Please provide a value of 8 or less characters'),
-						}}
-					>
+					<>
 						<label htmlFor="firstName">First name</label>
-						<input
-							id="firstName"
-							name="firstName"
-							type="text"
-							defaultValue="john"
-						/>
+						<input {...register(formFields.firstName)} />
 						{errors.firstName?.required && <span>{errors.firstName.required}</span>}
 						{errors.firstName?.maxLength && <span>{errors.firstName.maxLength}</span>}
-					</FormFieldWrapper>
+					</>
 				)}
 				<button type="button" onClick={() => setToggle(!toggle)}>toggle</button>
 
-				<FormFieldWrapper
-					{...registerWrapper('lastName')}
-					rules={{
-						required: Validators.isRequired('This field is required'),
-					}}
-				>
+				<>
 					<label htmlFor="lastName">Last name</label>
-					<input id="lastName" name="lastName" type="text" defaultValue="doe" />
+					<input {...register(formFields.lastName)} />
 					<div>
 						{errors.lastName?.required && <span>{errors.lastName.required}</span>}
 					</div>
-				</FormFieldWrapper>
+				</>
 
-				<FormFieldWrapper
-					{...registerWrapper('hasUsedHooks')}
-					rules={{
-						customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
-					}}
-				>
+				<>
 					<label htmlFor="hasUsedHooks">Ever used hooks before ?</label>
-					<select
-						id="hasUsedHooks"
-						name="hasUsedHooks"
-					>
+					<select {...register(formFields.hasUsedHooks)}>
 						<option value="">Select a value</option>
 						<option value="yes">yes</option>
 						<option value="no">No</option>
@@ -72,7 +77,8 @@ const App = () => {
 					<div>
 						{errors.hasUsedHooks?.customValidator && <span>{errors.hasUsedHooks.customValidator}</span>}
 					</div>
-				</FormFieldWrapper>
+				</>
+
 				<button type="submit">Submit</button>
 			</form>
 			<h3>Form data</h3>
