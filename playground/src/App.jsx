@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useForm, Validators } from 'air-react-forms';
+import { Fragment, useState } from 'react';
+import { useFieldArray, useForm, Validators } from 'air-react-forms';
 
 /**
  * @name App
@@ -8,9 +8,13 @@ import { useForm, Validators } from 'air-react-forms';
  * @author Yann Hodiesne
  */
 const App = () => {
-	const { formState: { errors }, handleSubmit, register } = useForm({ validateOnChange: true });
+	const { formState: { errors }, handleSubmit, register, getFieldsRefs } = useForm({ validateOnChange: true });
 	const [formData, setFormData] = useState({});
 	const [toggle, setToggle] = useState(false);
+	const { fields, append, remove } = useFieldArray({
+		formRef: { fieldsRef: getFieldsRefs() },
+		name: 'test',
+	});
 
 	const formFields = {
 		firstName: {
@@ -79,7 +83,18 @@ const App = () => {
 					</div>
 				</>
 
-				<button type="submit">Submit</button>
+				{fields.map((field) => (
+					<Fragment key={field.id}>
+						<label htmlFor={field.id}>{field.name}</label>
+						<input {...register(field)} />
+						<button type="button" onClick={() => remove(field)}>remove</button>
+						{errors[field.name]?.required && <span>{errors[field.name].required}</span>}
+					</Fragment>
+				))}
+				<div>
+					<button type="button" onClick={() => append(Math.random().toString(2, 12))}>Add field</button>
+					<button type="submit">Submit</button>
+				</div>
 			</form>
 			<h3>Form data</h3>
 			<pre>{JSON.stringify(formData, null, 2)}</pre>
