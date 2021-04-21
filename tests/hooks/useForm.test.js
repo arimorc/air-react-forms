@@ -18,6 +18,24 @@ describe('useForm hook', () => {
 		jest.restoreAllMocks();
 	});
 
+	describe('hook call result', () => {
+		it('should return multiple methods and attributes when called', () => {
+			const expectedValues = {
+				formState: {
+					errors: {},
+					isDirty: false,
+				},
+				getFieldsRefs: expect.any(Function),
+				getFormValues: expect.any(Function),
+				handleSubmit: expect.any(Function),
+				register: expect.any(Function),
+				validateField: expect.any(Function),
+			};
+
+			expect(sut).toMatchObject(expectedValues);
+		});
+	});
+
 	describe('register', () => {
 		it('should throw an error when called without a name attribute', () => {
 			const invalidField = { name: undefined, rules: {} };
@@ -25,7 +43,35 @@ describe('useForm hook', () => {
 			expect(() => shallow(<input {...sut.register(invalidField)} />)).toThrowError();
 		});
 
-		// @TODO: write additional unit tests.
+		it('should return an onChange implementation if useForm has been called with validateOnChange', () => {
+			testHook(() => {
+				sut = useForm({ validateOnChange: true });
+			});
+
+			const dummyFieldRef = { name: 'dummy_field' };
+			const result = sut.register(dummyFieldRef);
+
+			expect(result).toEqual(
+				expect.objectContaining(
+					{ onChange: expect.any(Function) },
+				),
+				expect.anything(),
+			);
+		});
+
+		it('should return all the arguments it has been provided', () => {
+			const dummyFieldArguments = { name: 'dummy_field', a: 'b', c: 'd' };
+			const result = sut.register(dummyFieldArguments);
+
+			expect(result).toEqual(
+				expect.objectContaining({
+					name: dummyFieldArguments.name,
+					a: dummyFieldArguments.a,
+					c: dummyFieldArguments.c,
+				}),
+				expect.anything(),
+			);
+		});
 	});
 
 	describe('registerFormField', () => {
@@ -123,10 +169,10 @@ describe('useForm hook', () => {
 		it('should return the result of the getFormValues method', () => {
 			const event = { preventDefault: () => {} };
 			const dummyFormFieldsRefs = [
-				{ name: 'firstname' },
-				{ name: 'lastname' },
-				{ name: 'age' },
-				{ name: 'unfilledInput' },
+				{ id: 1, name: 'firstname' },
+				{ id: 2, name: 'lastname' },
+				{ id: 3, name: 'age' },
+				{ id: 4, name: 'unfilledInput' },
 			];
 
 			mount(
@@ -147,8 +193,8 @@ describe('useForm hook', () => {
 	describe('getFieldsRefs', () => {
 		it('should return the current list of referenced fields', () => {
 			const dummyFormFieldsRefs = [
-				{ name: 'firstname', rules: {} },
-				{ name: 'lastname', rules: {} },
+				{ id: 1, name: 'firstname', rules: {} },
+				{ id: 2, name: 'lastname', rules: {} },
 			];
 
 			const nonReferencedFieldRef = { name: 'age', rules: {} };
@@ -186,7 +232,7 @@ describe('useForm hook', () => {
 			const dummyFieldRef = { name: 'dummy_field' };
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			sut.validateField('dummy_field');
+			act(() => sut.validateField('dummy_field'));
 
 			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
 			expect(hasLengthValidator).toHaveBeenCalledTimes(0);
@@ -233,7 +279,7 @@ describe('useForm hook', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator, hasLength: hasLengthValidator } };
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			sut.validateField('dummy_field');
+			act(() => sut.validateField('dummy_field'));
 
 			// We expect two calls for each validation methods : one triggered by the registerFormField call, the other by the validateField call.
 			expect(isRequiredValidator).toHaveBeenCalledTimes(2);
@@ -244,7 +290,7 @@ describe('useForm hook', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator, maxLength: hasMaxLengthValidator } };
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			sut.validateField('dummy_field');
+			act(() => sut.validateField('dummy_field'));
 
 			// We expect two calls for each validation methods : one triggered by the registerFormField call, the other by the validateField call.
 			expect(isRequiredValidator).toHaveBeenCalledTimes(2);
@@ -259,7 +305,7 @@ describe('useForm hook', () => {
 			expect(sut.formState.errors).not.toMatchObject({ [dummyFieldRef.name]: expect.anything() });
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
-			sut.validateField('dummy_field');
+			act(() => sut.validateField('dummy_field'));
 
 			expect(sut.formState.errors).toMatchObject({ [dummyFieldRef.name]: expect.anything() });
 		});
@@ -268,7 +314,7 @@ describe('useForm hook', () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator, maxLength: hasMaxLengthValidator } };
 			render(<input data-testid="dummy_field" {...sut.register(dummyFieldRef)} />);
 
-			sut.validateField('dummy_field');
+			act(() => sut.validateField('dummy_field'));
 
 			// We expect two calls for each validation methods : one triggered by the registerFormField call, the other by the validateField call.
 			expect(isRequiredValidator).toHaveBeenCalledTimes(2);
