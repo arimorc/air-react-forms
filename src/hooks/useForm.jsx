@@ -6,6 +6,8 @@ import logger from '../utils/logger';
  * @description A hook providing several method to control forms.
  *
  * @author Timothée Simon-Franza
+ *
+ * @param {bool} [validateOnChange] Whether or not a field should trigger a validation check on change.
  */
 const useForm = ({ validateOnChange = false } = {}) => {
 	const inputsRefs = useRef({});
@@ -143,7 +145,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		 * If it has already been registered (eg : the form has been re-rendered), we simply
 		 * 	update the reference of the input, without overriding the rest.
 		 */
-		const isInitialRegister = inputsRefs.current[name];
+		const isInitialRegister = !inputsRefs.current[name];
 
 		inputsRefs.current[name] = {
 			...(isInitialRegister
@@ -202,6 +204,10 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const getFieldsRefs = useCallback(() => (inputsRefs.current), [inputsRefs]);
 
 	return {
+		formContext: {
+			fieldsRef: inputsRefs,
+			formStateRef,
+		},
 		formState,
 		getFieldsRefs,
 		getFormValues,

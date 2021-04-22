@@ -8,13 +8,10 @@ import { useFieldArray, useForm, Validators } from 'air-react-forms';
  * @author Yann Hodiesne
  */
 const App = () => {
-	const { formState: { errors }, handleSubmit, register, getFieldsRefs } = useForm({ validateOnChange: true });
+	const { formContext, formState: { errors }, handleSubmit, register } = useForm({ validateOnChange: true });
 	const [formData, setFormData] = useState({});
 	const [toggle, setToggle] = useState(false);
-	const { fields, append, remove } = useFieldArray({
-		formRef: { fieldsRef: getFieldsRefs() },
-		name: 'test',
-	});
+	const { fields, append, remove } = useFieldArray({ formContext, name: 'test' });
 
 	const formFields = {
 		firstName: {
@@ -86,13 +83,13 @@ const App = () => {
 				{fields.map((field) => (
 					<Fragment key={field.id}>
 						<label htmlFor={field.id}>{field.name}</label>
-						<input {...register(field)} />
+						<input {...append(field)} />
 						<button type="button" onClick={() => remove(field)}>remove</button>
 						{errors[field.name]?.required && <span>{errors[field.name].required}</span>}
 					</Fragment>
 				))}
 				<div>
-					<button type="button" onClick={() => append(Math.random().toString(2, 12))}>Add field</button>
+					<button type="button" onClick={() => append()}>Add field</button>
 					<button type="submit">Submit</button>
 				</div>
 			</form>
