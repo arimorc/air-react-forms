@@ -8,10 +8,13 @@ import { useCallback, useMemo, useRef, useState } from 'react';
  *
  * @param {object} formContext	The context provided by the useForm hook.
  * @param {string} name			The name to store all inputs under in the form inputs references.
+ * @param {object} [rules]		Validation rules to apply to each field inside the field array.
  */
-const useFieldArray = ({ formContext, name: fieldArrayName }) => {
+const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 	const {
 		fieldsRef,
+		validateOnChange,
+		validateFieldArray,
 	} = formContext;
 	const [fields, setFields] = useState({});
 	const indexRef = useRef(0);
@@ -68,9 +71,12 @@ const useFieldArray = ({ formContext, name: fieldArrayName }) => {
 				isFieldArray: true,
 				name: fieldArrayName,
 			};
+			if (rules) {
+				fieldsRef.current[fieldArrayName].rules = rules;
+			}
 		}
 
-		const inputName = name ?? `${fieldArrayName}.${indexRef.current}`;
+		const inputName = name ?? `${fieldArrayName}-${indexRef.current}`;
 		if (!name) {
 			indexRef.current++;
 		}
@@ -103,6 +109,10 @@ const useFieldArray = ({ formContext, name: fieldArrayName }) => {
 				: unregisterField(inputName)
 			),
 		};
+		if (validateOnChange) {
+			// @TODO: handle select, checkbox and radio button onChange implementation.
+			fieldProps.onChange = () => validateFieldArray(fieldArrayName);
+		}
 
 		/**
 		 * This condition is used to avoid re-rendering loops.
@@ -115,7 +125,7 @@ const useFieldArray = ({ formContext, name: fieldArrayName }) => {
 		}
 
 		return fieldProps;
-	}, [fields, fieldsRef, fieldArrayName, registerField, unregisterField]);
+	}, [fieldsRef, fieldArrayName, validateOnChange, fields, rules, registerField, unregisterField, validateFieldArray]);
 
 	/**
 	 * @function

@@ -27,8 +27,15 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const syncStateWithRef = useCallback(() => setFormState({ ...formStateRef.current }), [formStateRef]);
 
 	/**
+	 * @function
+	 * @name getFieldValue
+	 * @description Returns a field's value in a format that can be used with Object.fromEntries().
 	 *
-	 * @param {*} field
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} field The field to retrieve the value from.
+	 *
+	 * @returns {array}
 	 */
 	const getFieldValue = (field) => {
 		const { name, ref: { value } } = field;
@@ -37,12 +44,18 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	};
 
 	/**
+	 * @function
+	 * @name getFieldArrayValues
+	 * @description Returns the values of a fieldArray in a format that can be used with Object.fromEntries().
 	 *
-	 * @param {*} fieldArrayFieldsList
-	 * @returns
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} fieldArrayFieldsList The fieldArray reference to retrieve values from.
+	 *
+	 * @returns {array}
 	 */
 	const getFieldArrayValues = (fieldArrayFieldsList) => {
-		const { name, ...fields } = fieldArrayFieldsList;
+		const { name, rules, ...fields } = fieldArrayFieldsList;
 
 		return [name, Object.values(fields).map(({ ref: { value } }) => value)];
 	};
@@ -68,6 +81,45 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		return Object.fromEntries(formValues);
 	}, [inputsRefs]);
 
+	// @TODO: find a way to validate nested field structures to have only one validation method.
+	/**
+	 * @function
+	 * @name validateFieldArray
+	 * @description Performs a validation check on all inputs of a specific field array.
+	 *
+	 * @param {string} fieldArrayName The name of the field array to perform validation on.
+	 */
+	const validateFieldArray = useCallback((shouldUpdateState) => (fieldArrayName) => {
+		if (inputsRefs.current[fieldArrayName]) {
+			const { name, rules, ...fields } = inputsRefs.current[fieldArrayName];
+
+			if (rules) {
+				Object.values(fields).filter(({ ref }) => ref).forEach((field) => {
+					const { ref: { value } } = field;
+					const fieldErrors = {};
+
+					Object.entries(rules).forEach(([rule, validator]) => {
+						fieldErrors[rule] = validator(value) || undefined;
+					});
+
+					if (!formStateRef.current.errors[fieldArrayName]) {
+						formStateRef.current.errors[fieldArrayName] = {};
+					}
+
+					formStateRef.current.errors[fieldArrayName][field.name] = Object.fromEntries(
+						Object.entries(fieldErrors).filter(([, v]) => v)
+					);
+				});
+
+				if (shouldUpdateState) {
+					syncStateWithRef();
+				}
+			}
+		} else if (process.env.NODE_ENV !== 'production') {
+			logger.warn(`tried to apply field array validation on a non-field array item ${fieldArrayName}`);
+		}
+	}, [syncStateWithRef]);
+
 	/**
 	 * @function
 	 * @name validateField
@@ -78,7 +130,9 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @param {string} fieldName The name of the field to perform validation on.
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
-		if (inputsRefs.current[fieldName] && !inputsRefs.current[fieldName].isFieldArray) {
+		if (inputsRefs.current[fieldName] && inputsRefs.current[fieldName].isFieldArray) {
+			validateFieldArray(shouldUpdateState)(fieldName);
+		} else if (inputsRefs.current[fieldName]) {
 			const { ref: { value }, rules } = inputsRefs.current[fieldName];
 
 			if (rules) {
@@ -93,15 +147,15 @@ const useForm = ({ validateOnChange = false } = {}) => {
 				});
 
 				formStateRef.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
+			}
 
-				if (shouldUpdateState) {
-					syncStateWithRef();
-				}
+			if (shouldUpdateState) {
+				syncStateWithRef();
 			}
 		} else if (process.env.NODE_ENV !== 'production') {
 			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
 		}
-	}, [syncStateWithRef]);
+	}, [syncStateWithRef, validateFieldArray]);
 
 	/**
 	 * @function
@@ -232,6 +286,9 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		formContext: {
 			fieldsRef: inputsRefs,
 			formStateRef,
+			validateOnChange,
+			validateField: validateField(true),
+			validateFieldArray: validateFieldArray(true),
 		},
 		formState,
 		getFieldsRefs,

@@ -11,7 +11,11 @@ const App = () => {
 	const { formContext, formState: { errors }, handleSubmit, register } = useForm({ validateOnChange: true });
 	const [formData, setFormData] = useState({});
 	const [toggle, setToggle] = useState(false);
-	const { fields, append, remove } = useFieldArray({ formContext, name: 'test' });
+	const { fields, append, remove } = useFieldArray({
+		formContext,
+		name: 'test',
+		rules: { required: Validators.isRequired('required, pal !') },
+	});
 
 	const formFields = {
 		firstName: {
@@ -83,9 +87,11 @@ const App = () => {
 				{fields.map((field) => (
 					<Fragment key={field.id}>
 						<label htmlFor={field.id}>{field.name}</label>
-						<input {...append(field)} />
-						<button type="button" onClick={() => remove(field)}>remove</button>
-						{errors[field.name]?.required && <span>{errors[field.name].required}</span>}
+						<div style={{ display: 'flex' }}>
+							<input {...append(field)} />
+							<button type="button" onClick={() => remove(field)}>remove</button>
+						</div>
+						{errors.test?.[field.name]?.required && <span>{errors.test?.[field.name]?.required}</span>}
 					</Fragment>
 				))}
 				<div>
