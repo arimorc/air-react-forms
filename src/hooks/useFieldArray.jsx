@@ -64,7 +64,10 @@ const useFieldArray = ({ formContext, name: fieldArrayName }) => {
 	 */
 	const register = useCallback(({ name = undefined, ...additionalProps } = {}) => {
 		if (!fieldsRef.current[fieldArrayName]) {
-			fieldsRef.current[fieldArrayName] = {};
+			fieldsRef.current[fieldArrayName] = {
+				isFieldArray: true,
+				name: fieldArrayName,
+			};
 		}
 
 		const inputName = name ?? `${fieldArrayName}.${indexRef.current}`;

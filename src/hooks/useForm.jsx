@@ -27,6 +27,27 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const syncStateWithRef = useCallback(() => setFormState({ ...formStateRef.current }), [formStateRef]);
 
 	/**
+	 *
+	 * @param {*} field
+	 */
+	const getFieldValue = (field) => {
+		const { name, ref: { value } } = field;
+
+		return [name, value];
+	};
+
+	/**
+	 *
+	 * @param {*} fieldArrayFieldsList
+	 * @returns
+	 */
+	const getFieldArrayValues = (fieldArrayFieldsList) => {
+		const { name, ...fields } = fieldArrayFieldsList;
+
+		return [name, Object.values(fields).map(({ ref: { value } }) => value)];
+	};
+
+	/**
 	 * @function
 	 * @name getFormValues
 	 * @description Returns the value of all controlled fields as an object.
@@ -38,7 +59,11 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
 			.filter((ref) => ref)
-			.map(({ ref: { value }, name }) => ([name, value]));
+			.map(({ isFieldArray, ...fieldRef }) => (
+				isFieldArray
+					? getFieldArrayValues(fieldRef)
+					: getFieldValue(fieldRef)
+			));
 
 		return Object.fromEntries(formValues);
 	}, [inputsRefs]);
@@ -53,7 +78,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @param {string} fieldName The name of the field to perform validation on.
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
-		if (inputsRefs.current[fieldName]) {
+		if (inputsRefs.current[fieldName] && !inputsRefs.current[fieldName].isFieldArray) {
 			const { ref: { value }, rules } = inputsRefs.current[fieldName];
 
 			if (rules) {
