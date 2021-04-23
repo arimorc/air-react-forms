@@ -128,13 +128,12 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
 		} else {
 			if (!formStateRef.current.errors[fieldArrayName]) {
-				formStateRef.current.errors[fieldArrayName] = { [fieldName]: {} };
+				formStateRef.current.errors[fieldArrayName] = {};
 			}
 
-			formStateRef.current.errors[fieldArrayName] = {
-				...formStateRef.current.errors[fieldArrayName],
-				[fieldName]: Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules))[0],
-			};
+			// Assigns the result of the 'validate' method call to the formState ref's related error field.
+			// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+			[formStateRef.current.errors[fieldArrayName][fieldName]] = Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules));
 
 			if (shouldUpdateState) {
 				syncStateWithRef();
@@ -151,34 +150,17 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateFieldArray = useCallback((shouldUpdateState) => (fieldArrayName) => {
 		if (inputsRefs.current[fieldArrayName]) {
-			const { name, rules, ...fields } = inputsRefs.current[fieldArrayName];
+			// Assigns the result of the 'validate' method call to the formState ref's related error field.
+			// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+			[formStateRef.current.errors[fieldArrayName]] = Object.values(validate(inputsRefs.current[fieldArrayName]));
 
-			if (rules) {
-				Object.values(fields).filter(({ ref }) => ref).forEach((field) => {
-					const { ref: { value } } = field;
-					const fieldErrors = {};
-
-					Object.entries(rules).forEach(([rule, validator]) => {
-						fieldErrors[rule] = validator(value) || undefined;
-					});
-
-					if (!formStateRef.current.errors[fieldArrayName]) {
-						formStateRef.current.errors[fieldArrayName] = {};
-					}
-
-					formStateRef.current.errors[fieldArrayName][field.name] = Object.fromEntries(
-						Object.entries(fieldErrors).filter(([, v]) => v)
-					);
-				});
-
-				if (shouldUpdateState) {
-					syncStateWithRef();
-				}
+			if (shouldUpdateState) {
+				syncStateWithRef();
 			}
-		} else if (process.env.NODE_ENV !== 'production') {
-			logger.warn(`tried to apply field array validation on a non-field array item ${fieldArrayName}`);
+		} else {
+			logger.warn(`tried to apply field validation on a non-registered field array ${fieldArrayName}`);
 		}
-	}, [syncStateWithRef]);
+	}, [syncStateWithRef, validate]);
 
 	/**
 	 * @function
@@ -190,27 +172,10 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @param {string} fieldName The name of the field to perform validation on.
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
-		if (inputsRefs.current[fieldName] && inputsRefs.current[fieldName].isFieldArray) {
-			validate(inputsRefs.current[fieldName]);
-
-			validateFieldArray(shouldUpdateState)(fieldName);
-		} else if (inputsRefs.current[fieldName]) {
-			validate(inputsRefs.current[fieldName]);
-			const { ref: { value }, rules } = inputsRefs.current[fieldName];
-
-			if (rules) {
-				const fieldErrors = {};
-
-				// We iterate over the rules object for the current formfield.
-				// For each rule, we store the validator method's return value inside the temporary fieldErrors object.
-				// If said validator method returns an empty string, it means the validation was successful and we store undefined.
-				// Undefined error keys are then filtered out of the temporary object, which is then stored in the formstate's errors field.
-				Object.entries(rules).forEach(([rule, validator]) => {
-					fieldErrors[rule] = validator(value) || undefined;
-				});
-
-				formStateRef.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
-			}
+		if (inputsRefs.current[fieldName]) {
+			// Assigns the result of the 'validate' method call to the formState ref's related error field.
+			// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+			[formStateRef.current.errors[fieldName]] = Object.values(validate(inputsRefs.current[fieldName]));
 
 			if (shouldUpdateState) {
 				syncStateWithRef();
@@ -218,7 +183,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		} else if (process.env.NODE_ENV !== 'production') {
 			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
 		}
-	}, [syncStateWithRef, validate, validateFieldArray]);
+	}, [syncStateWithRef, validate]);
 
 	/**
 	 * @function
@@ -228,19 +193,14 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = useCallback(() => {
-		// Object.values(inputsRefs.current).map((pField) => validate(pField));
-		// const validationResults = Object.values(inputsRefs.current).map((pField) => validate(pField));
-		// const s = Object.fromEntries(validationResults.map((validationResult) => Object.entries(validationResult)[0]));
-		// console.log(s);
+		Object.values(inputsRefs.current).forEach(({ isFieldArray, name }) => (
+			isFieldArray
+				? validateFieldArray(false)(name)
+				: validateField(false)(name)
+		));
 
-		// if (inputsRefs.current?.test) {
-		// 	const { name, isFieldArray, rules, ...fields } = inputsRefs.current.test;
-		// 	Object.values(fields).map((field) => console.log(validate(field, rules)));
-		// }
-
-		Object.values(inputsRefs.current).forEach(({ name }) => validateField(false)(name));
 		syncStateWithRef();
-	}, [syncStateWithRef, validateField]);
+	}, [syncStateWithRef, validateField, validateFieldArray]);
 
 	/**
 	 * @function
@@ -361,14 +321,14 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			formStateRef,
 			validateOnChange,
 			validateField: validateField(true),
-			validateFieldArray: validateFieldArray(true),
-			validateFieldArrayInput: validateFieldArrayInput(true),
+			validateFieldArrayInput,
 		},
 		formState,
 		getFieldsRefs,
 		getFormValues,
 		handleSubmit,
 		register,
+		validateFieldArray: validateFieldArray(true),
 		validateField: validateField(true),
 	};
 };

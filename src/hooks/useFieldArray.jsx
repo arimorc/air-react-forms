@@ -38,8 +38,9 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 	const registerField = useCallback((fieldRef) => {
 		if (fieldRef.name) {
 			fieldsRef.current[fieldArrayName][fieldRef.name] = fieldRef;
+			validateFieldArrayInput(false)(fieldRef.name, fieldArrayName, rules);
 		}
-	}, [fieldsRef, fieldArrayName]);
+	}, [fieldsRef, fieldArrayName, validateFieldArrayInput, rules]);
 
 	/**
 	 * @function
@@ -117,7 +118,7 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 
 		if (validateOnChange) {
 			// @TODO: handle select, checkbox and radio button onChange implementation.
-			fieldProps.onChange = () => validateFieldArrayInput(inputName, fieldArrayName, rules);
+			fieldProps.onChange = () => validateFieldArrayInput(true)(inputName, fieldArrayName, rules);
 		}
 
 		/**

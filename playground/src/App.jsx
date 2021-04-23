@@ -14,7 +14,10 @@ const App = () => {
 	const { fields, append, remove } = useFieldArray({
 		formContext,
 		name: 'test',
-		rules: { required: Validators.isRequired('required, pal !') },
+		rules: {
+			required: Validators.isRequired('required, pal !'),
+			customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
+		},
 	});
 
 	const formFields = {
@@ -35,6 +38,7 @@ const App = () => {
 			type: 'text',
 			rules: {
 				required: Validators.isRequired('This field is required'),
+				customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
 			},
 		},
 		hasUsedHooks: {
