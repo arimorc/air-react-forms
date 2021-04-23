@@ -13,8 +13,9 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 	const {
 		fieldsRef,
+		formStateRef,
 		validateOnChange,
-		validateFieldArray,
+		validateFieldArrayInput,
 	} = formContext;
 	const [fields, setFields] = useState({});
 	const indexRef = useRef(0);
@@ -52,9 +53,11 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 	const unregisterField = useCallback((fieldName) => {
 		if (fieldsRef.current[fieldArrayName] && fieldsRef.current[fieldArrayName][fieldName]) {
 			delete fieldsRef.current[fieldArrayName][fieldName];
-			// delete formStateRef.current.errors[fieldArrayName][fieldName];
+			if (formStateRef.current.errors[fieldArrayName]?.[fieldName]) {
+				delete formStateRef.current.errors[fieldArrayName][fieldName];
+			}
 		}
-	}, [fieldsRef, fieldArrayName]);
+	}, [fieldsRef, formStateRef, fieldArrayName]);
 
 	/**
 	 * @function
@@ -65,7 +68,7 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 	 *
 	 * @param {string} [name] : The name of the input to register.
 	 */
-	const register = useCallback(({ name = undefined, ...additionalProps } = {}) => {
+	const register = useCallback(({ name = undefined, defaultValue = undefined, ...additionalProps } = {}) => {
 		if (!fieldsRef.current[fieldArrayName]) {
 			fieldsRef.current[fieldArrayName] = {
 				isFieldArray: true,
@@ -92,6 +95,7 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 				}),
 			id: inputName,
 			name: inputName,
+			defaultValue: defaultValue ?? '', // @TODO: handle non-text inputs.
 			...additionalProps,
 		};
 
@@ -104,14 +108,16 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 			...additionalProps,
 			id: inputName,
 			name: inputName,
+			defaultValue: defaultValue ?? '', // @TODO: handle non-text inputs.
 			ref: (ref) => (ref
 				? registerField({ name: inputName, ref, ...additionalProps })
 				: unregisterField(inputName)
 			),
 		};
+
 		if (validateOnChange) {
 			// @TODO: handle select, checkbox and radio button onChange implementation.
-			fieldProps.onChange = () => validateFieldArray(fieldArrayName);
+			fieldProps.onChange = () => validateFieldArrayInput(inputName, fieldArrayName, rules);
 		}
 
 		/**
@@ -125,7 +131,7 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 		}
 
 		return fieldProps;
-	}, [fieldsRef, fieldArrayName, validateOnChange, fields, rules, registerField, unregisterField, validateFieldArray]);
+	}, [fieldsRef, fieldArrayName, validateOnChange, fields, rules, registerField, unregisterField, validateFieldArrayInput]);
 
 	/**
 	 * @function

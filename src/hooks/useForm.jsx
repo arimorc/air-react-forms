@@ -81,7 +81,67 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		return Object.fromEntries(formValues);
 	}, [inputsRefs]);
 
-	// @TODO: find a way to validate nested field structures to have only one validation method.
+	/**
+	 * @function
+	 * @name validate
+	 * @description Method used to perform validation checks on the provided field.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} field				The field to perform validation checks on. Must be from the inputsRef reference object.
+	 * @param {object} [validationRules]	Optional parameter used to pass down rules from a fieldArray to its fields.
+	 */
+	const validate = useCallback((field, validationRules = {}) => {
+		const fieldErrors = {};
+
+		if (field) {
+			if (field.isFieldArray) {
+				const { name, rules, isFieldArray, ...fields } = field;
+
+				if (rules) {
+					const validationResults = Object.values(fields).map((pField) => validate(pField, rules));
+
+					fieldErrors[field.name] = Object.fromEntries(validationResults.map((validationResult) => Object.entries(validationResult)[0]));
+
+					return fieldErrors;
+				}
+			} else {
+				const rules = field.rules ?? validationRules;
+
+				if (rules && field.ref?.value !== undefined) {
+					Object.entries(rules).forEach(([rule, validator]) => {
+						fieldErrors[rule] = validator(field.ref.value) || undefined;
+					});
+				}
+			}
+		}
+
+		const result = { [field.name]: Object.fromEntries(Object.entries(fieldErrors)) };
+
+		return result;
+	}, []);
+
+	const validateFieldArrayInput = useCallback((shouldUpdateState) => (fieldName, fieldArrayName, validationRules = {}) => {
+		if (!inputsRefs.current?.[fieldArrayName]) {
+			logger.warn(`tried to apply field validation on field from a non-registered field array ${fieldArrayName}`);
+		} else if (!inputsRefs.current?.[fieldArrayName]?.[fieldName]) {
+			logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
+		} else {
+			if (!formStateRef.current.errors[fieldArrayName]) {
+				formStateRef.current.errors[fieldArrayName] = { [fieldName]: {} };
+			}
+
+			formStateRef.current.errors[fieldArrayName] = {
+				...formStateRef.current.errors[fieldArrayName],
+				[fieldName]: Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules))[0],
+			};
+
+			if (shouldUpdateState) {
+				syncStateWithRef();
+			}
+		}
+	}, [syncStateWithRef, validate]);
+
 	/**
 	 * @function
 	 * @name validateFieldArray
@@ -131,8 +191,11 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
 		if (inputsRefs.current[fieldName] && inputsRefs.current[fieldName].isFieldArray) {
+			validate(inputsRefs.current[fieldName]);
+
 			validateFieldArray(shouldUpdateState)(fieldName);
 		} else if (inputsRefs.current[fieldName]) {
+			validate(inputsRefs.current[fieldName]);
 			const { ref: { value }, rules } = inputsRefs.current[fieldName];
 
 			if (rules) {
@@ -155,7 +218,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		} else if (process.env.NODE_ENV !== 'production') {
 			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
 		}
-	}, [syncStateWithRef, validateFieldArray]);
+	}, [syncStateWithRef, validate, validateFieldArray]);
 
 	/**
 	 * @function
@@ -165,6 +228,16 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = useCallback(() => {
+		// Object.values(inputsRefs.current).map((pField) => validate(pField));
+		// const validationResults = Object.values(inputsRefs.current).map((pField) => validate(pField));
+		// const s = Object.fromEntries(validationResults.map((validationResult) => Object.entries(validationResult)[0]));
+		// console.log(s);
+
+		// if (inputsRefs.current?.test) {
+		// 	const { name, isFieldArray, rules, ...fields } = inputsRefs.current.test;
+		// 	Object.values(fields).map((field) => console.log(validate(field, rules)));
+		// }
+
 		Object.values(inputsRefs.current).forEach(({ name }) => validateField(false)(name));
 		syncStateWithRef();
 	}, [syncStateWithRef, validateField]);
@@ -289,6 +362,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			validateOnChange,
 			validateField: validateField(true),
 			validateFieldArray: validateFieldArray(true),
+			validateFieldArrayInput: validateFieldArrayInput(true),
 		},
 		formState,
 		getFieldsRefs,
