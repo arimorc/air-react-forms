@@ -38,7 +38,7 @@ describe('logger utility methods', () => {
 		});
 	});
 
-	describe('error method mode', () => {
+	describe('error method', () => {
 		afterAll(() => {
 			if (initialEnvironmentMode) {
 				process.env.NODE_ENV = initialEnvironmentMode;
@@ -46,6 +46,7 @@ describe('logger utility methods', () => {
 				delete process.env.NODE_ENV;
 			}
 		});
+
 		it('should not project any console message while in production mode', () => {
 			process.env.NODE_ENV = 'production';
 			logger.error('error message');
@@ -58,6 +59,30 @@ describe('logger utility methods', () => {
 			logger.error('error message');
 
 			expect(global.console.error).toHaveBeenNthCalledWith(1, '%s : %s', logger.PREFIX, 'error message');
+		});
+	});
+
+	describe('fatal method', () => {
+		afterAll(() => {
+			if (initialEnvironmentMode) {
+				process.env.NODE_ENV = initialEnvironmentMode;
+			} else {
+				delete process.env.NODE_ENV;
+			}
+		});
+
+		it('should not throw any error nor project any console message while in production mode', () => {
+			process.env.NODE_ENV = 'production';
+
+			expect(() => logger.fatal('error message')).not.toThrow();
+			expect(global.console.error).toHaveBeenCalledTimes(0);
+			expect(global.console.warn).toHaveBeenCalledTimes(0);
+		});
+
+		it('should project a console error message with defined prefix while in non-production mode', () => {
+			process.env.NODE_ENV = 'dev';
+
+			expect(() => logger.fatal('error message')).toThrow(`${logger.PREFIX} error message`);
 		});
 	});
 });

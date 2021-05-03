@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import FormContext from '../FormContext';
+import logger from '../utils/logger';
 
 /**
  * @name useFieldArray
@@ -6,17 +8,24 @@ import { useCallback, useMemo, useRef, useState } from 'react';
  *
  * @author Timothée Simon-Franza
  *
- * @param {object} formContext	The context provided by the useForm hook.
  * @param {string} name			The name to store all inputs under in the form inputs references.
  * @param {object} [rules]		Validation rules to apply to each field inside the field array.
+ * @param {object} [context]	The form context given by useForm, obligatory only if useFieldArray is called inside the same component as useForm.
  */
-const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
+const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
+	const formContext = useContext(FormContext) ?? context;
+
+	if (!formContext) {
+		logger.fatal('useFieldArray has been called outside of a FormProvider (you can give formContext to useFieldArray directly as a parameter)');
+	}
+
 	const {
 		fieldsRef,
 		formStateRef,
 		validateOnChange,
 		validateFieldArrayInput,
 	} = formContext;
+
 	const [fields, setFields] = useState({});
 	const indexRef = useRef(0);
 
@@ -152,12 +161,15 @@ const useFieldArray = ({ formContext, name: fieldArrayName, rules }) => {
 
 	const getFields = useMemo(() => (Object.values(fields)), [fields]);
 
+	const errors = useMemo(() => formContext.formStateRef.current.errors[fieldArrayName] ?? {}, [formContext, fieldArrayName]);
+
 	return {
 		fields: getFields,
 		getFieldsValues,
 		register,
 		append: register,
 		remove,
+		errors,
 	};
 };
 

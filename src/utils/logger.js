@@ -6,7 +6,7 @@
  *
  * @author Timothée Simon-Franza
  */
-const PREFIX = '[react-air-forms]';
+const PREFIX = '[air-react-forms]';
 
 /**
  * @function
@@ -15,7 +15,7 @@ const PREFIX = '[react-air-forms]';
  *
  * @author Timothée Simon-Franza
  *
- * @param {string} message : The message to display.
+ * @param {string} message The message to display.
  */
 const warn = (message) => {
 	if (process.env.NODE_ENV !== 'production') {
@@ -30,7 +30,7 @@ const warn = (message) => {
  *
  * @author Timothée Simon-Franza
  *
- * @param {string} message : The message to display
+ * @param {string} message The message to display
  */
 const error = (message) => {
 	if (process.env.NODE_ENV !== 'production') {
@@ -38,9 +38,25 @@ const error = (message) => {
 	}
 };
 
+/**
+ * @function
+ * @name fatal
+ * @description Throws a fatal error with the given message.
+ *
+ * @author Yann Hodiesne
+ *
+ * @param {string} message The error to display
+ */
+const fatal = (message) => {
+	if (process.env.NODE_ENV !== 'production') {
+		throw new Error(`${PREFIX} ${message}`);
+	}
+};
+
 const logger = {
 	warn,
 	error,
+	fatal,
 	PREFIX,
 };
 

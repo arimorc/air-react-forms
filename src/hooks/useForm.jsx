@@ -319,6 +319,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		formContext: {
 			fieldsRef: inputsRefs,
 			formStateRef,
+			syncStateWithRef,
 			validateOnChange,
 			validateField: validateField(true),
 			validateFieldArrayInput,
