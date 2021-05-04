@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import FormContext from '../FormContext';
 import logger from '../utils/logger';
 
@@ -161,7 +161,15 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 
 	const getFields = useMemo(() => (Object.values(fields)), [fields]);
 
-	const errors = useMemo(() => formContext.formStateRef.current.errors[fieldArrayName] ?? {}, [formContext, fieldArrayName]);
+	const [errors, setErrors] = useState(() => formContext.formStateRef.current.errors[fieldArrayName] ?? {});
+
+	useEffect(() => {
+		const value = formContext.formStateRef.current.errors[fieldArrayName] ?? {};
+
+		if (value !== errors) {
+			setErrors(formContext.formStateRef.current.errors[fieldArrayName] ?? {});
+		}
+	}, [formContext, fieldArrayName, errors]);
 
 	return {
 		fields: getFields,

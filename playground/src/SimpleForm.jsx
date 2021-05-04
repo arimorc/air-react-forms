@@ -11,7 +11,7 @@ const SimpleForm = () => {
 	const { formContext, formState: { errors }, handleSubmit, register } = useForm({ validateOnChange: true });
 	const [formData, setFormData] = useState({});
 	const [toggle, setToggle] = useState(false);
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, register: registerArrayField, remove } = useFieldArray({
 		name: 'test',
 		rules: {
 			required: Validators.isRequired('required, pal !'),
@@ -91,14 +91,14 @@ const SimpleForm = () => {
 					<Fragment key={field.id}>
 						<label htmlFor={field.id}>{field.name}</label>
 						<div style={{ display: 'flex' }}>
-							<input {...append(field)} />
+							<input {...registerArrayField(field)} />
 							<button type="button" onClick={() => remove(field)}>remove</button>
 						</div>
 						{errors.test?.[field.name]?.required && <span>{errors.test?.[field.name]?.required}</span>}
 					</Fragment>
 				))}
 				<div>
-					<button type="button" onClick={() => append()}>Add field</button>
+					<button type="button" onClick={append}>Add field</button>
 					<button type="submit">Submit</button>
 				</div>
 			</form>
