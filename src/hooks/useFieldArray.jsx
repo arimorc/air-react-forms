@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import isEqual from 'lodash.isequal';
 import FormContext from '../FormContext';
 import logger from '../utils/logger';
 
@@ -77,6 +78,8 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 	 * @author Timothée Simon-Franza
 	 *
 	 * @param {string} [name] : The name of the input to register.
+	 *
+	 * @returns {object} The props to provide to the field instigating the call to this method.
 	 */
 	const register = useCallback(({ name = undefined, defaultValue = undefined, ...additionalProps } = {}) => {
 		if (!fieldsRef.current[fieldArrayName]) {
@@ -94,8 +97,15 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 			indexRef.current++;
 		}
 
+		// Determines whether this call is the first registration call made by the field or not.
 		const isInitialRegister = !fieldsRef.current[fieldArrayName][inputName];
 
+		/**
+		 * Saves the reference to the {@link fieldsRef} object.
+		 * 	If it is its first registration call, we simply register its name, id, defaultValue and options.
+		 *	If it has already been registered (eg: the form has been re-rendered), we simply update the reference
+		 *		to the input, without overriding the rest.
+		 */
 		fieldsRef.current[fieldArrayName][inputName] = {
 			...(isInitialRegister
 				? { name: inputName }
@@ -164,12 +174,12 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 	const [errors, setErrors] = useState(() => formContext.formStateRef.current.errors[fieldArrayName] ?? {});
 
 	useEffect(() => {
-		const value = formContext.formStateRef.current.errors[fieldArrayName] ?? {};
+		const value = formStateRef.current.errors[fieldArrayName] ?? {};
 
-		if (value !== errors) {
-			setErrors(formContext.formStateRef.current.errors[fieldArrayName] ?? {});
+		if (!isEqual(value, errors)) {
+			setErrors(formStateRef.current.errors[fieldArrayName] ?? {});
 		}
-	}, [formContext, fieldArrayName, errors]);
+	}, [errors, fieldArrayName, formStateRef]);
 
 	return {
 		fields: getFields,

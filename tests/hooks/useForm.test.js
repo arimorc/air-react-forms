@@ -1,8 +1,10 @@
+import { createRef } from 'react';
 import { mount, shallow } from 'enzyme';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import useForm from '../../src/hooks/useForm';
 import testHook from './hookTestUtils';
+import FieldArrayTestForm from './FieldArrayTestForm';
 import logger from '../../src/utils/logger';
+import { useForm } from '../../src';
 
 describe('useForm hook', () => {
 	let sut;
@@ -154,6 +156,39 @@ describe('useForm hook', () => {
 		});
 	});
 
+	describe('getFieldArrayValues', () => {
+		it('should return all values of a field array in the form of an array.', () => {
+			const formRef = createRef();
+
+			act(() => {
+				mount(<FieldArrayTestForm fieldArrayName="test" ref={formRef} />);
+				formRef.current.append();
+			});
+
+			const expectedResult = ['test', ['abcd']];
+
+			expect(formRef.current.getFieldArrayValues(
+				formRef.current.getContext().fieldsRef.current.test
+			)).toEqual(expectedResult);
+		});
+
+		it('should return an empty object if no fields is referenced', () => {
+			const formRef = createRef();
+
+			act(() => {
+				mount(<FieldArrayTestForm fieldArrayName="test" ref={formRef} />);
+				formRef.current.append(); // required for the fieldArray to be properly registered.
+				formRef.current.remove('test-0'); // 'test-0' is the name of the first input generated.
+			});
+
+			const expectedResult = ['test', []];
+
+			expect(formRef.current.getFieldArrayValues(
+				formRef.current.getContext().fieldsRef.current.test
+			)).toEqual(expectedResult);
+		});
+	});
+
 	describe('handleSubmit', () => {
 		it('should prevent the default form submission event', () => {
 			const event = { preventDefault: () => {} };
@@ -213,6 +248,64 @@ describe('useForm hook', () => {
 			expect(sut.getFieldsRefs()).toEqual(expectedResult);
 			expect(sut.getFieldsRefs()).not.toMatchObject({ [nonReferencedFieldRef.name]: { ...nonReferencedFieldRef, ref: expect.anything() } });
 		});
+	});
+
+	describe('validate', () => {
+		const isRequiredValidator = jest.fn();
+		const hasMinLengthValidator = jest.fn();
+
+		beforeEach(() => {
+			isRequiredValidator.mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			hasMinLengthValidator.mockImplementation((value) => (value.trim().length < 8 ? 'should be at least 8 chars' : ''));
+		});
+
+		it('should return an empty object if no field is provided', () => {
+			expect(sut.validate(undefined, {})).toStrictEqual({});
+		});
+
+		it('should return validation results in the expected format.', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: { isRequired: isRequiredValidator } };
+			const expectedResult = { dummy_field: { isRequired: 'required' } };
+
+			mount(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+		});
+
+		it('should return validation results in the expected format (field array version).', async () => {
+			const formRef = createRef();
+
+			await act(async () => {
+				mount(
+					<FieldArrayTestForm
+						fieldArrayName="test"
+						fieldArrayRules={{
+							isRequired: isRequiredValidator,
+							minLength: hasMinLengthValidator,
+						}}
+						ref={formRef}
+					/>
+				);
+				await formRef.current.append();
+				await formRef.current.append();
+			});
+			const expectedResult = {
+				test: {
+					'test-0': {
+						isRequired: undefined,
+						minLength: 'should be at least 8 chars',
+					},
+					'test-1': {
+						isRequired: undefined,
+						minLength: 'should be at least 8 chars',
+					},
+				},
+			};
+
+			expect(formRef.current.getUseFormResults().validate(formRef.current.getContext().fieldsRef.current.test)).toStrictEqual(expectedResult);
+		});
+
+		// @TODO: check recursive calls when provided a fieldArray.
 	});
 
 	describe('validateField', () => {

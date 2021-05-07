@@ -76,7 +76,11 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const getFieldArrayValues = (fieldArrayFieldsList) => {
 		const { name, rules, ...fields } = fieldArrayFieldsList;
 
-		return [name, Object.values(fields).map(({ ref: { value } }) => value)];
+		const values = Object.values(fields)
+			.filter(({ ref }) => ref)
+			.map(({ ref: { value } }) => value ?? undefined);
+
+		return [name, values];
 	};
 
 	/**
@@ -116,43 +120,45 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @returns {object} An object in the following format : { fieldName: { validationKey1: string, validationKey2: string, ... } }
 	 */
 	const validate = useCallback((field, validationRules = {}) => {
+		if (!field) {
+			return {};
+		}
+
 		const fieldErrors = {};
 
-		if (field) {
-			if (field.isFieldArray) {
-				const { name, rules, isFieldArray, ...fields } = field;
+		if (field.isFieldArray) {
+			const { name, rules, isFieldArray, ...fields } = field;
 
-				if (rules) {
-					/**
-					 * Retrieves all fields references, then map over each of them to apply validation checks using recursion.
-					 *	The validation results are in the following format fieldName: { validationKey1: string, validation2: string, ... }.
-					 *	We them map over them to get a final validation object formatted in the following way :
-					 *	{
-					 *		fieldName1: { validationKey1: string, validationKey2: string, ... },
-					 *		fieldName2: { validationKey1: string, validationKey2: string, ... }
-					 *		...
-					 *	}
-					 */
-					const validationResults = Object.values(fields)
-						.map((pField) => validate(pField, rules))
-						.map((validationResult) => Object.entries(validationResult)[0]);
+			if (rules) {
+				/**
+				 * Retrieves all fields references, then map over each of them to apply validation checks using recursion.
+				 *	The validation results are in the following format fieldName: { validationKey1: string, validation2: string, ... }.
+				 *	We them map over them to get a final validation object formatted in the following way :
+				 *	{
+				 *		fieldName1: { validationKey1: string, validationKey2: string, ... },
+				 *		fieldName2: { validationKey1: string, validationKey2: string, ... }
+				 *		...
+				 *	}
+				 */
+				const validationResults = Object.values(fields)
+					.map((pField) => validate(pField, rules))
+					.map((validationResult) => Object.entries(validationResult)[0]);
 
-					fieldErrors[field.name] = Object.fromEntries(validationResults);
+				fieldErrors[field.name] = Object.fromEntries(validationResults);
 
-					return fieldErrors;
-				}
-			} else {
-				const rules = field.rules ?? validationRules;
+				return fieldErrors;
+			}
+		} else {
+			const rules = field.rules ?? validationRules;
 
-				if (rules && field.ref?.value !== undefined) {
-					/**
-					 * For each rule, we call its linked validator method and store the result in the fieldErrors temporary object.
-					 * If the validator doesn't exist or returns nothing, we assign undefined to perform garbage collection.
-					 */
-					Object.entries(rules).forEach(([rule, validator]) => {
-						fieldErrors[rule] = validator(field.ref.value) || undefined;
-					});
-				}
+			if (rules && field.ref?.value !== undefined) {
+				/**
+				 * For each rule, we call its linked validator method and store the result in the fieldErrors temporary object.
+				 * If the validator doesn't exist or returns nothing, we assign undefined to perform garbage collection.
+				 */
+				Object.entries(rules).forEach(([rule, validator]) => {
+					fieldErrors[rule] = validator(field.ref.value) || undefined;
+				});
 			}
 		}
 
@@ -404,8 +410,10 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		formState,
 		getFieldsRefs,
 		getFormValues,
+		getFieldArrayValues, // exported for testing purposes.
 		handleSubmit,
 		register,
+		validate, // exported for testing purposes.
 		validateFieldArray: validateFieldArray(true),
 		validateField: validateField(true),
 	};
