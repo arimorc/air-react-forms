@@ -350,7 +350,8 @@ describe('useForm hook', () => {
 			sut.validateField('unreference_field');
 
 			expect(isRequiredValidator).toHaveBeenCalledTimes(0);
-			expect(loggerWarnSpy).toHaveBeenNthCalledWith(1, 'tried to apply form validation on unreferenced field unreference_field');
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+			expect(loggerWarnSpy).toHaveBeenCalledWith('tried to apply form validation on unreferenced field unreference_field');
 		});
 
 		it('should not trigger a console warning when called with an unreferenced field\'s name in production mode', () => {
@@ -439,5 +440,169 @@ describe('useForm hook', () => {
 
 			expect(sut.formState).toEqual({ errors: { dummy_field: { isRequired: 'required' } }, isDirty: false });
 		});
+	});
+
+	describe('validateFieldArrayInput', () => {
+		let loggerWarnSpy = null;
+
+		beforeEach(() => {
+			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+		});
+
+		it('should trigger a console warning when called with an unreferenced fieldArray name.', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: {} };
+			const unregisteredFieldArrayName = 'unregistered-field-array';
+
+			mount(<input {...sut.register(dummyFieldRef)} />);
+			sut.formContext.validateFieldArrayInput(false)(`${unregisteredFieldArrayName}-0`, unregisteredFieldArrayName);
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+			expect(loggerWarnSpy).toHaveBeenCalledWith(`tried to apply field validation on field from a non-registered field array ${unregisteredFieldArrayName}`);
+		});
+
+		it('should trigger a console warning when called with a referenced fieldArray name but unreferenced field.', async () => {
+			const formRef = createRef();
+			const fieldArrayName = 'referenced-field-array';
+
+			await act(async () => {
+				mount(
+					<FieldArrayTestForm
+						fieldArrayName={fieldArrayName}
+						fieldArrayRules={{}}
+						ref={formRef}
+					/>
+				);
+				await formRef.current.append();
+				await formRef.current.append();
+				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-5`, fieldArrayName);
+			});
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+			expect(loggerWarnSpy).toHaveBeenCalledWith(`tried to apply field validation on a non-registered field ${fieldArrayName}-5`);
+		});
+
+		it('should create a new formState.errors field for the specified fieldArray if it doesn\'t exist yet.', async () => {
+			const formRef = createRef();
+			const fieldArrayName = 'referenced-field-array';
+			let initialFormStateValue;
+
+			await act(async () => {
+				mount(
+					<FieldArrayTestForm
+						fieldArrayName={fieldArrayName}
+						fieldArrayRules={{}}
+						ref={formRef}
+					/>
+				);
+				initialFormStateValue = JSON.parse(JSON.stringify({ ...formRef.current.getContext().formStateRef.current }));
+				await formRef.current.append();
+				await formRef.current.append();
+				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-0`, fieldArrayName);
+			});
+
+			const expectedResult = {
+				...initialFormStateValue,
+				errors: {
+					...initialFormStateValue.errors,
+					[fieldArrayName]: expect.anything(),
+				},
+			};
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(initialFormStateValue).not.toMatchObject({ errors: { [fieldArrayName]: expect.anything() } });
+			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedResult);
+		});
+
+		// @TODO: test syncStateWithRef call after completion if called with the souldUpdateState param set to true
+	});
+
+	describe('validateFieldArray', () => {
+		let loggerWarnSpy = null;
+
+		beforeEach(() => {
+			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+		});
+
+		it('should trigger a console warning when called with an unreferenced fieldArray name in a non-production environment.', () => {
+			const initialNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'development';
+
+			const dummyFieldRef = { name: 'dummy_field', rules: {} };
+			const unregisteredFieldArrayName = 'unregistered-field-array';
+
+			mount(<input {...sut.register(dummyFieldRef)} />);
+			sut.validateFieldArray(unregisteredFieldArrayName);
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+			expect(loggerWarnSpy).toHaveBeenCalledWith(`tried to apply field validation on a non-registered field array ${unregisteredFieldArrayName}`);
+
+			process.env.NODE_ENV = initialNodeEnv;
+		});
+
+		it('should not trigger a console warning when called with an unreferenced fieldArray name in a production environment.', () => {
+			const initialNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'production';
+
+			const dummyFieldRef = { name: 'dummy_field', rules: {} };
+			const unregisteredFieldArrayName = 'unregistered-field-array';
+
+			mount(<input {...sut.register(dummyFieldRef)} />);
+			sut.validateFieldArray(unregisteredFieldArrayName);
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			process.env.NODE_ENV = initialNodeEnv;
+		});
+
+		it('should update formState.errors field for the specified fieldArray with new validation results.', async () => {
+			const formRef = createRef();
+			const fieldArrayName = 'referenced-field-array';
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+
+			let initialFormStateValue;
+
+			await act(async () => {
+				render(
+					<FieldArrayTestForm
+						fieldArrayName={fieldArrayName}
+						fieldArrayRules={{
+							required: isRequiredValidator,
+						}}
+						ref={formRef}
+					/>
+				);
+				await formRef.current.append();
+				await formRef.current.append();
+				await formRef.current.getUseFormResults().validateFieldArray(fieldArrayName);
+				initialFormStateValue = JSON.parse(JSON.stringify({ ...formRef.current.getContext().formStateRef.current }));
+
+				fireEvent.change(screen.getByTestId(`${fieldArrayName}-0`), { target: { value: '' } });
+			});
+
+			const expectedInitialState = {
+				errors: {
+					[fieldArrayName]: {
+						[`${fieldArrayName}-0`]: {},
+						[`${fieldArrayName}-1`]: {},
+					},
+				},
+			};
+
+			const expectedUpdatedState = {
+				...initialFormStateValue,
+				errors: {
+					...initialFormStateValue.errors,
+					[fieldArrayName]: {
+						[`${fieldArrayName}-0`]: { required: 'required' },
+						[`${fieldArrayName}-1`]: expect.anything(),
+					},
+				},
+			};
+
+			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(initialFormStateValue).toMatchObject(expectedInitialState);
+			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedUpdatedState);
+		});
+
+		// @TODO: test that the method calls the validate method for each field registered under the specified fieldArray.
 	});
 });

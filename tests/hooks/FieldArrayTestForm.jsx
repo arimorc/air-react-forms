@@ -49,7 +49,7 @@ const FieldArrayTestForm = forwardRef(({ fieldArrayName, fieldArrayRules }, ref)
 
 	return (
 		<FormProvider context={formContext}>
-			{fields.map((field) => <input key={field.id} {...registerArrayField(field)} defaultValue="abcd" />)}
+			{fields.map((field) => <input key={field.id} data-testid={field.id} {...registerArrayField(field)} defaultValue="abcd" />)}
 		</FormProvider>
 	);
 });
