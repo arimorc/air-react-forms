@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import isEmpty from 'lodash.isempty';
 import logger from '../utils/logger';
 
 /**
@@ -129,7 +130,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		if (field.isFieldArray) {
 			const { name, rules, isFieldArray, ...fields } = field;
 
-			if (rules) {
+			if (rules && !isEmpty(rules)) {
 				/**
 				 * Retrieves all fields references, then map over each of them to apply validation checks using recursion.
 				 *	The validation results are in the following format fieldName: { validationKey1: string, validation2: string, ... }.
@@ -151,7 +152,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		} else {
 			const rules = field.rules ?? validationRules;
 
-			if (rules && field.ref?.value !== undefined) {
+			if (rules && !isEmpty(rules) && field.ref?.value !== undefined) {
 				/**
 				 * For each rule, we call its linked validator method and store the result in the fieldErrors temporary object.
 				 * If the validator doesn't exist or returns nothing, we assign undefined to perform garbage collection.
@@ -191,9 +192,12 @@ const useForm = ({ validateOnChange = false } = {}) => {
 				formStateRef.current.errors[fieldArrayName] = {};
 			}
 
-			// Assigns the result of the 'validate' method call to the formState ref's related error field.
-			// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
-			[formStateRef.current.errors[fieldArrayName][fieldName]] = Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules));
+			// We avoid unnecessary resource usage by skipping the calculations when there is no validation rules to check.
+			if (!isEmpty(validationRules)) {
+				// Assigns the result of the 'validate' method call to the formState ref's related error field.
+				// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+				[formStateRef.current.errors[fieldArrayName][fieldName]] = Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules));
+			}
 
 			if (shouldUpdateState) {
 				syncStateWithRef();
@@ -403,6 +407,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			fieldsRef: inputsRefs,
 			formStateRef,
 			getFieldValue,
+			getFormValues,
 			syncStateWithRef,
 			validateOnChange,
 			validateField: validateField(true),
