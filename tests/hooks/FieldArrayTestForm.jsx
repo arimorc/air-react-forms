@@ -1,10 +1,6 @@
 import { forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
-import {
-	useFieldArray,
-	useForm,
-	FormProvider,
-} from '../../src';
+import { useFieldArray, useForm, FormProvider } from '../../src';
 
 /**
  * @name FieldArrayTestForm
@@ -12,10 +8,12 @@ import {
  *
  * @author Timothée Simon-Franza
  *
- * @param {string} fieldArrayName		The name to register a fieldArray under.
- * @param {object} [fieldArrayRules]	Optional rules to apply to the fieldArray's children input.
+ * @param {any}		[defaultValue]		The default value to apply to each input of the fieldArray.
+ * @param {string} 	fieldArrayName		The name to register a fieldArray under.
+ * @param {object} 	[fieldArrayRules]	Optional rules to apply to the fieldArray's children input.
+ * @param {string}	fieldType			The type of field in the fieldArray.
  */
-const FieldArrayTestForm = forwardRef(({ fieldArrayName, fieldArrayRules }, ref) => {
+const FieldArrayTestForm = forwardRef(({ defaultValue, fieldArrayName, fieldArrayRules, fieldType }, ref) => {
 	const useFormResults = useForm({ validateOnChange: true });
 	const { formContext, getFieldArrayValues } = useFormResults;
 	const { fields, append, register: registerArrayField, remove } = useFieldArray({ name: fieldArrayName, rules: fieldArrayRules }, formContext);
@@ -49,18 +47,26 @@ const FieldArrayTestForm = forwardRef(({ fieldArrayName, fieldArrayRules }, ref)
 
 	return (
 		<FormProvider context={formContext}>
-			{fields.map((field) => <input key={field.id} data-testid={field.id} {...registerArrayField(field)} defaultValue="abcd" />)}
+			{fields.map((field) => <input key={field.id} data-testid={field.id} {...registerArrayField(field)} defaultValue={defaultValue} type={fieldType} />)}
 		</FormProvider>
 	);
 });
 
 FieldArrayTestForm.propTypes = {
+	defaultValue: PropTypes.oneOfType([
+		PropTypes.bool,
+		PropTypes.number,
+		PropTypes.string,
+	]),
 	fieldArrayName: PropTypes.string.isRequired,
 	fieldArrayRules: PropTypes.object,
+	fieldType: PropTypes.string,
 };
 
 FieldArrayTestForm.defaultProps = {
+	defaultValue: undefined,
 	fieldArrayRules: {},
+	fieldType: 'text',
 };
 
 export default FieldArrayTestForm;

@@ -57,7 +57,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @returns {array}
 	 */
 	const getFieldValue = (field) => {
-		const { name, ref: { value } } = field;
+		const { name, ref: { value = undefined } = {} } = field;
 
 		return [name, value];
 	};
@@ -78,7 +78,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 		const values = Object.values(fields)
 			.filter(({ ref }) => ref)
-			.map(({ ref: { value } }) => value ?? undefined);
+			.map(({ ref: { value } }) => value);
 
 		return [name, values];
 	};
@@ -402,6 +402,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		formContext: {
 			fieldsRef: inputsRefs,
 			formStateRef,
+			getFieldValue,
 			syncStateWithRef,
 			validateOnChange,
 			validateField: validateField(true),
