@@ -70,12 +70,12 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} fieldArrayFieldsList The fieldArray reference to retrieve values from.
+	 * @param {object} fieldArray The fieldArray reference to retrieve values from.
 	 *
 	 * @returns {array}
 	 */
-	const getFieldArrayValues = (fieldArrayFieldsList) => {
-		const { name, rules, ...fields } = fieldArrayFieldsList;
+	const getFieldArrayValues = (fieldArray) => {
+		const { name, rules, ...fields } = fieldArray;
 
 		const values = Object.values(fields)
 			.filter(({ ref }) => ref)
@@ -128,7 +128,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		const fieldErrors = {};
 
 		if (field.isFieldArray) {
-			const { name, rules, isFieldArray, ...fields } = field;
+			const { name, rules = {}, isFieldArray, ...fields } = field;
 
 			if (rules && !isEmpty(rules)) {
 				/**
@@ -183,21 +183,30 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateFieldArrayInput = useCallback((shouldUpdateState) => (fieldName, fieldArrayName, validationRules = {}) => {
 		if (!inputsRefs.current?.[fieldArrayName]) {
-			logger.warn(`tried to apply field validation on field from a non-registered field array ${fieldArrayName}`);
-		} else if (!inputsRefs.current?.[fieldArrayName]?.[fieldName]) {
-			logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
-		} else {
-			// If no records of the current fieldArray exists in the form's state, we create an empty one to avoid null pointers issues.
-			if (!formStateRef.current.errors[fieldArrayName]) {
-				formStateRef.current.errors[fieldArrayName] = {};
+			if (process.env.NODE_ENV !== 'production') {
+				logger.warn(`tried to apply field validation on field from a non-registered field array ${fieldArrayName}`);
 			}
 
-			// We avoid unnecessary resource usage by skipping the calculations when there is no validation rules to check.
-			if (!isEmpty(validationRules)) {
-				// Assigns the result of the 'validate' method call to the formState ref's related error field.
-				// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
-				[formStateRef.current.errors[fieldArrayName][fieldName]] = Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules));
+			return;
+		}
+
+		if (!inputsRefs.current?.[fieldArrayName]?.[fieldName]) {
+			if (process.env.NODE_ENV !== 'production') {
+				logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
 			}
+
+			return;
+		}
+		// If no records of the current fieldArray exists in the form's state, we create an empty one to avoid null pointers issues.
+		if (!formStateRef.current.errors[fieldArrayName]) {
+			formStateRef.current.errors[fieldArrayName] = {};
+		}
+
+		// We avoid unnecessary resource usage by skipping the calculations when there is no validation rules to check.
+		if (!isEmpty(validationRules)) {
+			// Assigns the result of the 'validate' method call to the formState ref's related error field.
+			// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+			[formStateRef.current.errors[fieldArrayName][fieldName]] = Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules));
 
 			if (shouldUpdateState) {
 				syncStateWithRef();
@@ -364,6 +373,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 				? registerFormField({ name, ref, rules, ...options })
 				: unregisterFormField(name)
 			),
+			rules,
 			...options,
 		};
 
@@ -388,6 +398,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const handleSubmit = useCallback((event) => {
 		event.preventDefault();
+		// @TODO: Prevent form submission when form is not valid.
 		validateForm();
 
 		return getFormValues();
