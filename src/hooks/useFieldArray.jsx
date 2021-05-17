@@ -33,12 +33,6 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 	const indexRef = useRef(0);
 
 	/**
-	 *
-	 * @returns
-	 */
-	const getFieldsValues = () => ([]);
-
-	/**
 	 * @function
 	 * @name registerField
 	 * @description A callback method used by a fieldArray input to register itself to its parent.
@@ -184,7 +178,6 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 
 	return {
 		fields: getFields,
-		getFieldsValues,
 		register,
 		remove,
 		errors,

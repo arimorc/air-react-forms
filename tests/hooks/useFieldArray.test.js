@@ -23,7 +23,6 @@ describe('useFieldArray hook', () => {
 
 			const expectedValues = {
 				fields: expect.any(Array),
-				getFieldsValues: expect.any(Function),
 				register: expect.any(Function),
 				remove: expect.any(Function),
 				errors: {},
