@@ -183,17 +183,13 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateFieldArrayInput = useCallback((shouldUpdateState) => (fieldName, fieldArrayName, validationRules = {}) => {
 		if (!inputsRefs.current?.[fieldArrayName]) {
-			if (process.env.NODE_ENV !== 'production') {
-				logger.warn(`tried to apply field validation on field from a non-registered field array ${fieldArrayName}`);
-			}
+			logger.warn(`tried to apply field validation on field from a non-registered field array ${fieldArrayName}`);
 
 			return;
 		}
 
 		if (!inputsRefs.current?.[fieldArrayName]?.[fieldName]) {
-			if (process.env.NODE_ENV !== 'production') {
-				logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
-			}
+			logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
 
 			return;
 		}
@@ -226,9 +222,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateFieldArray = useCallback((shouldUpdateState) => (fieldArrayName) => {
 		if (!inputsRefs.current[fieldArrayName]) {
-			if (process.env.NODE_ENV !== 'production') {
-				logger.warn(`tried to apply field validation on a non-registered field array ${fieldArrayName}`);
-			}
+			logger.warn(`tried to apply field validation on a non-registered field array ${fieldArrayName}`);
 
 			return;
 		}
@@ -256,9 +250,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
 		if (!inputsRefs.current[fieldName]) {
-			if (process.env.NODE_ENV !== 'production') {
-				logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
-			}
+			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
 
 			return;
 		}

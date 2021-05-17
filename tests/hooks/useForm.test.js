@@ -1,9 +1,8 @@
 import { createRef } from 'react';
 import { mount, shallow } from 'enzyme';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import testHook from './hookTestUtils';
-import FieldArrayTestForm from './FieldArrayTestForm';
-import logger from '../../src/utils/logger';
+import testHook from '../testUtils/hookTestUtils';
+import FieldArrayTestForm from '../testUtils/FieldArrayTestForm';
 import { useForm } from '../../src';
 
 describe('useForm hook', () => {
@@ -306,10 +305,10 @@ describe('useForm hook', () => {
 	});
 
 	describe('validateFieldArrayInput', () => {
-		let loggerWarnSpy = null;
+		let consoleWarnSpy = null;
 
 		beforeEach(() => {
-			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+			consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 		});
 
 		it('should trigger a console warning when called with an unreferenced fieldArray name in non-production mode.', () => {
@@ -319,8 +318,12 @@ describe('useForm hook', () => {
 			mount(<input {...sut.register(dummyFieldRef)} />);
 			sut.formContext.validateFieldArrayInput(false)(`${unregisteredFieldArrayName}-0`, unregisteredFieldArrayName);
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
-			expect(loggerWarnSpy).toHaveBeenCalledWith(`tried to apply field validation on field from a non-registered field array ${unregisteredFieldArrayName}`);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+			expect(consoleWarnSpy).toHaveBeenCalledWith(
+				'%s : %s',
+				'[air-react-forms]',
+				`tried to apply field validation on field from a non-registered field array ${unregisteredFieldArrayName}`,
+			);
 		});
 
 		it('should not trigger a console warning when called with an unreferenced fieldArray name in production mode.', () => {
@@ -332,7 +335,7 @@ describe('useForm hook', () => {
 			mount(<input {...sut.register(dummyFieldRef)} />);
 			sut.formContext.validateFieldArrayInput(false)(`${unregisteredFieldArrayName}-0`, unregisteredFieldArrayName);
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			process.env.NODE_ENV = initialNodeEnv;
 		});
 
@@ -354,8 +357,12 @@ describe('useForm hook', () => {
 				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-5`, fieldArrayName);
 			});
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
-			expect(loggerWarnSpy).toHaveBeenCalledWith(`tried to apply field validation on a non-registered field ${fieldArrayName}-5`);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+			expect(consoleWarnSpy).toHaveBeenCalledWith(
+				'%s : %s',
+				'[air-react-forms]',
+				`tried to apply field validation on a non-registered field ${fieldArrayName}-5`,
+			);
 		});
 
 		it('should not trigger a console warning when called with a referenced fieldArray name but unreferenced field in production mode.', async () => {
@@ -378,7 +385,7 @@ describe('useForm hook', () => {
 				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-5`, fieldArrayName);
 			});
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			process.env.NODE_ENV = initialNodeEnv;
 		});
 
@@ -437,7 +444,7 @@ describe('useForm hook', () => {
 				},
 			};
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			expect(initialFormStateValue).not.toMatchObject({ errors: { [fieldArrayName]: expect.anything() } });
 			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedResult);
 		});
@@ -476,16 +483,16 @@ describe('useForm hook', () => {
 				},
 			};
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedResult);
 		});
 	});
 
 	describe('validateFieldArray', () => {
-		let loggerWarnSpy = null;
+		let consoleWarnSpy = null;
 
 		beforeEach(() => {
-			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+			consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 		});
 
 		it('should trigger a console warning when called with an unreferenced fieldArray name in a non-production environment.', () => {
@@ -498,8 +505,12 @@ describe('useForm hook', () => {
 			mount(<input {...sut.register(dummyFieldRef)} />);
 			sut.validateFieldArray(unregisteredFieldArrayName);
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
-			expect(loggerWarnSpy).toHaveBeenCalledWith(`tried to apply field validation on a non-registered field array ${unregisteredFieldArrayName}`);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+			expect(consoleWarnSpy).toHaveBeenCalledWith(
+				'%s : %s',
+				'[air-react-forms]',
+				`tried to apply field validation on a non-registered field array ${unregisteredFieldArrayName}`,
+			);
 
 			process.env.NODE_ENV = initialNodeEnv;
 		});
@@ -514,7 +525,7 @@ describe('useForm hook', () => {
 			mount(<input {...sut.register(dummyFieldRef)} />);
 			sut.validateFieldArray(unregisteredFieldArrayName);
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			process.env.NODE_ENV = initialNodeEnv;
 		});
 
@@ -572,7 +583,7 @@ describe('useForm hook', () => {
 				},
 			};
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			expect(initialFormStateValue).toMatchObject(expectedInitialState);
 			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedUpdatedState);
 		});
@@ -601,7 +612,7 @@ describe('useForm hook', () => {
 				isDirty: false,
 			};
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(0);
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			expect(formRef.current.getContext().formStateRef.current).toEqual(expectedUpdatedState);
 		});
 	});
@@ -610,10 +621,10 @@ describe('useForm hook', () => {
 		const isRequiredValidator = jest.fn();
 		const hasLengthValidator = jest.fn();
 		const hasMaxLengthValidator = jest.fn();
-		let loggerWarnSpy = null;
+		let consoleWarnSpy = null;
 
 		beforeEach(() => {
-			loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+			consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 			isRequiredValidator.mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
 			hasLengthValidator.mockImplementation((value) => (value.trim().length !== 4 ? 'should be 4 chars' : ''));
 			hasMaxLengthValidator.mockImplementation((value) => (value.trim().length > 6 ? 'must be less than 6 characters' : ''));
@@ -622,8 +633,12 @@ describe('useForm hook', () => {
 		it('should trigger a console warning when called with an unreferenced field\'s name in non-production mode', () => {
 			sut.validateField('unreference_field');
 
-			expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
-			expect(loggerWarnSpy).toHaveBeenCalledWith('tried to apply form validation on unreferenced field unreference_field');
+			expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+			expect(consoleWarnSpy).toHaveBeenCalledWith(
+				'%s : %s',
+				'[air-react-forms]',
+				'tried to apply form validation on unreferenced field unreference_field',
+			);
 		});
 
 		it('should not trigger a console warning when called with an unreferenced field\'s name in production mode', () => {
@@ -632,7 +647,7 @@ describe('useForm hook', () => {
 
 			sut.validateField('unreference_field');
 
-			expect(loggerWarnSpy).not.toHaveBeenCalled();
+			expect(consoleWarnSpy).not.toHaveBeenCalled();
 			process.env.NODE_ENV = initialNodeEnv;
 		});
 
