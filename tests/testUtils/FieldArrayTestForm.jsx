@@ -16,7 +16,7 @@ import { useFieldArray, useForm, FormProvider } from '../../src';
 const FieldArrayTestForm = forwardRef(({ defaultValue, fieldArrayName, fieldArrayRules, fieldType }, ref) => {
 	const useFormResults = useForm({ validateOnChange: true });
 	const { formContext, getFieldArrayValues } = useFormResults;
-	const { fields, append, register: registerArrayField, remove } = useFieldArray({ name: fieldArrayName, rules: fieldArrayRules }, formContext);
+	const { fields, register: registerArrayField, remove } = useFieldArray({ name: fieldArrayName, rules: fieldArrayRules }, formContext);
 
 	useImperativeHandle(ref, () => ({
 		// eslint-disable-next-line require-jsdoc
@@ -25,8 +25,13 @@ const FieldArrayTestForm = forwardRef(({ defaultValue, fieldArrayName, fieldArra
 		},
 
 		// eslint-disable-next-line require-jsdoc
-		append() {
-			append();
+		getFields() {
+			return fields;
+		},
+
+		// eslint-disable-next-line require-jsdoc
+		registerArrayField() {
+			registerArrayField();
 		},
 
 		// eslint-disable-next-line require-jsdoc

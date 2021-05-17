@@ -185,7 +185,6 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 		fields: getFields,
 		getFieldsValues,
 		register,
-		append: register,
 		remove,
 		errors,
 	};

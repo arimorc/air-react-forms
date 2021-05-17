@@ -117,9 +117,9 @@ describe('useForm hook', () => {
 
 			await act(async () => {
 				render(<FieldArrayTestForm defaultValue="abcd" fieldArrayName="test" ref={formRef} />);
-				await formRef.current.append();
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await fireEvent.change(screen.getByTestId('test-1'), { target: { value: 'efgh' } });
 				await fireEvent.change(screen.getByTestId('test-2'), { target: { value: 'ijkl' } });
 			});
@@ -138,7 +138,7 @@ describe('useForm hook', () => {
 
 			act(() => {
 				mount(<FieldArrayTestForm defaultValue="abcd" fieldArrayName="test" ref={formRef} />);
-				formRef.current.append(); // required for the fieldArray to be properly registered.
+				formRef.current.registerArrayField(); // required for the fieldArray to be properly registered.
 				formRef.current.remove('test-0'); // 'test-0' is the name of the first input generated.
 			});
 
@@ -179,9 +179,9 @@ describe('useForm hook', () => {
 
 			await act(async () => {
 				render(<FieldArrayTestForm defaultValue="abcd" fieldArrayName="test" ref={formRef} />);
-				await formRef.current.append();
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				fireEvent.change(screen.getByTestId('test-1'), { target: { value: 'efgh' } });
 				fireEvent.change(screen.getByTestId('test-2'), { target: { value: 'ijkl' } });
 			});
@@ -231,8 +231,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 			});
 
 			const validationResults = formRef.current.getUseFormResults().validate(formRef.current.getContext().fieldsRef.current.skurt);
@@ -282,8 +282,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 			});
 			const expectedResult = {
 				test: {
@@ -352,8 +352,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-5`, fieldArrayName);
 			});
 
@@ -380,8 +380,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-5`, fieldArrayName);
 			});
 
@@ -431,8 +431,8 @@ describe('useForm hook', () => {
 					/>
 				);
 				initialFormStateValue = JSON.parse(JSON.stringify({ ...formRef.current.getContext().formStateRef.current }));
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-0`, fieldArrayName);
 			});
 
@@ -464,8 +464,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await fireEvent.change(screen.getByTestId(`${fieldArrayName}-1`), { target: { value: '' } });
 				await formRef.current.getContext().validateFieldArrayInput(false)(`${fieldArrayName}-1`, fieldArrayName);
 			});
@@ -555,8 +555,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await formRef.current.getUseFormResults().validateFieldArray(fieldArrayName);
 				initialFormStateValue = JSON.parse(JSON.stringify({ ...formRef.current.getContext().formStateRef.current }));
 
@@ -600,8 +600,8 @@ describe('useForm hook', () => {
 						ref={formRef}
 					/>
 				);
-				await formRef.current.append();
-				await formRef.current.append();
+				await formRef.current.registerArrayField();
+				await formRef.current.registerArrayField();
 				await formRef.current.getUseFormResults().validateFieldArray(fieldArrayName);
 			});
 
