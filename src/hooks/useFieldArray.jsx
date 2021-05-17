@@ -28,6 +28,8 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 	} = formContext;
 
 	const [fields, setFields] = useState({});
+	const [errors, setErrors] = useState(() => formContext.formStateRef.current.errors[fieldArrayName] ?? {});
+
 	const indexRef = useRef(0);
 
 	/**
@@ -171,8 +173,7 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 
 	const getFields = useMemo(() => (Object.values(fields)), [fields]);
 
-	const [errors, setErrors] = useState(() => formContext.formStateRef.current.errors[fieldArrayName] ?? {});
-
+	/* istanbul ignore next */
 	useEffect(() => {
 		const value = formStateRef.current.errors[fieldArrayName] ?? {};
 
