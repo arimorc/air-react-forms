@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import testHook from '../testUtils/hookTestUtils';
 import FieldArrayTestForm from '../testUtils/FieldArrayTestForm';
 import { useForm } from '../../src';
+import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
 
 describe('useForm hook', () => {
 	let sut;
@@ -778,12 +779,24 @@ describe('useForm hook', () => {
 		});
 
 		it('should only register the provided name, rules and options when called with provided arguments for the first time.', () => {
+			const dummyFieldArguments = { name: 'dummy_field', a: 'b', c: 'd', type: 'text', rules: {} };
+			sut.register(dummyFieldArguments);
+
+			expect(sut.getFieldsRefs()).toStrictEqual({
+				[dummyFieldArguments.name]: {
+					...dummyFieldArguments,
+				},
+			});
+		});
+
+		it('should register a default \'text\' type if none is provided.', () => {
 			const dummyFieldArguments = { name: 'dummy_field', a: 'b', c: 'd', rules: {} };
 			sut.register(dummyFieldArguments);
 
 			expect(sut.getFieldsRefs()).toStrictEqual({
 				[dummyFieldArguments.name]: {
 					...dummyFieldArguments,
+					type: 'text',
 				},
 			});
 		});
@@ -796,6 +809,19 @@ describe('useForm hook', () => {
 				...dummyFieldArguments,
 				ref: expect.any(Function),
 			});
+		});
+
+		it('should return a defaultValue field with the result of the getDefaultValueByType method if none is provided', () => {
+			const getDefaultValueSpy = jest.spyOn(inputTypeUtils, 'getDefaultValueByInputType');
+			const dummyFieldArguments = { name: 'dummy_field', a: 'b', c: 'd', type: 'number', rules: {} };
+			const result = sut.register(dummyFieldArguments);
+
+			expect(result).toMatchObject({
+				type: expect.any(String),
+				defaultValue: expect.any(Number),
+			});
+			expect(getDefaultValueSpy).toHaveBeenCalledTimes(1);
+			expect(result.defaultValue).toStrictEqual(inputTypeUtils.getDefaultValueByInputType(dummyFieldArguments.type));
 		});
 
 		it('should return an empty "rules" property if none has been provided.', () => {

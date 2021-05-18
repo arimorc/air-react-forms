@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import logger from '../utils/logger';
+import { getDefaultValueByInputType } from '../utils/inputTypeUtils';
 
 /**
  * @name useForm
@@ -329,7 +330,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 *
 	 * @returns {object} The props to provide to the field instigating the call to this method.
 	 */
-	const register = useCallback(({ name, rules = {}, ...options }) => {
+	const register = useCallback(({ defaultValue = undefined, name, rules = {}, type = 'text', ...options }) => {
 		if (!name || name.trim().length === 0) {
 			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
 		}
@@ -352,6 +353,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 				}),
 			name,
 			rules,
+			type,
 			...options,
 		};
 
@@ -360,12 +362,14 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		 * We return all the arguments passed to the method, along with a ref callback method to handle (un)registration processes.
 		 */
 		const fieldProps = {
+			defaultValue: defaultValue ?? getDefaultValueByInputType(type),
 			name,
 			ref: (ref) => (ref
 				? registerFormField({ name, ref, rules, ...options })
 				: unregisterFormField(name)
 			),
 			rules,
+			type,
 			...options,
 		};
 
