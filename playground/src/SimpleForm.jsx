@@ -40,6 +40,16 @@ const SimpleForm = () => {
 				customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
 			},
 		},
+		age: {
+			name: 'age',
+			id: 'age',
+			type: 'number',
+		},
+		color: {
+			name: 'color',
+			id: 'color',
+			type: 'color',
+		},
 		hasUsedHooks: {
 			name: 'hasUsedHooks',
 			id: 'hasUsedHooks',
@@ -68,6 +78,22 @@ const SimpleForm = () => {
 					<input {...register(formFields.lastName)} />
 					<div>
 						{errors.lastName?.required && <span>{errors.lastName.required}</span>}
+					</div>
+				</>
+
+				<>
+					<label htmlFor="age">Age</label>
+					<input {...register(formFields.age)} />
+					<div>
+						{errors.age?.required && <span>{errors.age.required}</span>}
+					</div>
+				</>
+
+				<>
+					<label htmlFor="color">Favorite color</label>
+					<input {...register(formFields.color)} />
+					<div>
+						{errors.color?.required && <span>{errors.color.required}</span>}
 					</div>
 				</>
 

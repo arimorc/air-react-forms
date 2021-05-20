@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import isEqual from 'lodash.isequal';
 import FormContext from '../FormContext';
+import { getDefaultValueByInputType } from '../utils/inputTypeUtils';
 import logger from '../utils/logger';
 
 /**
@@ -9,11 +10,12 @@ import logger from '../utils/logger';
  *
  * @author Timothée Simon-Franza
  *
- * @param {string} name			The name to store all inputs under in the form inputs references.
- * @param {object} [rules]		Validation rules to apply to each field inside the field array.
- * @param {object} [context]	The form context given by useForm, obligatory only if useFieldArray is called inside the same component as useForm.
+ * @param {object}	[context]				The form context given by useForm, obligatory only if useFieldArray is called inside the same component as useForm.
+ * @param {string}	[inputType = 'text']	The input's type. Defaults to 'text'.
+ * @param {string}	name					The name to store all inputs under in the form inputs references.
+ * @param {object}	[rules]					Validation rules to apply to each field inside the field array.
  */
-const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
+const useFieldArray = ({ name: fieldArrayName, inputType = 'text', rules }, context) => {
 	const formContext = useContext(FormContext) ?? context;
 
 	if (!formContext) {
@@ -95,7 +97,6 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 
 		// Determines whether this call is the first registration call made by the field or not.
 		const isInitialRegister = !fieldsRef.current[fieldArrayName][inputName];
-
 		/**
 		 * Saves the reference to the {@link fieldsRef} object.
 		 * 	If it is its first registration call, we simply register its name, id, defaultValue and options.
@@ -111,7 +112,6 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 				}),
 			id: inputName,
 			name: inputName,
-			defaultValue: defaultValue ?? '', // @TODO: handle non-text inputs.
 			...additionalProps,
 		};
 
@@ -124,7 +124,8 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 			...additionalProps,
 			id: inputName,
 			name: inputName,
-			defaultValue: defaultValue ?? '', // @TODO: handle non-text inputs.
+			defaultValue: defaultValue ?? getDefaultValueByInputType(inputType),
+			type: inputType,
 			ref: (ref) => (ref
 				? registerField({ name: inputName, ref, ...additionalProps })
 				: unregisterField(inputName)
@@ -147,7 +148,7 @@ const useFieldArray = ({ name: fieldArrayName, rules }, context) => {
 		}
 
 		return fieldProps;
-	}, [fieldsRef, fieldArrayName, validateOnChange, fields, rules, registerField, unregisterField, validateFieldArrayInput]);
+	}, [fieldsRef, fieldArrayName, inputType, validateOnChange, fields, rules, registerField, unregisterField, validateFieldArrayInput]);
 
 	/**
 	 * @function

@@ -5,6 +5,7 @@ import FieldArrayTestForm from '../testUtils/FieldArrayTestForm';
 import testHook from '../testUtils/hookTestUtils';
 import logger from '../../src/utils/logger';
 import { useForm, useFieldArray } from '../../src';
+import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
 
 describe('useFieldArray hook', () => {
 	afterEach(() => {
@@ -212,7 +213,6 @@ describe('useFieldArray hook', () => {
 					[`${fieldArrayName}-0`]: {
 						id: `${fieldArrayName}-0`,
 						name: `${fieldArrayName}-0`,
-						defaultValue: '',
 					},
 				},
 			};
@@ -222,7 +222,6 @@ describe('useFieldArray hook', () => {
 					[`${fieldArrayName}-0`]: {
 						id: `${fieldArrayName}-0`,
 						name: `${fieldArrayName}-0`,
-						defaultValue: '',
 						ref: expect.anything(),
 					},
 				},
@@ -243,7 +242,7 @@ describe('useFieldArray hook', () => {
 			expect(fieldsRef).not.toMatchObject(unexpectedFieldsRef);
 		});
 
-		it('should return all the arguments it has been provided along with string id, name and a "ref" callback method.', async () => {
+		it('should return all the arguments it has been provided along with string id, name, type and a "ref" callback method.', async () => {
 			const fieldArrayName = 'fieldArray';
 			const callParameters = { a: 'b', c: 'd' };
 			let callResult;
@@ -255,6 +254,7 @@ describe('useFieldArray hook', () => {
 				id: expect.any(String),
 				name: expect.any(String),
 				ref: expect.any(Function),
+				type: expect.any(String),
 			};
 
 			testHook(() => {
@@ -269,19 +269,19 @@ describe('useFieldArray hook', () => {
 			expect(callResult).toMatchObject(expectedResult);
 		});
 
-		it('should return a defaultValue property if none has been provided.', async () => {
+		it('should return a type property equal to the inputType attribute provided to the useFieldArray hook if any.', async () => {
 			const fieldArrayName = 'fieldArray';
+			const inputType = 'number';
 			let callResult;
-			let useFormResults;
 			let sut;
 
 			const expectedResult = {
-				defaultValue: expect.anything(),
+				type: inputType,
 			};
 
 			testHook(() => {
-				useFormResults = useForm();
-				sut = useFieldArray({ name: fieldArrayName, rules: {} }, useFormResults.formContext);
+				const useFormResults = useForm();
+				sut = useFieldArray({ name: fieldArrayName, inputType, rules: {} }, useFormResults.formContext);
 			});
 
 			await act(async () => {
@@ -289,6 +289,32 @@ describe('useFieldArray hook', () => {
 			});
 
 			expect(callResult).toMatchObject(expectedResult);
+		});
+
+		it('should return a defaultValue property with the result of the getDefaultValueByType method if none has been provided.', async () => {
+			const getDefaultValueSpy = jest.spyOn(inputTypeUtils, 'getDefaultValueByInputType');
+			const fieldArrayParams = { name: 'field-array', inputType: 'number' };
+			let callResult;
+			let useFormResults;
+			let sut;
+
+			const expectedResult = {
+				type: fieldArrayParams.inputType,
+				defaultValue: expect.any(Number),
+			};
+
+			testHook(() => {
+				useFormResults = useForm();
+				sut = useFieldArray(fieldArrayParams, useFormResults.formContext);
+			});
+
+			await act(async () => {
+				callResult = sut.register();
+			});
+
+			expect(callResult).toMatchObject(expectedResult);
+			expect(getDefaultValueSpy).toHaveBeenCalledTimes(1);
+			expect(callResult.defaultValue).toStrictEqual(inputTypeUtils.getDefaultValueByInputType(fieldArrayParams.inputType));
 		});
 
 		it('should return an onChange implementation if useForm has been called with validateOnChange.', async () => {

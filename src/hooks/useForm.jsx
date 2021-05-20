@@ -321,10 +321,14 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @name register
 	 * @description Method used to register an input to its parent form. It will return its name, options and ref callback method.
 	 *
+	 * Note : if the defaultValue param is not provided, inputs will be provided with the result of the {@link getDefaultValueByInputType} method.
+	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {string}	name	The input's name.
-	 * @param {object}	[rules]	Optional validation methods to apply to the input.
+	 * @param {any}		[defaultValue]	The default value to provide to the input.
+	 * @param {string}	name			The input's name.
+	 * @param {object}	[rules]			Optional validation methods to apply to the input.
+	 * @param {string}	[type = 'text']	The input's type. Defaults to text.
 	 *
 	 * @throws Will throw an error if called without a name attribute.
 	 *
