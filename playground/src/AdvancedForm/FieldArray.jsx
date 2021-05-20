@@ -13,7 +13,7 @@ import { useFieldArray } from 'air-react-forms';
 const FieldArray = ({ fieldDefinition }) => {
 	// The link between useFieldArray and the parent useForm is done via the FormProvider component
 	// As this component is located anywhere inside the FormProvider children, it will auto-detect the form to interact with
-	const { fields, append, register, remove, errors } = useFieldArray(fieldDefinition);
+	const { fields, register, remove, errors } = useFieldArray(fieldDefinition);
 
 	return (
 		<>
@@ -29,7 +29,7 @@ const FieldArray = ({ fieldDefinition }) => {
 			))}
 
 			<div>
-				<button type="button" onClick={append}>Add field</button>
+				<button type="button" onClick={register}>Add field</button>
 				<button type="submit">Submit</button>
 			</div>
 		</>
