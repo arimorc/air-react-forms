@@ -112,7 +112,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	/**
 	 * @function
 	 * @name validate
-	 * @description Method used to perform validation checks on the provided field. If the provided field is a fieldArray, this method will perform recursive calls to herself.
+	 * @description Method used to perform validation checks on the provided field. If the provided field is a fieldArray, this method will perform recursive calls to itself.
 	 *
 	 * @author Timothée Simon-Franza
 	 *

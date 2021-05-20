@@ -9,7 +9,7 @@ import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
 
 describe('useFieldArray hook', () => {
 	afterEach(() => {
-		jest.clearAllMocks();
+		jest.restoreAllMocks();
 	});
 
 	describe('hook call result', () => {
@@ -23,6 +23,7 @@ describe('useFieldArray hook', () => {
 			});
 
 			const expectedValues = {
+				append: expect.any(Function),
 				fields: expect.any(Array),
 				register: expect.any(Function),
 				remove: expect.any(Function),
@@ -93,15 +94,22 @@ describe('useFieldArray hook', () => {
 			const fieldArrayName = 'field-array';
 
 			let initialFieldsList;
-			const expectedInitialFieldsList = [
-				{ id: `${fieldArrayName}-0`, name: `${fieldArrayName}-0` },
-				{ id: `${fieldArrayName}-1`, name: `${fieldArrayName}-1` },
-				{ id: `${fieldArrayName}-2`, name: `${fieldArrayName}-2` },
-			];
+			const expectedInitialFieldsList = {
+				[fieldArrayName]: {
+					[`${fieldArrayName}-0`]: { id: `${fieldArrayName}-0`, name: `${fieldArrayName}-0` },
+					[`${fieldArrayName}-1`]: { id: `${fieldArrayName}-1`, name: `${fieldArrayName}-1` },
+					[`${fieldArrayName}-2`]: { id: `${fieldArrayName}-2`, name: `${fieldArrayName}-2` },
+				},
+			};
 
-			const expectedFieldsList = [
-				{ id: `${fieldArrayName}-0`, name: `${fieldArrayName}-0` },
-			];
+			const expectedFieldsList = {
+				[fieldArrayName]: {
+					[`${fieldArrayName}-0`]: {
+						id: `${fieldArrayName}-0`,
+						name: `${fieldArrayName}-0`,
+					},
+				},
+			};
 
 			await act(async () => {
 				const wrapper = mount(
@@ -114,17 +122,22 @@ describe('useFieldArray hook', () => {
 				await formRef.current.registerArrayField();
 				await formRef.current.registerArrayField();
 				wrapper.update();
-				initialFieldsList = JSON.parse(JSON.stringify(formRef.current.getFields()));
+				initialFieldsList = JSON.parse(
+					JSON.stringify(
+						formRef.current.getContext().fieldsRef.current,
+						((key, value) => (key !== 'ref' ? value : null)) // we need to filter out ref to avoid circular dependancies
+					)
+				);
 				await formRef.current.remove({ name: `${fieldArrayName}-1` });
 				await formRef.current.remove({ name: `${fieldArrayName}-2` });
 				wrapper.update();
 			});
 
-			const fieldsList = formRef.current.getFields();
+			const fieldsList = formRef.current.getContext().fieldsRef.current;
 
-			expect(initialFieldsList).toStrictEqual(expectedInitialFieldsList);
-			expect(fieldsList).not.toEqual(initialFieldsList);
-			expect(fieldsList).toStrictEqual(expectedFieldsList);
+			expect(initialFieldsList).toMatchObject(expectedInitialFieldsList);
+			expect(fieldsList).not.toMatchObject(initialFieldsList);
+			expect(fieldsList).toMatchObject(expectedFieldsList);
 		});
 
 		it('should remove the form state\'s error entry linked to the provided field name if there is any.', async () => {
@@ -173,6 +186,22 @@ describe('useFieldArray hook', () => {
 			expect(initialFormState).toStrictEqual(expectedInitialFormState);
 			expect(formState).not.toEqual(initialFormState);
 			expect(formState).toStrictEqual(expectedFormState);
+		});
+	});
+
+	describe('append', () => {
+		it('should be an alias to register', () => {
+			let sut;
+
+			testHook(() => {
+				const useFormResults = useForm();
+				sut = useFieldArray({ name: 'field-array', rules: {} }, useFormResults.formContext);
+			});
+
+			expect(sut.append).toEqual(sut.register);
+			expect(sut.append).toBe(sut.register);
+			expect(sut.append).not.toEqual(sut.remove);
+			expect(sut.append).not.toBe(sut.remove);
 		});
 	});
 

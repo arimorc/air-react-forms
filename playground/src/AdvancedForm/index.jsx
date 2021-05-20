@@ -89,6 +89,8 @@ const AdvancedForm = () => {
 				</>
 
 				<FieldArray fieldDefinition={formFields.testArray} />
+
+				<button type="submit">Submit</button>
 			</form>
 			<h3>Form data</h3>
 			<pre>{JSON.stringify(formData, null, 2)}</pre>

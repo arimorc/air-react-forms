@@ -178,6 +178,7 @@ const useFieldArray = ({ name: fieldArrayName, inputType = 'text', rules }, cont
 	}, [errors, fieldArrayName, formStateRef]);
 
 	return {
+		append: register,
 		fields: getFields,
 		register,
 		remove,

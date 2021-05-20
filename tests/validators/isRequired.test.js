@@ -22,7 +22,7 @@ describe('isRequired', () => {
 		expect(isRequired(errorMessage)(value)).toEqual('');
 	});
 
-	it('should return a default \'required\' error message if non is provided.', () => {
+	it('should return a default \'required\' error message if none is provided.', () => {
 		const errorMessage = 'required';
 		const value = '';
 
