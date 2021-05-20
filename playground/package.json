@@ -6,6 +6,7 @@
     "react": "link:../node_modules/react",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.2",
+    "prop-types": "^15.7.2",
     "air-react-forms": "link:.."
   },
   "scripts": {

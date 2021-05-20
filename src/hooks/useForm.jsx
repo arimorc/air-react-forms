@@ -1,24 +1,47 @@
 import { useCallback, useRef, useState } from 'react';
+import isEmpty from 'lodash.isempty';
 import logger from '../utils/logger';
+import { getDefaultValueByInputType } from '../utils/inputTypeUtils';
 
 /**
  * @name useForm
  * @description A hook providing several method to control forms.
  *
  * @author Timothée Simon-Franza
+ *
+ * @param {bool} [validateOnChange] Whether or not a field should trigger a validation check on change.
  */
 const useForm = ({ validateOnChange = false } = {}) => {
+	/**
+	 * @field
+	 * @name inputsRefs
+	 * @description A reference object containing a list of all controlled inputs of the linked form component.
+	 */
 	const inputsRefs = useRef({});
+
+	/**
+	 * @field
+	 * @name formStateRef
+	 * @description A reference object containing the current form's state information, such as validation errors.
+	 */
 	const formStateRef = useRef({
 		errors: {},
 		isDirty: false,
 	});
+
+	/**
+	 * @field
+	 * @name formState
+	 * @description The state object linked to the {@link formStateRef} object above, used to notify the form component a change has happened to the form.
+	 *
+	 * You can perform said notification by using the {@link syncStateWithRef} method down below.
+	 */
 	const [formState, setFormState] = useState({ ...formStateRef.current });
 
 	/**
 	 * @function
 	 * @name syncStateWithRef
-	 * @description Syncs the exported formState object with the current formStateRef value.
+	 * @description Syncs the exported formState object with the current formStateRef value to notify the linked form of any change to the state.
 	 *
 	 * @author Timothée Simon-Franza
 	 */
@@ -26,8 +49,49 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
+	 * @name getFieldValue
+	 * @description Returns a field's value in a format that can be used with Object.fromEntries().
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} field The field to retrieve the value from.
+	 *
+	 * @returns {array}
+	 */
+	const getFieldValue = (field) => {
+		const { name, ref: { value = undefined } = {} } = field;
+
+		return [name, value];
+	};
+
+	/**
+	 * @function
+	 * @name getFieldArrayValues
+	 * @description Returns the values of a fieldArray in a format that can be used with Object.fromEntries().
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} fieldArray The fieldArray reference to retrieve values from.
+	 *
+	 * @returns {array}
+	 */
+	const getFieldArrayValues = (fieldArray) => {
+		const { name, rules, ...fields } = fieldArray;
+
+		const values = Object.values(fields)
+			.filter(({ ref }) => ref)
+			.map(({ ref: { value } }) => value);
+
+		return [name, values];
+	};
+
+	/**
+	 * @function
 	 * @name getFormValues
 	 * @description Returns the value of all controlled fields as an object.
+	 *
+	 * To achieve that, this method maps over each field registered in the form. If a field is a fieldArray,
+	 * 	it calls the {@link getFieldArrayValues} method. Else, it calls the {@link getFieldValue} method.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
@@ -35,57 +99,190 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
-			.map(({ element: { value }, name }) => ([name, value]));
+			.filter((ref) => ref) // To ignore fields that are yet to be registered or garbage collected.
+			.map(({ isFieldArray, ...fieldRef }) => (
+				isFieldArray
+					? getFieldArrayValues(fieldRef)
+					: getFieldValue(fieldRef)
+			));
 
 		return Object.fromEntries(formValues);
 	}, [inputsRefs]);
 
 	/**
 	 * @function
-	 * @name validateField
-	 * @description Performs a validation check on the requested input.
+	 * @name validate
+	 * @description Method used to perform validation checks on the provided field. If the provided field is a fieldArray, this method will perform recursive calls to itself.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {string} fieldName The name of the field to perform validation on.
+	 * @param {object} field				The field to perform validation checks on. Must be from the inputsRef reference object.
+	 * @param {object} [validationRules]	Optional parameter used to pass down rules from a fieldArray to its fields.
+	 *
+	 * @returns {object} An object in the following format : { fieldName: { validationKey1: string, validationKey2: string, ... } }
+	 */
+	const validate = useCallback((field, validationRules = {}) => {
+		if (!field) {
+			return {};
+		}
+
+		const fieldErrors = {};
+
+		if (field.isFieldArray) {
+			const { name, rules = {}, isFieldArray, ...fields } = field;
+
+			if (rules && !isEmpty(rules)) {
+				/**
+				 * Retrieves all fields references, then map over each of them to apply validation checks using recursion.
+				 *	The validation results are in the following format fieldName: { validationKey1: string, validation2: string, ... }.
+				 *	We them map over them to get a final validation object formatted in the following way :
+				 *	{
+				 *		fieldName1: { validationKey1: string, validationKey2: string, ... },
+				 *		fieldName2: { validationKey1: string, validationKey2: string, ... }
+				 *		...
+				 *	}
+				 */
+				const validationResults = Object.values(fields)
+					.map((pField) => validate(pField, rules))
+					.map((validationResult) => Object.entries(validationResult)[0]);
+
+				fieldErrors[field.name] = Object.fromEntries(validationResults);
+
+				return fieldErrors;
+			}
+		} else {
+			const rules = field.rules ?? validationRules;
+
+			if (rules && !isEmpty(rules) && field.ref?.value !== undefined) {
+				/**
+				 * For each rule, we call its linked validator method and store the result in the fieldErrors temporary object.
+				 * If the validator doesn't exist or returns nothing, we assign undefined to perform garbage collection.
+				 */
+				Object.entries(rules).forEach(([rule, validator]) => {
+					fieldErrors[rule] = validator(field.ref.value) || undefined;
+				});
+			}
+		}
+
+		const result = { [field.name]: Object.fromEntries(Object.entries(fieldErrors)) };
+
+		return result;
+	}, []);
+
+	/**
+	 * @function
+	 * @name validateFieldArrayInput
+	 * @description Method used to perform validation checks on the provided field, using its parent fieldArray name and validation rules. Uses {@link validate}.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done.
+	 *
+	 * @param {string}	fieldName			The name of the field to perform validation checks on.
+	 * @param {string}	fieldArrayName		The name of the field's parent. Used to update the form's state's error field.
+	 * @param {object}	[validationRules]	The field's parent's validation rules to apply on the current field.
+	 */
+	const validateFieldArrayInput = useCallback((shouldUpdateState) => (fieldName, fieldArrayName, validationRules = {}) => {
+		if (!inputsRefs.current?.[fieldArrayName]) {
+			logger.warn(`tried to apply field validation on field from a non-registered field array ${fieldArrayName}`);
+
+			return;
+		}
+
+		if (!inputsRefs.current?.[fieldArrayName]?.[fieldName]) {
+			logger.warn(`tried to apply field validation on a non-registered field ${fieldName}`);
+
+			return;
+		}
+		// If no records of the current fieldArray exists in the form's state, we create an empty one to avoid null pointers issues.
+		if (!formStateRef.current.errors[fieldArrayName]) {
+			formStateRef.current.errors[fieldArrayName] = {};
+		}
+
+		// We avoid unnecessary resource usage by skipping the calculations when there is no validation rules to check.
+		if (!isEmpty(validationRules)) {
+			// Assigns the result of the 'validate' method call to the formState ref's related error field.
+			// This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+			[formStateRef.current.errors[fieldArrayName][fieldName]] = Object.values(validate(inputsRefs.current[fieldArrayName][fieldName], validationRules));
+
+			if (shouldUpdateState) {
+				syncStateWithRef();
+			}
+		}
+	}, [syncStateWithRef, validate]);
+
+	/**
+	 * @function
+	 * @name validateFieldArray
+	 * @description Performs a validation check on all inputs of a specific field array using the {@link validate} method.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done.
+	 * @param {string}	fieldArrayName		The name of the field array to perform validation on.
+	 */
+	const validateFieldArray = useCallback((shouldUpdateState) => (fieldArrayName) => {
+		if (!inputsRefs.current[fieldArrayName]) {
+			logger.warn(`tried to apply field validation on a non-registered field array ${fieldArrayName}`);
+
+			return;
+		}
+
+		/**
+		 * Assigns the result of the {@link validate} method call to the formState ref's related error field.
+		 * This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+		 */
+		[formStateRef.current.errors[fieldArrayName]] = Object.values(validate(inputsRefs.current[fieldArrayName]));
+
+		if (shouldUpdateState) {
+			syncStateWithRef();
+		}
+	}, [syncStateWithRef, validate]);
+
+	/**
+	 * @function
+	 * @name validateField
+	 * @description Performs a validation check on the requested input using the {@link validate} method.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done.
+	 * @param {string}	fieldName			The name of the field to perform validation on.
 	 */
 	const validateField = useCallback((shouldUpdateState) => (fieldName) => {
-		if (inputsRefs.current[fieldName]) {
-			const { element: { value }, rules } = inputsRefs.current[fieldName];
-
-			if (rules) {
-				const fieldErrors = {};
-
-				// We iterate over the rules object for the current formfield.
-				// For each rule, we store the validator method's return value inside the temporary fieldErrors object.
-				// If said validator method returns an empty string, it means the validation was successful and we store undefined.
-				// Undefined error keys are then filtered out of the temporary object, which is then stored in the formstate's errors field.
-				Object.entries(rules).forEach(([rule, validator]) => {
-					fieldErrors[rule] = validator(value) || undefined;
-				});
-
-				formStateRef.current.errors[fieldName] = Object.fromEntries(Object.entries(fieldErrors).filter(([, v]) => v));
-
-				if (shouldUpdateState) {
-					syncStateWithRef();
-				}
-			}
-		} else if (process.env.NODE_ENV !== 'production') {
+		if (!inputsRefs.current[fieldName]) {
 			logger.warn(`tried to apply form validation on unreferenced field ${fieldName}`);
+
+			return;
 		}
-	}, [syncStateWithRef]);
+
+		/**
+		 * Assigns the result of the {@link validate} method call to the formState ref's related error field.
+		 * This uses array destructuring to access only the list of validation and their results, therefor avoiding nesting.
+		 */
+		[formStateRef.current.errors[fieldName]] = Object.values(validate(inputsRefs.current[fieldName]));
+
+		if (shouldUpdateState) {
+			syncStateWithRef();
+		}
+	}, [syncStateWithRef, validate]);
 
 	/**
 	 * @function
 	 * @name validateForm
-	 * @description Performs a validation check on each registered input.
+	 * @description Performs a validation check on each registered input using the {@link validateFieldArray} and {@link validateField} methods.
 	 *
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = useCallback(() => {
-		Object.values(inputsRefs.current).forEach(({ name }) => validateField(false)(name));
+		Object.values(inputsRefs.current).forEach(({ isFieldArray, name }) => (
+			isFieldArray
+				? validateFieldArray(false)(name)
+				: validateField(false)(name)
+		));
+
 		syncStateWithRef();
-	}, [syncStateWithRef, validateField]);
+	}, [syncStateWithRef, validateField, validateFieldArray]);
 
 	/**
 	 * @function
@@ -94,14 +291,12 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} formFieldRef The ref to register.
+	 * @param {object} fieldRef The ref to register.
 	 */
-	const registerFormField = useCallback((formFieldRef) => {
-		if (formFieldRef.name) {
-			inputsRefs.current[formFieldRef.name] = formFieldRef;
-			validateField(false)(formFieldRef.name);
-		} else {
-			logger.warn('attempting to register a form without a name property.');
+	const registerFormField = useCallback((fieldRef) => {
+		if (fieldRef.name) {
+			inputsRefs.current[fieldRef.name] = fieldRef;
+			validateField(false)(fieldRef.name);
 		}
 	}, [inputsRefs, validateField]);
 
@@ -123,33 +318,71 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
-	 * @name registerWrapper
-	 * @description Convenience method to be passed to any form field wrapper, providing them with necessary methods and information as components props.
+	 * @name register
+	 * @description Method used to register an input to its parent form. It will return its name, options and ref callback method.
+	 *
+	 * Note : if the defaultValue param is not provided, inputs will be provided with the result of the {@link getDefaultValueByInputType} method.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @example <FormFieldWrapper {...registerWrapper('name')}> ... </FormFieldWrapper>
+	 * @param {any}		[defaultValue]	The default value to provide to the input.
+	 * @param {string}	name			The input's name.
+	 * @param {object}	[rules]			Optional validation methods to apply to the input.
+	 * @param {string}	[type = 'text']	The input's type. Defaults to text.
 	 *
-	 * @param {string} wrapperName The name under which the wrapped input will be named.
+	 * @throws Will throw an error if called without a name attribute.
 	 *
-	 * @returns {object}
+	 * @returns {object} The props to provide to the field instigating the call to this method.
 	 */
-	const registerWrapper = useCallback((wrapperName) => {
-		if (!wrapperName || wrapperName.trim().length === 0) {
+	const register = useCallback(({ defaultValue = undefined, name, rules = {}, type = 'text', ...options }) => {
+		if (!name || name.trim().length === 0) {
 			throw new Error(`${logger.PREFIX} : Attempting to register a form field without a name property.`);
 		}
 
-		const wrapperProps = {
-			name: wrapperName,
-			registerFormField,
-			unregisterFormField,
+		// Determines whether this call is the first registration call made by the field or not.
+		const isInitialRegister = !inputsRefs.current[name];
+
+		/**
+		 * Saves the reference to the {@link inputsRefs} object.
+		 *	If it is its first registration call, we simply register its name, validation rules and options.
+		 *	If it has already been registered (eg : the form has been re-rendered), we simply
+		 * 		update the reference of the input, without overriding the rest.
+		 */
+		inputsRefs.current[name] = {
+			...(isInitialRegister
+				? { name }
+				: {
+					ref: (inputsRefs.current[name] || {}).ref,
+					...inputsRefs.current[name],
+				}),
+			name,
+			rules,
+			type,
+			...options,
+		};
+
+		/**
+		 * The props to return to the field.
+		 * We return all the arguments passed to the method, along with a ref callback method to handle (un)registration processes.
+		 */
+		const fieldProps = {
+			defaultValue: defaultValue ?? getDefaultValueByInputType(type),
+			name,
+			ref: (ref) => (ref
+				? registerFormField({ name, ref, rules, ...options })
+				: unregisterFormField(name)
+			),
+			rules,
+			type,
+			...options,
 		};
 
 		if (validateOnChange) {
-			wrapperProps.onChange = () => validateField(true)(wrapperName);
+			// @TODO: handle select, checkbox and radio button onChange implementation.
+			fieldProps.onChange = () => validateField(true)(name);
 		}
 
-		return wrapperProps;
+		return fieldProps;
 	}, [registerFormField, unregisterFormField, validateField, validateOnChange]);
 
 	/**
@@ -165,6 +398,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 */
 	const handleSubmit = useCallback((event) => {
 		event.preventDefault();
+		// @TODO: Prevent form submission when form is not valid.
 		validateForm();
 
 		return getFormValues();
@@ -180,11 +414,24 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const getFieldsRefs = useCallback(() => (inputsRefs.current), [inputsRefs]);
 
 	return {
+		formContext: {
+			fieldsRef: inputsRefs,
+			formStateRef,
+			getFieldValue,
+			getFormValues,
+			syncStateWithRef,
+			validateOnChange,
+			validateField: validateField(true),
+			validateFieldArrayInput,
+		},
 		formState,
 		getFieldsRefs,
 		getFormValues,
+		getFieldArrayValues, // exported for testing purposes.
 		handleSubmit,
-		registerWrapper,
+		register,
+		validate, // exported for testing purposes.
+		validateFieldArray: validateFieldArray(true),
 		validateField: validateField(true),
 	};
 };

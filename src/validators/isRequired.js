@@ -10,6 +10,6 @@
  *
  * @returns {string}
  */
-const isRequired = (message = 'required') => (value) => (value.trim().length === 0 ? message : '');
+const isRequired = (message = 'required') => (value) => ((value ?? '').trim().length === 0 ? message : '');
 
 export default isRequired;

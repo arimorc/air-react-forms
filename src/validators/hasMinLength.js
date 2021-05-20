@@ -11,6 +11,6 @@
  *
  * @returns {string}
  */
-const hasMinLength = (minLength, message) => (value) => (value.trim().length >= minLength ? message : '');
+const hasMinLength = (minLength, message) => (value) => (value.trim().length >= minLength ? '' : message);
 
 export default hasMinLength;
