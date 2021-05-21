@@ -848,7 +848,7 @@ describe('useForm hook', () => {
 	});
 
 	describe('handleSubmit', () => {
-		it('should prevent the default form submission event', () => {
+		it('should prevent the default form submission event.', () => {
 			const event = { preventDefault: () => {} };
 			const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
 
@@ -857,6 +857,21 @@ describe('useForm hook', () => {
 			});
 
 			expect(preventDefaultSpy).toHaveBeenCalledTimes(1);
+		});
+
+		it('should return null if form is invalid.', () => {
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			const dummyFieldRef = { name: 'dummy_field', rules: { required: isRequiredValidator } };
+			const event = { preventDefault: () => {} };
+			let submitResult;
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			act(() => {
+				submitResult = sut.handleSubmit(event);
+			});
+
+			expect(submitResult).toEqual(null);
 		});
 
 		it('should return the result of the getFormValues method', () => {
@@ -883,8 +898,36 @@ describe('useForm hook', () => {
 		});
 	});
 
+	describe('isFormValid', () => {
+		it('should return false if at least one validation check fails', () => {
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			const dummyFieldRef = { name: 'dummy_field', rules: { required: isRequiredValidator } };
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.isFormValid()).toEqual(false);
+		});
+
+		it('should return true if no validation rule has been registered', () => {
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			const dummyFieldRef = { defaultValue: 'abcd', name: 'dummy_field', rules: { required: isRequiredValidator } };
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.isFormValid()).toEqual(true);
+		});
+
+		it('should return true if all validation checks succeed', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: {} };
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.isFormValid()).toEqual(true);
+		});
+	});
+
 	describe('getFieldsRefs', () => {
-		it('should return the current list of referenced fields', () => {
+		it('should return the current list of referenced fields.', () => {
 			const dummyFormFieldsRefs = [
 				{ id: 1, name: 'firstname', rules: {} },
 				{ id: 2, name: 'lastname', rules: {} },
