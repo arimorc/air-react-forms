@@ -848,19 +848,36 @@ describe('useForm hook', () => {
 	});
 
 	describe('handleSubmit', () => {
-		it('should prevent the default form submission event', () => {
+		it('should prevent the default form submission event.', () => {
 			const event = { preventDefault: () => {} };
 			const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
 
 			act(() => {
-				sut.handleSubmit(event);
+				sut.handleSubmit(() => {})(event);
 			});
 
 			expect(preventDefaultSpy).toHaveBeenCalledTimes(1);
 		});
 
-		it('should return the result of the getFormValues method', () => {
+		it('should not call the provided callback method if the form is invalid.', () => {
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			const dummyFieldRef = { name: 'dummy_field', rules: { required: isRequiredValidator } };
 			const event = { preventDefault: () => {} };
+			const callbackMock = jest.fn();
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			act(() => {
+				sut.handleSubmit(callbackMock)(event);
+			});
+
+			expect(callbackMock).not.toHaveBeenCalled();
+		});
+
+		it('should call the provided callback method with the result of the getFormValues method.', () => {
+			const event = { preventDefault: () => {} };
+			const callbackMock = jest.fn();
+
 			const dummyFormFieldsRefs = [
 				{ id: 1, name: 'firstname' },
 				{ id: 2, name: 'lastname' },
@@ -873,18 +890,46 @@ describe('useForm hook', () => {
 					{dummyFormFieldsRefs.map((field) => <input key={field.id} {...sut.register(field)} />)}
 				</>
 			);
-			let submitResult;
 
 			act(() => {
-				submitResult = sut.handleSubmit(event);
+				sut.handleSubmit(callbackMock)(event);
 			});
 
-			expect(submitResult).toEqual(sut.getFormValues());
+			expect(callbackMock).toHaveBeenCalledTimes(1);
+			expect(callbackMock).toHaveBeenCalledWith(sut.getFormValues());
+		});
+	});
+
+	describe('isFormValid', () => {
+		it('should return false if at least one validation check fails', () => {
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			const dummyFieldRef = { name: 'dummy_field', rules: { required: isRequiredValidator } };
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.isFormValid()).toEqual(false);
+		});
+
+		it('should return true if no validation rule has been registered', () => {
+			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
+			const dummyFieldRef = { defaultValue: 'abcd', name: 'dummy_field', rules: { required: isRequiredValidator } };
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.isFormValid()).toEqual(true);
+		});
+
+		it('should return true if all validation checks succeed', () => {
+			const dummyFieldRef = { name: 'dummy_field', rules: {} };
+
+			render(<input {...sut.register(dummyFieldRef)} />);
+
+			expect(sut.isFormValid()).toEqual(true);
 		});
 	});
 
 	describe('getFieldsRefs', () => {
-		it('should return the current list of referenced fields', () => {
+		it('should return the current list of referenced fields.', () => {
 			const dummyFormFieldsRefs = [
 				{ id: 1, name: 'firstname', rules: {} },
 				{ id: 2, name: 'lastname', rules: {} },

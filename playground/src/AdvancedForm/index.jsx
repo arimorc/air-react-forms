@@ -52,7 +52,7 @@ const AdvancedForm = () => {
 
 	return (
 		<FormProvider context={formContext}>
-			<form onSubmit={(e) => setFormData(handleSubmit(e))}>
+			<form onSubmit={handleSubmit(setFormData)}>
 				<h2>Advanced form (multiple re-usable file)</h2>
 				{toggle && (
 					<>

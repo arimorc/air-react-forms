@@ -387,22 +387,63 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
-	 * @name handleSubmit
-	 * @description A handler used to apply validation to each controlled input of the form and return their value if all are valid.
+	 * @name findError
+	 * @description Recursive method which iterates over the item parameter's values to look for validation errors.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} event The "form submit" event to handle.
+	 * @param {object | string} item : The item to iterate over.
 	 *
-	 * @returns {object}
+	 * @returns {number} The amount of errors found. If none, returns 0.
 	 */
-	const handleSubmit = useCallback((event) => {
-		event.preventDefault();
-		// @TODO: Prevent form submission when form is not valid.
+	const findError = useCallback((item) => (
+		Object.entries(item)
+			.reduce((acc, [, value]) => {
+				if (
+					value !== undefined
+					&& value !== null
+					&& (typeof value === 'string' && !isEmpty(value))
+					&& typeof value !== 'object'
+				) {
+					return acc + 1; // Error.
+				}
+
+				if (typeof value === 'object' && Object.values(value).length > 0) {
+					return acc + findError(value); // Recursive call.
+				}
+
+				return acc; // Field is valid.
+			}, 0)
+	), []);
+
+	/**
+	 * @function
+	 * @name isFormValid
+	 * @description Checks if the form is valid by analysing the formStateRef object.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @returns {bool} True if the form is valid, false otherwise.
+	 */
+	const isFormValid = useCallback(() => findError(formStateRef.current.errors) === 0, [findError]);
+
+	/**
+	 * @function
+	 * @name handleSubmit
+	 * @description A handler method which applies validation to all the controlled fields and calls the callback parameter if the form is valid.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {func} callback The callback method to call if the form is valid.
+	 */
+	const handleSubmit = useCallback((callback) => (event) => {
+		event?.preventDefault();
 		validateForm();
 
-		return getFormValues();
-	}, [getFormValues, validateForm]);
+		if (isFormValid()) {
+			callback(getFormValues());
+		}
+	}, [getFormValues, isFormValid, validateForm]);
 
 	/**
 	 * @function
@@ -429,6 +470,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		getFormValues,
 		getFieldArrayValues, // exported for testing purposes.
 		handleSubmit,
+		isFormValid,
 		register,
 		validate, // exported for testing purposes.
 		validateFieldArray: validateFieldArray(true),
