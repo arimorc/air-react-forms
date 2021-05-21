@@ -61,7 +61,7 @@ const SimpleForm = () => {
 
 	return (
 		<FormProvider context={formContext}>
-			<form onSubmit={(e) => setFormData(handleSubmit(e))}>
+			<form onSubmit={handleSubmit(setFormData)}>
 				<h2>Simple form (single file)</h2>
 				{toggle && (
 					<>

@@ -430,22 +430,20 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	/**
 	 * @function
 	 * @name handleSubmit
-	 * @description A handler used to apply validation to each controlled input of the form and return their value if all are valid.
+	 * @description A handler method which applies validation to all the controlled fields and calls the callback parameter if the form is valid.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {object} event The "form submit" event to handle.
-	 *
-	 * @returns {object}
+	 * @param {func} callback The callback method to call if the form is valid.
 	 */
-	const handleSubmit = useCallback((event) => {
-		event.preventDefault();
+	const handleSubmit = useCallback((callback) => (event) => {
+		event?.preventDefault();
 		validateForm();
 
-		return isFormValid()
-			? getFormValues()
-			: null;
-	}, [isFormValid, getFormValues, validateForm]);
+		if (isFormValid()) {
+			callback(getFormValues());
+		}
+	}, [getFormValues, isFormValid, validateForm]);
 
 	/**
 	 * @function

@@ -853,29 +853,31 @@ describe('useForm hook', () => {
 			const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
 
 			act(() => {
-				sut.handleSubmit(event);
+				sut.handleSubmit(() => {})(event);
 			});
 
 			expect(preventDefaultSpy).toHaveBeenCalledTimes(1);
 		});
 
-		it('should return null if form is invalid.', () => {
+		it('should not call the provided callback method if the form is invalid.', () => {
 			const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
 			const dummyFieldRef = { name: 'dummy_field', rules: { required: isRequiredValidator } };
 			const event = { preventDefault: () => {} };
-			let submitResult;
+			const callbackMock = jest.fn();
 
 			render(<input {...sut.register(dummyFieldRef)} />);
 
 			act(() => {
-				submitResult = sut.handleSubmit(event);
+				sut.handleSubmit(callbackMock)(event);
 			});
 
-			expect(submitResult).toEqual(null);
+			expect(callbackMock).not.toHaveBeenCalled();
 		});
 
-		it('should return the result of the getFormValues method', () => {
+		it('should call the provided callback method with the result of the getFormValues method.', () => {
 			const event = { preventDefault: () => {} };
+			const callbackMock = jest.fn();
+
 			const dummyFormFieldsRefs = [
 				{ id: 1, name: 'firstname' },
 				{ id: 2, name: 'lastname' },
@@ -888,13 +890,13 @@ describe('useForm hook', () => {
 					{dummyFormFieldsRefs.map((field) => <input key={field.id} {...sut.register(field)} />)}
 				</>
 			);
-			let submitResult;
 
 			act(() => {
-				submitResult = sut.handleSubmit(event);
+				sut.handleSubmit(callbackMock)(event);
 			});
 
-			expect(submitResult).toEqual(sut.getFormValues());
+			expect(callbackMock).toHaveBeenCalledTimes(1);
+			expect(callbackMock).toHaveBeenCalledWith(sut.getFormValues());
 		});
 	});
 
