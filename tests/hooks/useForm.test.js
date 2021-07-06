@@ -82,6 +82,26 @@ describe('useForm hook', () => {
 			expect(result).toStrictEqual(expectedResult);
 		});
 
+		it('should return the provided field\'s "checked" field value if said field has a ref property with "checkbox" type', () => {
+			const dummyFieldRef1 = { name: 'dummy_checkbox_field_1', type: 'checkbox', checked: true };
+			const dummyFieldRef2 = { name: 'dummy_checkbox_field_2', type: 'checkbox', checked: false };
+
+			const expectedResult1 = [dummyFieldRef1.name, dummyFieldRef1.checked];
+			const expectedResult2 = [dummyFieldRef2.name, dummyFieldRef2.checked];
+
+			mount(
+				<>
+					<input data-testid="dummy_checkbox_field_1" {...sut.register(dummyFieldRef1)} />
+					<input data-testid="dummy_checkbox_field-2" {...sut.register(dummyFieldRef2)} />
+				</>
+			);
+			const result1 = sut.formContext.getFieldValue(sut.formContext.fieldsRef.current[dummyFieldRef1.name]);
+			const result2 = sut.formContext.getFieldValue(sut.formContext.fieldsRef.current[dummyFieldRef2.name]);
+
+			expect(result1).toStrictEqual(expectedResult1);
+			expect(result2).toStrictEqual(expectedResult2);
+		});
+
 		it('should return undefined in lieu of the value if the provided field has no ref', async () => {
 			const dummyFieldRef = { name: 'dummy_field', rules: {}, type: 'text', defaultValue: 'test value' };
 			const expectedResult = [dummyFieldRef.name, undefined];
@@ -150,6 +170,8 @@ describe('useForm hook', () => {
 		});
 	});
 
+	// @TODO: test the getCheckboxGroupValues method.
+
 	describe('getFormValues', () => {
 		it('should return all controlled fields\' values bundled into a single object', () => {
 			const dummyFormFieldsRefs = [
@@ -193,6 +215,8 @@ describe('useForm hook', () => {
 			expect(actualResult).toMatchObject({ test: expect.arrayContaining(expectedResult.test) });
 			expect(actualResult.test.length).toBe(expectedResult.test.length);
 		});
+
+		// @TODO: test the method with a checkboxGroup hook usage.
 
 		it('should return an empty object if no fields is referenced', () => {
 			expect(sut.getFormValues()).toEqual({});

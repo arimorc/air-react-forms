@@ -3,6 +3,7 @@ import {
 	isRadio,
 	isRadioOrCheckbox,
 	getDefaultValueByInputType,
+	isSelect,
 } from '../../src/utils/inputTypeUtils';
 
 describe('input type utils', () => {
@@ -49,6 +50,24 @@ describe('input type utils', () => {
 
 		it('shoud return false if provided with an element without type', () => {
 			expect(isRadioOrCheckbox({})).toEqual(false);
+		});
+	});
+
+	describe('isSelect', () => {
+		it('should return true if provided with a select-one element', () => {
+			expect(isSelect({ type: 'select-one' })).toEqual(true);
+		});
+
+		it('should return true if provided with a select-multiple element', () => {
+			expect(isSelect({ type: 'select-multiple' })).toEqual(true);
+		});
+
+		it('should return false if provided with a non-select element', () => {
+			expect(isSelect({ type: 'checkbox' })).toEqual(false);
+		});
+
+		it('should return false if provided with an element without a type', () => {
+			expect(isSelect({})).toEqual(false);
 		});
 	});
 

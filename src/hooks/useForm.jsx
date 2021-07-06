@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import logger from '../utils/logger';
-import { getDefaultValueByInputType } from '../utils/inputTypeUtils';
+import { getDefaultValueByInputType, isCheckbox } from '../utils/inputTypeUtils';
 
 /**
  * @name useForm
@@ -59,6 +59,11 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @returns {array}
 	 */
 	const getFieldValue = (field) => {
+		// @TODO: handle multiple checkbox with same name but different values
+		if (isCheckbox(field?.ref)) {
+			return [field.name, field.ref.checked];
+		}
+
 		const { name, ref: { value = undefined } = {} } = field;
 
 		return [name, value];
@@ -87,6 +92,31 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
+	 * @getCheckboxGroupValues
+	 * @description Returns the values of a checkbox group in a format that can be used with Object.fromEntries().
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} checkboxGroup The checkbox group reference to retrieve values from.
+	 *
+	 * @returns {array}
+	 */
+	const getCheckboxGroupValues = (checkboxGroup) => {
+		const { name, rules, ...fields } = checkboxGroup;
+
+		const values = Object.values(fields)
+			.filter(({ ref }) => ref)
+			.reduce((acc, { ref: { value, checked } }) => {
+				acc[value] = checked;
+
+				return acc;
+			}, {});
+
+		return [name, values];
+	};
+
+	/**
+	 * @function
 	 * @name getFormValues
 	 * @description Returns the value of all controlled fields as an object.
 	 *
@@ -100,11 +130,17 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
 			.filter((ref) => ref) // To ignore fields that are yet to be registered or garbage collected.
-			.map(({ isFieldArray, ...fieldRef }) => (
-				isFieldArray
-					? getFieldArrayValues(fieldRef)
-					: getFieldValue(fieldRef)
-			));
+			.map(({ isFieldArray, isCheckboxGroup, ...fieldRef }) => {
+				if (isFieldArray) {
+					return getFieldArrayValues(fieldRef);
+				}
+
+				if (isCheckboxGroup) {
+					return getCheckboxGroupValues(fieldRef);
+				}
+
+				return getFieldValue(fieldRef);
+			});
 
 		return Object.fromEntries(formValues);
 	}, [inputsRefs]);
@@ -351,10 +387,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		inputsRefs.current[name] = {
 			...(isInitialRegister
 				? { name }
-				: {
-					ref: (inputsRefs.current[name] || {}).ref,
-					...inputsRefs.current[name],
-				}),
+				: { ref: (inputsRefs.current[name] || {}).ref, ...inputsRefs.current[name] }),
 			name,
 			rules,
 			type,
@@ -368,10 +401,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		const fieldProps = {
 			defaultValue: defaultValue ?? getDefaultValueByInputType(type),
 			name,
-			ref: (ref) => (ref
-				? registerFormField({ name, ref, rules, ...options })
-				: unregisterFormField(name)
-			),
+			ref: (ref) => (ref ? registerFormField({ name, ref, rules, ...options }) : unregisterFormField(name)),
 			rules,
 			type,
 			...options,
@@ -379,7 +409,16 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 		if (validateOnChange) {
 			// @TODO: handle select, checkbox and radio button onChange implementation.
-			fieldProps.onChange = () => validateField(true)(name);
+			switch (type) {
+				case 'checkbox': {
+					fieldProps.onChange = () => validateField(true)(name);
+					break;
+				}
+				default: {
+					fieldProps.onChange = () => validateField(true)(name);
+					break;
+				}
+			}
 		}
 
 		return fieldProps;

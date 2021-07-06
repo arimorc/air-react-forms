@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { useFieldArray, useForm, Validators, FormProvider } from 'air-react-forms';
+import { useCheckboxGroup, useFieldArray, useForm, Validators, FormProvider } from 'air-react-forms';
 
 /**
  * @name SimpleForm
@@ -17,6 +17,11 @@ const SimpleForm = () => {
 			required: Validators.isRequired('required, pal !'),
 			customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
 		},
+	}, formContext);
+
+	const { register: registerCheckbox } = useCheckboxGroup({
+		name: 'proteinSource',
+		defaultValues: { ham: true },
 	}, formContext);
 
 	const formFields = {
@@ -56,6 +61,18 @@ const SimpleForm = () => {
 			rules: {
 				customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
 			},
+		},
+		checkbox1: {
+			name: 'checkbox1',
+			id: 'checkbox1',
+			rules: {},
+			type: 'checkbox',
+		},
+		checkbox2: {
+			name: 'checkbox2',
+			id: 'checkbox2',
+			rules: {},
+			type: 'checkbox',
 		},
 	};
 
@@ -112,20 +129,48 @@ const SimpleForm = () => {
 						{errors.hasUsedHooks?.customValidator && <span>{errors.hasUsedHooks.customValidator}</span>}
 					</div>
 				</>
+				<>
+					<label htmlFor="checkbox1">checkbox 1</label>
+					<input type="checkbox" {...register(formFields.checkbox1)} />
+				</>
+				<>
+					<label htmlFor="checkbox2">checkbox 2</label>
+					<input type="checkbox" {...register(formFields.checkbox2)} />
+				</>
 
-				{fields.map((field) => (
-					<Fragment key={field.id}>
-						<label htmlFor={field.id}>{field.name}</label>
-						<div style={{ display: 'flex' }}>
-							<input {...registerArrayField(field)} />
-							<button type="button" onClick={() => remove(field)}>remove</button>
-						</div>
-						{errors.test?.[field.name]?.required && <span>{errors.test?.[field.name]?.required}</span>}
-					</Fragment>
-				))}
-				<div>
+				<fieldset style={{ marginTop: '2em', marginBottom: '2em' }}>
+					<legend>Checkbox group</legend>
+					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
+						<input {...registerCheckbox({ value: 'ham' })} />
+						<label htmlFor="proteinSource-ham" style={{ margin: 0 }}>Ham</label>
+					</div>
+					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
+						<input {...registerCheckbox({ value: 'turkey' })} />
+						<label htmlFor="proteinSource-turkey" style={{ margin: 0 }}>Turkey</label>
+					</div>
+					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
+						<input {...registerCheckbox({ value: 'tuna' })} />
+						<label htmlFor="proteinSource-tuna" style={{ margin: 0 }}>tuna</label>
+					</div>
+				</fieldset>
+
+				<fieldset style={{ marginTop: '2em', marginBottom: '2em' }}>
+					<legend>Dynamic field array</legend>
+					{fields.map((field) => (
+						<Fragment key={field.id}>
+							<label htmlFor={field.id}>{field.name}</label>
+							<div style={{ display: 'flex' }}>
+								<input {...registerArrayField(field)} />
+								<button type="button" onClick={() => remove(field)}>remove</button>
+							</div>
+							{errors.test?.[field.name]?.required && <span>{errors.test?.[field.name]?.required}</span>}
+						</Fragment>
+					))}
+					<br />
 					<button type="button" onClick={append}>Add field</button>
-					<button type="submit">Submit</button>
+				</fieldset>
+				<div>
+					<button type="submit">Submit form</button>
 				</div>
 			</form>
 			<h3>Form data</h3>
