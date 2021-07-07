@@ -507,13 +507,16 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		formState,
 		getFieldsRefs,
 		getFormValues,
-		getFieldArrayValues, // exported for testing purposes.
 		handleSubmit,
 		isFormValid,
 		register,
-		validate, // exported for testing purposes.
 		validateFieldArray: validateFieldArray(true),
 		validateField: validateField(true),
+		// Methods exported to simplify the testing process.
+		unitTestingExports: {
+			getFieldArrayValues,
+			validate,
+		},
 	};
 };
 

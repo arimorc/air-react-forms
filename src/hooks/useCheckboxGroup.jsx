@@ -59,11 +59,8 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 	const unregisterCheckbox = useCallback((checkboxValue) => {
 		if (fieldsRef.current[checkboxGroupName] && fieldsRef.current[checkboxGroupName][checkboxValue]) {
 			delete fieldsRef.current[checkboxGroupName][checkboxValue];
-			if (formStateRef.current.errors[checkboxGroupName]?.[checkboxValue]) {
-				delete formStateRef.current.errors[checkboxGroupName][checkboxValue];
-			}
 		}
-	}, [fieldsRef, formStateRef, checkboxGroupName]);
+	}, [fieldsRef, checkboxGroupName]);
 
 	/**
 	 * @function
@@ -78,6 +75,10 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 	 * @returns {object} The props to provide to the field instigating the call to this method.
 	 */
 	const register = useCallback(({ value, defaultChecked = false, ...additionalProps } = {}) => {
+		if (value === null || value === undefined) {
+			return undefined;
+		}
+
 		if (!fieldsRef.current[checkboxGroupName]) {
 			fieldsRef.current[checkboxGroupName] = {
 				isCheckboxGroup: true,
@@ -122,7 +123,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 			...additionalProps,
 			id: inputId,
 			name: checkboxGroupName,
-			defaultChecked: defaultChecked || defaultValues[value],
+			defaultChecked: defaultChecked || (defaultValues[value] ?? false),
 			type: 'checkbox',
 			value,
 			ref: (ref) => (ref
@@ -163,6 +164,11 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 		fields: getFields,
 		register,
 		errors,
+		// Methods exported to simplify the testing process.
+		unitTestingExports: {
+			registerCheckbox,
+			unregisterCheckbox,
+		},
 	};
 };
 

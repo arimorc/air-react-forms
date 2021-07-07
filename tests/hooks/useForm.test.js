@@ -233,7 +233,7 @@ describe('useForm hook', () => {
 		});
 
 		it('should return an empty object if no field is provided', () => {
-			expect(sut.validate(undefined)).toStrictEqual({});
+			expect(sut.unitTestingExports.validate(undefined)).toStrictEqual({});
 		});
 
 		it('should return a key value pair with the field\'s name as key and an empty object as value if no validation rule is provided.', () => {
@@ -242,7 +242,7 @@ describe('useForm hook', () => {
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+			expect(sut.unitTestingExports.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
 		});
 
 		it('should return an empty object if no validation rule is provided (field array version).', async () => {
@@ -260,7 +260,7 @@ describe('useForm hook', () => {
 				await formRef.current.registerArrayField();
 			});
 
-			const validationResults = formRef.current.getUseFormResults().validate(formRef.current.getContext().fieldsRef.current.skurt);
+			const validationResults = formRef.current.getUseFormResults().unitTestingExports.validate(formRef.current.getContext().fieldsRef.current.skurt);
 
 			expect(validationResults).toStrictEqual({});
 		});
@@ -280,7 +280,7 @@ describe('useForm hook', () => {
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+			expect(sut.unitTestingExports.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
 		});
 
 		it('should return validation results in the expected format.', () => {
@@ -289,7 +289,7 @@ describe('useForm hook', () => {
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+			expect(sut.unitTestingExports.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
 		});
 
 		it('should return validation results in the expected format (field array version).', async () => {
@@ -323,7 +323,7 @@ describe('useForm hook', () => {
 				},
 			};
 
-			const validationResults = formRef.current.getUseFormResults().validate(formRef.current.getContext().fieldsRef.current.test);
+			const validationResults = formRef.current.getUseFormResults().unitTestingExports.validate(formRef.current.getContext().fieldsRef.current.test);
 
 			expect(validationResults).toStrictEqual(expectedResult);
 		});

@@ -15,7 +15,7 @@ import { useFieldArray, useForm, FormProvider } from '../../src';
  */
 const FieldArrayTestForm = forwardRef(({ defaultValue, fieldArrayName, fieldArrayRules, fieldType }, ref) => {
 	const useFormResults = useForm({ validateOnChange: true });
-	const { formContext, getFieldArrayValues } = useFormResults;
+	const { formContext, unitTestingExports: { getFieldArrayValues } } = useFormResults;
 	const { fields, register: registerArrayField, remove } = useFieldArray({ name: fieldArrayName, rules: fieldArrayRules }, formContext);
 
 	useImperativeHandle(ref, () => ({
