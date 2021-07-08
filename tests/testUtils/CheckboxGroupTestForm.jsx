@@ -12,7 +12,7 @@ import { FormProvider, useCheckboxGroup, useForm } from '../../src';
  */
 const CheckboxGroupTestForm = forwardRef(({ defaultValues, checkboxGroupName, validationRules }, ref) => {
 	const useFormResults = useForm({ validateOnChange: true });
-	const { formContext } = useFormResults;
+	const { formContext, unitTestingExports: { getCheckboxGroupValues } } = useFormResults;
 	const { register } = useCheckboxGroup({
 		name: checkboxGroupName,
 		rules: validationRules,
@@ -28,6 +28,11 @@ const CheckboxGroupTestForm = forwardRef(({ defaultValues, checkboxGroupName, va
 		// eslint-disable-next-line require-jsdoc
 		getContext() {
 			return formContext;
+		},
+
+		// eslint-disable-next-line require-jsdoc
+		getCheckboxGroupValues(checkboxGroup) {
+			return getCheckboxGroupValues(checkboxGroup);
 		},
 	}));
 

@@ -14,7 +14,7 @@ import logger from '../utils/logger';
  * @param {string}	name			The name to store all checkboxes under in the form inputs references.
  * @param {object}	[rules]			Validation rules to apply to the checkboxes as a group.
  */
-const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }, context) => {
+const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules = {} }, context) => {
 	const formContext = useContext(FormContext) ?? context;
 
 	if (!formContext) {
@@ -24,13 +24,12 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 	const {
 		fieldsRef,
 		formStateRef,
+		validateCheckboxGroup,
 		validateOnChange,
 	} = formContext;
 
 	const [fields, setFields] = useState({});
 	const [errors, setErrors] = useState(() => formContext.formStateRef.current.errors[checkboxGroupName] ?? {});
-
-	// @TODO: implement validation rules logic.
 
 	/**
 	 * @function
@@ -59,6 +58,8 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 	const unregisterCheckbox = useCallback((checkboxValue) => {
 		if (fieldsRef.current[checkboxGroupName] && fieldsRef.current[checkboxGroupName][checkboxValue]) {
 			delete fieldsRef.current[checkboxGroupName][checkboxValue];
+
+			// @TODO: implement a way to remove the related field from the formState's errors object when all checkbox have unmounted.
 		}
 	}, [fieldsRef, checkboxGroupName]);
 
@@ -133,7 +134,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 		};
 
 		if (validateOnChange) {
-			// @TODO: handle checkbox onChange implementation.
+			fieldProps.onChange = () => validateCheckboxGroup(true)(checkboxGroupName);
 		}
 
 		/**
@@ -147,7 +148,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules }
 		}
 
 		return fieldProps;
-	}, [fieldsRef, checkboxGroupName, defaultValues, validateOnChange, fields, rules, registerCheckbox, unregisterCheckbox]);
+	}, [fieldsRef, checkboxGroupName, defaultValues, validateOnChange, fields, rules, registerCheckbox, unregisterCheckbox, validateCheckboxGroup]);
 
 	const getFields = useMemo(() => (Object.values(fields)), [fields]);
 

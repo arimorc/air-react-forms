@@ -102,7 +102,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @returns {array}
 	 */
 	const getCheckboxGroupValues = (checkboxGroup) => {
-		const { name, rules, ...fields } = checkboxGroup;
+		const { isCheckboxGroup, name, rules, ...fields } = checkboxGroup;
 
 		const values = Object.values(fields)
 			.filter(({ ref }) => ref)
@@ -254,8 +254,8 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done.
 	 * @param {string}	fieldArrayName		The name of the field array to perform validation on.
+	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done.
 	 */
 	const validateFieldArray = useCallback((shouldUpdateState) => (fieldArrayName) => {
 		if (!inputsRefs.current[fieldArrayName]) {
@@ -274,6 +274,37 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			syncStateWithRef();
 		}
 	}, [syncStateWithRef, validate]);
+
+	/**
+	 * @function
+	 * @name validateCheckboxGroup
+	 * @description A callback method used to perform validation checks on a specific checkbox group.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {string}	checkboxGroupName	The name of the checkbox group to perform validation on.
+	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done
+	 */
+	const validateCheckboxGroup = useCallback((shouldUpdateState) => (checkboxGroupName) => {
+		if (!formStateRef.current.errors[checkboxGroupName]) {
+			formStateRef.current.errors[checkboxGroupName] = {};
+		}
+
+		const fieldErrors = {};
+
+		const checkboxGroupRef = inputsRefs.current?.[checkboxGroupName];
+		const { isCheckboxGroup, name, rules, ...fields } = checkboxGroupRef;
+
+		Object.entries(rules).forEach(([rule, validator]) => {
+			fieldErrors[rule] = validator(fields) || undefined;
+		});
+
+		formStateRef.current.errors[checkboxGroupName] = Object.fromEntries(Object.entries(fieldErrors));
+
+		if (shouldUpdateState) {
+			syncStateWithRef();
+		}
+	}, [formStateRef, syncStateWithRef]);
 
 	/**
 	 * @function
@@ -306,19 +337,27 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	/**
 	 * @function
 	 * @name validateForm
-	 * @description Performs a validation check on each registered input using the {@link validateFieldArray} and {@link validateField} methods.
+	 * @description Performs a validation check on each registered input using the validation methods related to the input type.
+	 *
+	 * @uses {@link validateCheckboxGroup}
+	 * @uses {@link validateFieldArray}
+	 * @uses {@link validateField}
 	 *
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = useCallback(() => {
-		Object.values(inputsRefs.current).forEach(({ isFieldArray, name }) => (
-			isFieldArray
-				? validateFieldArray(false)(name)
-				: validateField(false)(name)
-		));
+		Object.values(inputsRefs.current).forEach(({ isCheckboxGroup, isFieldArray, name }) => {
+			if (isFieldArray) {
+				validateFieldArray(false)(name);
+			} else if (isCheckboxGroup) {
+				validateCheckboxGroup(false)(name);
+			} else {
+				validateField(false)(name);
+			}
+		});
 
 		syncStateWithRef();
-	}, [syncStateWithRef, validateField, validateFieldArray]);
+	}, [syncStateWithRef, validateCheckboxGroup, validateField, validateFieldArray]);
 
 	/**
 	 * @function
@@ -408,7 +447,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		};
 
 		if (validateOnChange) {
-			// @TODO: handle select, checkbox and radio button onChange implementation.
+			// @TODO: handle select and radio button onChange implementation.
 			switch (type) {
 				case 'checkbox': {
 					fieldProps.onChange = () => validateField(true)(name);
@@ -503,6 +542,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			validateOnChange,
 			validateField: validateField(true),
 			validateFieldArrayInput,
+			validateCheckboxGroup,
 		},
 		formState,
 		getFieldsRefs,
@@ -514,6 +554,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		validateField: validateField(true),
 		// Methods exported to simplify the testing process.
 		unitTestingExports: {
+			getCheckboxGroupValues,
 			getFieldArrayValues,
 			validate,
 		},

@@ -86,6 +86,7 @@ describe('useCheckboxGroup hook', () => {
 				[checkboxGroupName]: {
 					name: checkboxGroupName,
 					isCheckboxGroup: true,
+					rules: {},
 					one: expect.anything(),
 				},
 			};
@@ -164,6 +165,7 @@ describe('useCheckboxGroup hook', () => {
 				[checkboxGroupName]: {
 					name: checkboxGroupName,
 					isCheckboxGroup: true,
+					rules: {},
 					one: { id: `${checkboxGroupName}-one`, name: checkboxGroupName, value: 'one' },
 					two: { id: `${checkboxGroupName}-two`, name: checkboxGroupName, value: 'two' },
 				},
@@ -197,6 +199,7 @@ describe('useCheckboxGroup hook', () => {
 				[checkboxGroupName]: {
 					name: checkboxGroupName,
 					isCheckboxGroup: true,
+					rules: {},
 					one: { id: `${checkboxGroupName}-one`, name: checkboxGroupName, value: 'one' },
 					two: { id: `${checkboxGroupName}-two`, name: checkboxGroupName, value: 'two' },
 					three: { id: `${checkboxGroupName}-three`, name: checkboxGroupName, value: 'three' },
@@ -241,6 +244,7 @@ describe('useCheckboxGroup hook', () => {
 				[checkboxGroupName]: {
 					name: checkboxGroupName,
 					isCheckboxGroup: true,
+					rules: {},
 					one: expect.anything(),
 				},
 			};
@@ -381,9 +385,7 @@ describe('useCheckboxGroup hook', () => {
 				callResult = sut.register({ value: 'one' });
 			});
 
-			expect(callResult).not.toMatchObject(expectedResult);
+			expect(callResult).toMatchObject(expectedResult);
 		});
 	});
-
-	// @TODO: test if the provided validation rules are triggered on the checkbox group.
 });

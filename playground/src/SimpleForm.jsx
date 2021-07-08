@@ -22,6 +22,10 @@ const SimpleForm = () => {
 	const { register: registerCheckbox } = useCheckboxGroup({
 		name: 'proteinSource',
 		defaultValues: { ham: true },
+		rules: {
+			maxChecked: Validators.hasMaxChecked(3, 'You can only select up to 3 options'),
+			minChecked: Validators.hasMinChecked(1, 'Please select at least one option'),
+		},
 	}, formContext);
 
 	const formFields = {
@@ -151,6 +155,14 @@ const SimpleForm = () => {
 					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
 						<input {...registerCheckbox({ value: 'tuna' })} />
 						<label htmlFor="proteinSource-tuna" style={{ margin: 0 }}>tuna</label>
+					</div>
+					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
+						<input {...registerCheckbox({ value: 'eggs' })} />
+						<label htmlFor="proteinSource-eggs" style={{ margin: 0 }}>eggs</label>
+					</div>
+					<div>
+						{errors.proteinSource?.minChecked && <span>{errors.proteinSource?.minChecked}</span>}
+						{errors.proteinSource?.maxChecked && <span>{errors.proteinSource?.maxChecked}</span>}
 					</div>
 				</fieldset>
 
