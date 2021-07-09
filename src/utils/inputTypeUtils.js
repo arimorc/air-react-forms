@@ -1,6 +1,7 @@
 import isEqual from 'lodash.isequal';
 
 /**
+ * @function
  * @name isCheckbox
  * @description Determines if the provided element is a checkbox input.
  *
@@ -10,9 +11,10 @@ import isEqual from 'lodash.isequal';
  *
  * @returns {bool} true if the element is a checkbox input, false otherwise.
  */
-const isCheckbox = (element) => element.type === 'checkbox';
+const isCheckbox = (element) => element?.type === 'checkbox';
 
 /**
+ * @function
  * @name isRadio
  * @description Determines if the provided element is a radio input.
  *
@@ -22,9 +24,10 @@ const isCheckbox = (element) => element.type === 'checkbox';
  *
  * @returns {bool} true if the element is a radio input, false otherwise.
  */
-const isRadio = (element) => element.type === 'radio';
+const isRadio = (element) => element?.type === 'radio';
 
 /**
+ * @function
  * @name isRadioOrCheckbox
  * @description Determines if the provided element is a checkbox or a radio input.
  *
@@ -33,6 +36,15 @@ const isRadio = (element) => element.type === 'radio';
  * @returns {bool} true if the element is a checkbox or radio input, false otherwise.
  */
 const isRadioOrCheckbox = (element) => isCheckbox(element) || isRadio(element);
+
+/**
+ * @function
+ * @name isSelect
+ * @param {*} element The element to assert the type of.
+ *
+ * @returns {bool} true if the element is a select, false otherwise.
+ */
+const isSelect = (element) => element?.type === 'select-one' || element?.type === 'select-multiple';
 
 /**
  * @name getDefaultValueByType
@@ -65,4 +77,5 @@ export {
 	isCheckbox,
 	isRadio,
 	isRadioOrCheckbox,
+	isSelect,
 };

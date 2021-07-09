@@ -2,6 +2,7 @@ import { createRef } from 'react';
 import { mount, shallow } from 'enzyme';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import testHook from '../testUtils/hookTestUtils';
+import CheckboxGroupTestForm from '../testUtils/CheckboxGroupTestForm';
 import FieldArrayTestForm from '../testUtils/FieldArrayTestForm';
 import { useForm } from '../../src';
 import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
@@ -22,19 +23,33 @@ describe('useForm hook', () => {
 
 	describe('hook call result', () => {
 		it('should return multiple methods and attributes when called', () => {
-			const expectedValues = {
-				formState: {
-					errors: {},
-					isDirty: false,
+			const expectedResult = {
+				formContext: {
+					fieldsRef: expect.any(Object),
+					formStateRef: expect.any(Object),
+					getFieldValue: expect.any(Function),
+					getFormValues: expect.any(Function),
+					syncStateWithRef: expect.any(Function),
+					validateOnChange: expect.any(Boolean),
+					validateField: expect.any(Function),
+					validateFieldArrayInput: expect.any(Function),
+					validateCheckboxGroup: expect.any(Function),
 				},
+				formState: expect.any(Object),
 				getFieldsRefs: expect.any(Function),
 				getFormValues: expect.any(Function),
 				handleSubmit: expect.any(Function),
+				isFormValid: expect.any(Function),
 				register: expect.any(Function),
+				validateFieldArray: expect.any(Function),
 				validateField: expect.any(Function),
+				unitTestingExports: {
+					getFieldArrayValues: expect.any(Function),
+					validate: expect.any(Function),
+				},
 			};
 
-			expect(sut).toMatchObject(expectedValues);
+			expect(sut).toMatchObject(expectedResult);
 		});
 	});
 
@@ -80,6 +95,26 @@ describe('useForm hook', () => {
 			const result = sut.formContext.getFieldValue(sut.formContext.fieldsRef.current[dummyFieldRef.name]);
 
 			expect(result).toStrictEqual(expectedResult);
+		});
+
+		it('should return the provided field\'s "defaultChecked" field value if said field has a ref property with "checkbox" type', () => {
+			const dummyFieldRef1 = { name: 'dummy_checkbox_field_1', type: 'checkbox', defaultChecked: true };
+			const dummyFieldRef2 = { name: 'dummy_checkbox_field_2', type: 'checkbox', defaultChecked: false };
+
+			const expectedResult1 = [dummyFieldRef1.name, dummyFieldRef1.defaultChecked];
+			const expectedResult2 = [dummyFieldRef2.name, dummyFieldRef2.defaultChecked];
+
+			mount(
+				<>
+					<input data-testid="dummy_checkbox_field_1" {...sut.register(dummyFieldRef1)} />
+					<input data-testid="dummy_checkbox_field-2" {...sut.register(dummyFieldRef2)} />
+				</>
+			);
+			const result1 = sut.formContext.getFieldValue(sut.formContext.fieldsRef.current[dummyFieldRef1.name]);
+			const result2 = sut.formContext.getFieldValue(sut.formContext.fieldsRef.current[dummyFieldRef2.name]);
+
+			expect(result1).toStrictEqual(expectedResult1);
+			expect(result2).toStrictEqual(expectedResult2);
 		});
 
 		it('should return undefined in lieu of the value if the provided field has no ref', async () => {
@@ -150,6 +185,28 @@ describe('useForm hook', () => {
 		});
 	});
 
+	describe('getCheckboxGroupValues', () => {
+		it('should return the value of each checkbox as an object', async () => {
+			const formRef = createRef();
+			const checkboxGroupName = 'dummy_checkbox_group';
+			const defaultValues = {
+				one: true,
+				two: false,
+				three: true,
+			};
+
+			await act(async () => {
+				render(
+					<CheckboxGroupTestForm checkboxGroupName={checkboxGroupName} defaultValues={defaultValues} ref={formRef} />
+				);
+			});
+			const expectedResult = [checkboxGroupName, defaultValues];
+			const actualResult = formRef.current.getCheckboxGroupValues(formRef.current.getContext().fieldsRef.current[checkboxGroupName]);
+
+			expect(actualResult).toStrictEqual(expectedResult);
+		});
+	});
+
 	describe('getFormValues', () => {
 		it('should return all controlled fields\' values bundled into a single object', () => {
 			const dummyFormFieldsRefs = [
@@ -194,6 +251,23 @@ describe('useForm hook', () => {
 			expect(actualResult.test.length).toBe(expectedResult.test.length);
 		});
 
+		it('should return values of all controlled fields, including checkboxGroups\' inputs, bundled into a single object', async () => {
+			const formRef = createRef();
+			const checkboxGroupName = 'dummy_checkbox_group';
+			const defaultValues = { one: true, two: false, three: true };
+
+			await act(async () => {
+				render(
+					<CheckboxGroupTestForm checkboxGroupName={checkboxGroupName} defaultValues={defaultValues} ref={formRef} />
+				);
+			});
+
+			const expectedResult = { [checkboxGroupName]: defaultValues };
+			const actualResult = formRef.current.getContext().getFormValues();
+
+			expect(actualResult).toStrictEqual(expectedResult);
+		});
+
 		it('should return an empty object if no fields is referenced', () => {
 			expect(sut.getFormValues()).toEqual({});
 		});
@@ -209,7 +283,7 @@ describe('useForm hook', () => {
 		});
 
 		it('should return an empty object if no field is provided', () => {
-			expect(sut.validate(undefined)).toStrictEqual({});
+			expect(sut.unitTestingExports.validate(undefined)).toStrictEqual({});
 		});
 
 		it('should return a key value pair with the field\'s name as key and an empty object as value if no validation rule is provided.', () => {
@@ -218,7 +292,7 @@ describe('useForm hook', () => {
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+			expect(sut.unitTestingExports.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
 		});
 
 		it('should return an empty object if no validation rule is provided (field array version).', async () => {
@@ -236,7 +310,7 @@ describe('useForm hook', () => {
 				await formRef.current.registerArrayField();
 			});
 
-			const validationResults = formRef.current.getUseFormResults().validate(formRef.current.getContext().fieldsRef.current.skurt);
+			const validationResults = formRef.current.getUseFormResults().unitTestingExports.validate(formRef.current.getContext().fieldsRef.current.skurt);
 
 			expect(validationResults).toStrictEqual({});
 		});
@@ -256,7 +330,7 @@ describe('useForm hook', () => {
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+			expect(sut.unitTestingExports.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
 		});
 
 		it('should return validation results in the expected format.', () => {
@@ -265,7 +339,7 @@ describe('useForm hook', () => {
 
 			mount(<input {...sut.register(dummyFieldRef)} />);
 
-			expect(sut.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
+			expect(sut.unitTestingExports.validate(sut.getFieldsRefs().dummy_field)).toStrictEqual(expectedResult);
 		});
 
 		it('should return validation results in the expected format (field array version).', async () => {
@@ -299,7 +373,7 @@ describe('useForm hook', () => {
 				},
 			};
 
-			const validationResults = formRef.current.getUseFormResults().validate(formRef.current.getContext().fieldsRef.current.test);
+			const validationResults = formRef.current.getUseFormResults().unitTestingExports.validate(formRef.current.getContext().fieldsRef.current.test);
 
 			expect(validationResults).toStrictEqual(expectedResult);
 		});
@@ -615,6 +689,40 @@ describe('useForm hook', () => {
 
 			expect(consoleWarnSpy).toHaveBeenCalledTimes(0);
 			expect(formRef.current.getContext().formStateRef.current).toEqual(expectedUpdatedState);
+		});
+	});
+
+	describe('validateCheckboxGroup', () => {
+		it('should update formState.errors field for the specified checkboxGroup with new validation results.', async () => {
+			const formRef = createRef();
+			const checkboxGroupName = 'dummy-checkbox-group';
+			const dummyValidator = jest.fn().mockReturnValue('dummy_error_message');
+
+			let initialFormStateValue;
+
+			await act(async () => {
+				render(
+					<CheckboxGroupTestForm checkboxGroupName={checkboxGroupName} validationRules={{ dummy: dummyValidator }} ref={formRef} />
+				);
+
+				initialFormStateValue = JSON.parse(JSON.stringify({ ...formRef.current.getContext().formStateRef.current }));
+				formRef.current.getContext().validateCheckboxGroup(true)(checkboxGroupName);
+			});
+
+			const expectedInitialState = {
+				errors: {},
+			};
+
+			const expectedUpdatedState = {
+				...initialFormStateValue,
+				errors: {
+					...initialFormStateValue.errors,
+					[checkboxGroupName]: { dummy: 'dummy_error_message' },
+				},
+			};
+
+			expect(initialFormStateValue).toMatchObject(expectedInitialState);
+			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedUpdatedState);
 		});
 	});
 
