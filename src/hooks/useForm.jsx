@@ -426,7 +426,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		inputsRefs.current[name] = {
 			...(isInitialRegister
 				? { name }
-				: { ref: (inputsRefs.current[name] || {}).ref, ...inputsRefs.current[name] }),
+				: { ref: inputsRefs.current[name]?.ref, ...inputsRefs.current[name] }),
 			name,
 			rules,
 			type,

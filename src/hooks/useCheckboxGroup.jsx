@@ -106,7 +106,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules =
 			...(isInitialRegister
 				? { value }
 				: {
-					ref: (fieldsRef.current[checkboxGroupName][value] || {}).ref,
+					ref: fieldsRef.current[checkboxGroupName][value]?.ref,
 					...fieldsRef.current[checkboxGroupName][value],
 				}),
 			id: inputId,

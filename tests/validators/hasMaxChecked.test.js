@@ -1,6 +1,11 @@
 import { hasMaxChecked } from '../../src/validators';
+import logger from '../../src/utils/logger';
 
 describe('hasMaxChecked', () => {
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
 	it('should return the provided message if there are more checked checkboxes than allowed by the provided criteria.', () => {
 		const errorMessage = 'Easy there, champ.';
 		const maxCheckedAmount = 2;
@@ -47,5 +52,26 @@ describe('hasMaxChecked', () => {
 		};
 
 		expect(hasMaxChecked(maxCheckedAmount, errorMessage)(systemUnderValidation)).toEqual('');
+	});
+
+	it('should call logger.warn if called with no checkboxes', () => {
+		const loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(jest.fn());
+
+		hasMaxChecked(2, '')({});
+		expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('should call logger.warn if called with less checkboxes than the required maxCheckedAmount value', () => {
+		const loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation(jest.fn());
+		const systemUnderValidation = {
+			isCheckboxGroup: true,
+			name: 'dummy_cbx_group',
+			rules: {},
+			'cbx-one': { ref: { checked: true } },
+			'cbx-two': { ref: { checked: false } },
+		};
+
+		hasMaxChecked(3, '')(systemUnderValidation);
+		expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
 	});
 });

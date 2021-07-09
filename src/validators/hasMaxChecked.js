@@ -1,3 +1,5 @@
+import logger from '../utils/logger';
+
 /**
  * @function
  * @name hasMaxChecked
@@ -13,6 +15,19 @@
  */
 const hasMaxChecked = (maxCheckedAmount, message) => (checkboxGroupRef) => {
 	const { isCheckboxGroup, name, rules, ...fields } = checkboxGroupRef;
+	const fieldsAmount = Object.values(fields ?? {}).length;
+
+	if (fieldsAmount === 0) {
+		logger.warn(`tried to check if the ${name} checkbox group has at most ${maxCheckedAmount} inputs checked even though it has no checkbox.`);
+
+		return '';
+	}
+
+	if (maxCheckedAmount > fieldsAmount) {
+		logger.warn(`tried to check if the ${name} checkbox group has at most ${maxCheckedAmount} inputs checked even though it only has ${fieldsAmount} checkboxes.`);
+
+		return '';
+	}
 
 	const checkedAmount = Object.values(fields)
 		.filter(({ ref }) => ref)
