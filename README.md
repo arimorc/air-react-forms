@@ -4,12 +4,12 @@ A react-based library that helps you create controlled forms using hooks.
 
 * [Getting started](#getting-started)
 * [Usage examples](#usage-examples)
-	* [Field validation](#using-field-validation)
-	* [Displaying validation error messages](#displaying-validation-error-messages)
-	* [Accessing the form's data](#accessing-the-forms-data)
-	* [Toggle fields on and off](#toggle-fields-on-and-off)
-	* [Using dynamic field arrays](#Using-dynamic-field-arrays)
-	* [Using checkbox groups](#Using-checkbox-groups)
+  * [Field validation](#using-field-validation)
+  * [Displaying validation error messages](#displaying-validation-error-messages)
+  * [Accessing the form's data](#accessing-the-forms-data)
+  * [Toggle fields on and off](#toggle-fields-on-and-off)
+  * [Using dynamic field arrays](#Using-dynamic-field-arrays)
+  * [Using checkbox groups](#Using-checkbox-groups)
 * [API reference](#api-reference)
 
 --- 
@@ -20,20 +20,20 @@ We have a lot of examples on how to use the various features in the dedicated [w
 import { useForm, FormProvider } from 'air-react-forms';
 
 const basicForm = () => {
-	const { formContext, handleSubmit, register } = useForm();
-	const myInputFieldData = { id: 'firstname', name: 'firstname', defaultalue: 'John' };
+  const { formContext, handleSubmit, register } = useForm();
+  const myInputFieldData = { id: 'firstname', name: 'firstname', defaultalue: 'John' };
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(console.log)}>
-				<>
-					<label htmlFor="firstname">Firstname</label>
-					<input id="firstname" {...register(myInputFieldData)} />
-				</>
-				<input type="submit">Submit</input>
-			</form>
-		</FormProvider>
-	)
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        <>
+          <label htmlFor="firstname">Firstname</label>
+          <input id="firstname" {...register(myInputFieldData)} />
+        </>
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
 };
 ```
 
@@ -61,25 +61,25 @@ const validationMethod = (value) => (value.trim().length === 0 ? 'error' : '');
 
 // My form component
 const validatedForm = () => {
-	const { formContext, handleSubmit, register } = useForm();
-	const myInputFieldData = {
-		id: 'firstname',
-		name: 'firstname',
-		defaultalue: 'John',
-		rules: { required: validationMethod }
-	};
+  const { formContext, handleSubmit, register } = useForm();
+  const myInputFieldData = {
+    id: 'firstname',
+    name: 'firstname',
+    defaultalue: 'John',
+    rules: { required: validationMethod }
+  };
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(console.log)}>
-				<>
-					<label htmlFor="firstname">Firstname</label>
-					<input id="firstname" {...register(myInputFieldData)} />
-				</>
-				<input type="submit">Submit</input>
-			</form>
-		</FormProvider>
-	)
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        <>
+          <label htmlFor="firstname">Firstname</label>
+          <input id="firstname" {...register(myInputFieldData)} />
+        </>
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
 };
 ```
 
@@ -102,26 +102,26 @@ const validationMethod = (value) => (value.trim().length === 0 ? 'error' : '');
 
 // My form component
 const validatedForm = () => {
-	const { formContext, formState: { errors } handleSubmit, register } = useForm();
-	const myInputFieldData = {
-		id: 'firstname',
-		name: 'firstname',
-		defaultalue: 'John',
-		rules: { required: validationMethod }
-	};
+  const { formContext, formState: { errors } handleSubmit, register } = useForm();
+  const myInputFieldData = {
+    id: 'firstname',
+    name: 'firstname',
+    defaultalue: 'John',
+    rules: { required: validationMethod }
+  };
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(console.log)}>
-				<>
-					<label htmlFor="firstname">Firstname</label>
-					<input id="firstname" {...register(myInputFieldData)} />
-					{errors.firstname?.required && <span>{errors.firstname.required}</span>}
-				</>
-				<input type="submit">Submit</input>
-			</form>
-		</FormProvider>
-	)
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        <>
+          <label htmlFor="firstname">Firstname</label>
+          <input id="firstname" {...register(myInputFieldData)} />
+          {errors.firstname?.required && <span>{errors.firstname.required}</span>}
+        </>
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
 };
 ```
 
@@ -156,31 +156,31 @@ import { useState } from 'react';
 import { FormProvider, useForm, Validators } from 'air-react-forms';
 
 const myForm = () => {
-	const { formContext, formState: { errors } handleSubmit, register } = useForm();
-	const [formData, setFormData] = useState({});
+  const { formContext, formState: { errors } handleSubmit, register } = useForm();
+  const [formData, setFormData] = useState({});
 
-	const myInputFieldData = {
-		id: 'firstname',
-		name: 'firstname',
-		defaultalue: 'John',
-		rules: { required: Validators.isRequired('please provide a firstname') },
-	};
+  const myInputFieldData = {
+    id: 'firstname',
+    name: 'firstname',
+    defaultalue: 'John',
+    rules: { required: Validators.isRequired('please provide a firstname') },
+  };
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(setFormData)}>
-				<>
-					<label htmlFor="firstname">Firstname</label>
-					<input id="firstname" {...register(myInputFieldData)} />
-					{errors.firstname?.required && <span>{errors.firstname.required}</span>}
-				</>
-				<input type="submit">Submit</input>
-			</form>
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(setFormData)}>
+        <>
+          <label htmlFor="firstname">Firstname</label>
+          <input id="firstname" {...register(myInputFieldData)} />
+          {errors.firstname?.required && <span>{errors.firstname.required}</span>}
+        </>
+        <input type="submit">Submit</input>
+      </form>
 
-			<h3>Form data</h3>
-			<pre>{JSON.stringify(formData, null, 2)}</pre>
-		</FormProvider>
-	)
+      <h3>Form data</h3>
+      <pre>{JSON.stringify(formData, null, 2)}</pre>
+    </FormProvider>
+  )
 };
 ```
 
@@ -195,31 +195,31 @@ import { useState } from 'react';
 import { FormProvider, useForm, Validators } from 'air-react-forms';
 
 const myForm = () => {
-	const { formContext, formState: { errors } handleSubmit, register } = useForm();
-	const [toggleFieldDisplay, setToggleFieldDisplay] = useState(false);
+  const { formContext, formState: { errors } handleSubmit, register } = useForm();
+  const [toggleFieldDisplay, setToggleFieldDisplay] = useState(false);
 
-	const myInputFieldData = {
-		id: 'firstname',
-		name: 'firstname',
-		defaultalue: 'John',
-		rules: { required: Validators.isRequired('please provide a firstname') },
-	};
+  const myInputFieldData = {
+    id: 'firstname',
+    name: 'firstname',
+    defaultalue: 'John',
+    rules: { required: Validators.isRequired('please provide a firstname') },
+  };
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(console.log)}>
-				{toggle && (
-					<>
-						<label htmlFor="firstname">Firstname</label>
-						<input {...register(myInputFieldData)} />
-						{errors.firstname?.required && <span>{errors.firstname.required}</span>}
-					</>
-				)}
-				<button type="button" onClick={() => setToggleFieldDisplay(!toggleFieldDisplay)}>toggle</button>
-				<input type="submit">Submit</input>
-			</form>
-		</FormProvider>
-	)
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        {toggle && (
+          <>
+            <label htmlFor="firstname">Firstname</label>
+            <input {...register(myInputFieldData)} />
+            {errors.firstname?.required && <span>{errors.firstname.required}</span>}
+          </>
+        )}
+        <button type="button" onClick={() => setToggleFieldDisplay(!toggleFieldDisplay)}>toggle</button>
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
 };
 ```
 
@@ -234,53 +234,53 @@ Sometimes, you may need to let users control the amount of inputs available (for
 import { FormProvider, useFieldArray, useForm, Validators } from 'air-react-forms';
 
 const myForm = () => {
-	const { formContext, formState: { errors }, handleSubmit } = useForm();
+  const { formContext, formState: { errors }, handleSubmit } = useForm();
 
-	const { append fields, register, remove } = useFieldArray({
-		name: 'phoneNumbers',
-		rules: { required: Validators.isRequired('please provide a phone number.') },
-	}, formContext);
+  const { append fields, register, remove } = useFieldArray({
+    name: 'phoneNumbers',
+    rules: { required: Validators.isRequired('please provide a phone number.') },
+  }, formContext);
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(console.log)}>
-				<fieldset>
-					<legend>Phone numbers</legend>
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        <fieldset>
+          <legend>Phone numbers</legend>
 
-					{fields.map((field) => (
-						<Fragment key={field.id}>
-							<label htmlFor={field.id}>{field.name}</label>
-							<div style={{ display: 'flex' }}>
-								<input {...register(field)} />
-								<button type="button" onClick={() => remove(field)}>remove</button>
-							</div>
-							{errors.phoneNumbers?.[field.name]?.required && <span>{errors.phoneNumbers?.[field.name]?.required}</span>}
-						</Fragment>
-					))}
+          {fields.map((field) => (
+            <Fragment key={field.id}>
+              <label htmlFor={field.id}>{field.name}</label>
+              <div style={{ display: 'flex' }}>
+                <input {...register(field)} />
+                <button type="button" onClick={() => remove(field)}>remove</button>
+              </div>
+              {errors.phoneNumbers?.[field.name]?.required && <span>{errors.phoneNumbers?.[field.name]?.required}</span>}
+            </Fragment>
+          ))}
 
-					<button type="button" onClick={append}>Add field</button>
-				</fieldset>
+          <button type="button" onClick={append}>Add field</button>
+        </fieldset>
 
-				<input type="submit">Submit</input>
-			</form>
-		</FormProvider>
-	)
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
 };
 ```
 
 The result forwarded to you submit callback method will have the following shape
 ```js
 {
-	fieldArrayName: [
-		fieldArrayInput1Value,
-		fieldArrayInput2Value,
-		...,
-	],
-	phoneNumbers: [
-		0123456789,
-		1234567890,
-		...
-	]
+  fieldArrayName: [
+    fieldArrayInput1Value,
+    fieldArrayInput2Value,
+    ...,
+  ],
+  phoneNumbers: [
+    0123456789,
+    1234567890,
+    ...
+  ]
 }
 ```
 
@@ -293,43 +293,43 @@ For instance, imagine you're building a form for a fast food delivery app, where
 import { FormProvider, useCheckboxGroup, useForm, Validators } from 'air-react-forms';
 
 const myForm = () => {
-	const { formContext, formState: { errors }, handleSubmit } = useForm();
+  const { formContext, formState: { errors }, handleSubmit } = useForm();
 
-	const { register: registerCheckbox } = useCheckboxGroup({
-		name: 'toppings',
-		rules: {
-			maxChecked: Validators.hasMaxChecked(3, 'You can only select up to 3 toppings'),
-		},
-	}, formContext);
+  const { register: registerCheckbox } = useCheckboxGroup({
+    name: 'toppings',
+    rules: {
+      maxChecked: Validators.hasMaxChecked(3, 'You can only select up to 3 toppings'),
+    },
+  }, formContext);
 
-	return (
-		<FormProvider context={formContext}>
-			<form onSubmit={handleSubmit(console.log)}>
-				<fieldset>
-					<legend>Toppings</legend>
-					<div>
-						<label htmlFor="toppings-pepperoni">Pepperoni</label>
-						<input {...registerCheckbox({ value: 'pepperoni' })} />
-					</div>
-					<div>
-						<label htmlFor="toppings-mushrooms">Mushrooms</label>
-						<input {...registerCheckbox({ value: 'mushrooms' })} />
-					</div>
-					<div>
-						<label htmlFor="toppings-jalapeños">Jalapeños</label>
-						<input {...registerCheckbox({ value: 'jalapeños' })} />
-					</div>
-					<div>
-						<label htmlFor="toppings-olives">Olives</label>
-						<input {...registerCheckbox({ value: 'olives' })} />
-					</div>
-					{errors.toppings?.maxChecked && <span>{errors.toppings?.maxChecked}</span>}
-				</fieldset>
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        <fieldset>
+          <legend>Toppings</legend>
+          <div>
+            <label htmlFor="toppings-pepperoni">Pepperoni</label>
+            <input {...registerCheckbox({ value: 'pepperoni' })} />
+          </div>
+          <div>
+            <label htmlFor="toppings-mushrooms">Mushrooms</label>
+            <input {...registerCheckbox({ value: 'mushrooms' })} />
+          </div>
+          <div>
+            <label htmlFor="toppings-jalapeños">Jalapeños</label>
+            <input {...registerCheckbox({ value: 'jalapeños' })} />
+          </div>
+          <div>
+            <label htmlFor="toppings-olives">Olives</label>
+            <input {...registerCheckbox({ value: 'olives' })} />
+          </div>
+          {errors.toppings?.maxChecked && <span>{errors.toppings?.maxChecked}</span>}
+        </fieldset>
 
-				<input type="submit">Submit</input>
-			</form>
-		</FormProvider>
-	)
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
 };
 ```
 
@@ -338,17 +338,17 @@ const myForm = () => {
 The result forwarded to you submit callback method will have the following shape
 ```js
 {
-	checkboxGroupName: {
-		first_checkbox_value: true|false,
-		second_checkbox_value: true|false,
-		...,
-	},
-	toppings: {
-		pepperoni: false,
-		mushrooms: true,
-		jalapeños: true,
-		olives: true,
-	}
+  checkboxGroupName: {
+    first_checkbox_value: true|false,
+    second_checkbox_value: true|false,
+    ...,
+  },
+  toppings: {
+    pepperoni: false,
+    mushrooms: true,
+    jalapeños: true,
+    olives: true,
+  }
 }
 ```
 
