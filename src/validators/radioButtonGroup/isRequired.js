@@ -25,7 +25,7 @@ const isRequired = (message) => (radioButtonGroupRef) => {
 		.filter(({ ref }) => ref)
 		.reduce((acc, { ref: { checked } }) => acc + (checked ? 1 : 0), 0);
 
-	return checkedAmount >= 1 ? '' : message;
+	return checkedAmount > 0 ? '' : message;
 };
 
 export default isRequired;
