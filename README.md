@@ -21,7 +21,7 @@ import { useForm, FormProvider } from 'air-react-forms';
 
 const basicForm = () => {
   const { formContext, handleSubmit, register } = useForm();
-  const myInputFieldData = { id: 'firstname', name: 'firstname', defaultalue: 'John' };
+  const myInputFieldData = { id: 'firstname', name: 'firstname', defaultValue: 'John' };
 
   return (
     <FormProvider context={formContext}>
@@ -83,14 +83,14 @@ const validatedForm = () => {
 };
 ```
 
-With this little addition to our component, users won't be able to submit the form until the *firstname* input doesn't pass the validation check.
+With this little addition to our component, users won't be able to submit the form until the *firstname* input passes the validation check.
 
 > <u>Note:</u> We provide a number of premade **validation methods** which you can learn more about in the [dedicated section](LINK-TO-VALIDATORS-DOC).
 
 <br />
 
 ### Displaying validation error messages
-Now that we made sure our form can't be submitted unless the *firstname* input hasn't been filled, we may want to explain to our users **why** the form won't submit. Luckily, the `useForm` hook provides a `formState` object, which contains the validation error messages from the latest checks :
+Now that we made sure our form can't be submitted until the *firstname* input has been filled, we may want to explain to our users **why** the form won't submit. Luckily, the `useForm` hook provides a `formState` object, which contains the validation error messages from the latest checks :
 
 Let's say I want to make my `firstname` field required, I can do it like this :
 
@@ -102,7 +102,7 @@ const validationMethod = (value) => (value.trim().length === 0 ? 'error' : '');
 
 // My form component
 const validatedForm = () => {
-  const { formContext, formState: { errors } handleSubmit, register } = useForm();
+  const { formContext, formState: { errors }, handleSubmit, register } = useForm();
   const myInputFieldData = {
     id: 'firstname',
     name: 'firstname',
@@ -133,8 +133,8 @@ Now, whenever our users ✨ forget ✨ to fill the **only field in the form**, t
 ### Accessing the form's data
 Until now, we've only used a blatantly useless `console.log` method as our form's onSubmit. Let's take a better look at how to use the `handleSubmit` method.
 
-The `handleSubmit` method take a callback value parameter, which will be called after a complete form validation has been made and no error has been generated.
-The callback method parameter will be provided the form's data in the following format : 
+The `handleSubmit` method takes a callback value parameter, which will be called after a complete form validation has been made and no error has been generated. The callback method parameter will receive the form's data in the following format :
+
 ```js
 {
   input_name: inputValue,
@@ -156,7 +156,7 @@ import { useState } from 'react';
 import { FormProvider, useForm, Validators } from 'air-react-forms';
 
 const myForm = () => {
-  const { formContext, formState: { errors } handleSubmit, register } = useForm();
+  const { formContext, formState: { errors }, handleSubmit, register } = useForm();
   const [formData, setFormData] = useState({});
 
   const myInputFieldData = {
@@ -195,7 +195,7 @@ import { useState } from 'react';
 import { FormProvider, useForm, Validators } from 'air-react-forms';
 
 const myForm = () => {
-  const { formContext, formState: { errors } handleSubmit, register } = useForm();
+  const { formContext, formState: { errors }, handleSubmit, register } = useForm();
   const [toggleFieldDisplay, setToggleFieldDisplay] = useState(false);
 
   const myInputFieldData = {
@@ -236,7 +236,7 @@ import { FormProvider, useFieldArray, useForm, Validators } from 'air-react-form
 const myForm = () => {
   const { formContext, formState: { errors }, handleSubmit } = useForm();
 
-  const { append fields, register, remove } = useFieldArray({
+  const { append, fields, register, remove } = useFieldArray({
     name: 'phoneNumbers',
     rules: { required: Validators.isRequired('please provide a phone number.') },
   }, formContext);
@@ -268,7 +268,8 @@ const myForm = () => {
 };
 ```
 
-The result forwarded to you submit callback method will have the following shape
+The result forwarded to your submit callback method will have the following shape :
+
 ```js
 {
   fieldArrayName: [
@@ -277,8 +278,8 @@ The result forwarded to you submit callback method will have the following shape
     ...,
   ],
   phoneNumbers: [
-    0123456789,
-    1234567890,
+    '0123456789',
+    '1234567890',
     ...
   ]
 }
@@ -335,7 +336,7 @@ const myForm = () => {
 
 > <u>Note:</u> Validation rules provided to the `useCheckboxGroup` hook are applied to the group **as a whole**, not on each checkbox individually.
 
-The result forwarded to you submit callback method will have the following shape
+The result forwarded to your submit callback method will have the following shape
 ```js
 {
   checkboxGroupName: {
