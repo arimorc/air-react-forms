@@ -53,7 +53,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules =
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {string} checkboxValue The name under which the input's ref has been registered.
+	 * @param {string} checkboxValue The value under which the input's ref has been registered.
 	 */
 	const unregisterCheckbox = useCallback((checkboxValue) => {
 		if (fieldsRef.current[checkboxGroupName] && fieldsRef.current[checkboxGroupName][checkboxValue]) {
@@ -98,7 +98,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules =
 
 		/**
 		 * Saves the reference to the {@link fieldsRef} object.
-		 * 	If it is its first registration call, we simply register its name, id, defaultChecked and options.
+		 * 	If it is its first registration call, we simply register the provided data.
 		 *	If it has already been registered (eg: the form has been re-rendered), we simply update the reference
 		 *		to the input, without overriding the rest.
 		 */
@@ -117,7 +117,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules =
 
 		/**
 		 * These are the props to pass down to the input when it gets rendered.
-		 *	it contains the provided props with unique id and name, alongside a
+		 *	it contains the provided props with unique id and value, alongside a
 		 *	ref callback method, allowing us to properly manage ref handling.
 		 */
 		const fieldProps = {

@@ -6,6 +6,7 @@ import CheckboxGroupTestForm from '../testUtils/CheckboxGroupTestForm';
 import FieldArrayTestForm from '../testUtils/FieldArrayTestForm';
 import { useForm } from '../../src';
 import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
+import RadioButtonGroupTestForm from '../testUtils/RadioButtonGroupTestForm';
 
 describe('useForm hook', () => {
 	let sut;
@@ -34,6 +35,7 @@ describe('useForm hook', () => {
 					validateField: expect.any(Function),
 					validateFieldArrayInput: expect.any(Function),
 					validateCheckboxGroup: expect.any(Function),
+					validateRadioButtonGroup: expect.any(Function),
 				},
 				formState: expect.any(Object),
 				getFieldsRefs: expect.any(Function),
@@ -43,10 +45,6 @@ describe('useForm hook', () => {
 				register: expect.any(Function),
 				validateFieldArray: expect.any(Function),
 				validateField: expect.any(Function),
-				unitTestingExports: {
-					getFieldArrayValues: expect.any(Function),
-					validate: expect.any(Function),
-				},
 			};
 
 			expect(sut).toMatchObject(expectedResult);
@@ -207,6 +205,39 @@ describe('useForm hook', () => {
 		});
 	});
 
+	describe('getRadioButtonGroupValue', () => {
+		it('should return the value of the checked input', async () => {
+			const formRef = createRef();
+			const radioButtonGroupName = 'dummy_radiobutton_group';
+			const defaultValue = 'two';
+
+			await act(async () => {
+				render(
+					<RadioButtonGroupTestForm radioButtonGroupName={radioButtonGroupName} defaultValue={defaultValue} ref={formRef} />
+				);
+			});
+			const expectedResult = [radioButtonGroupName, defaultValue];
+			const actualResult = formRef.current.getRadioButtonGroupValue(formRef.current.getContext().fieldsRef.current[radioButtonGroupName]);
+
+			expect(actualResult).toStrictEqual(expectedResult);
+		});
+
+		it('should return undefined if no input is checked', async () => {
+			const formRef = createRef();
+			const radioButtonGroupName = 'dummy_radiobutton_group';
+
+			await act(async () => {
+				render(
+					<RadioButtonGroupTestForm radioButtonGroupName={radioButtonGroupName} ref={formRef} />
+				);
+			});
+			const expectedResult = [radioButtonGroupName, undefined];
+			const actualResult = formRef.current.getRadioButtonGroupValue(formRef.current.getContext().fieldsRef.current[radioButtonGroupName]);
+
+			expect(actualResult).toStrictEqual(expectedResult);
+		});
+	});
+
 	describe('getFormValues', () => {
 		it('should return all controlled fields\' values bundled into a single object', () => {
 			const dummyFormFieldsRefs = [
@@ -263,6 +294,23 @@ describe('useForm hook', () => {
 			});
 
 			const expectedResult = { [checkboxGroupName]: defaultValues };
+			const actualResult = formRef.current.getContext().getFormValues();
+
+			expect(actualResult).toStrictEqual(expectedResult);
+		});
+
+		it('should return values of all controlled fields, including radioButtonGroups\' inputs\'', async () => {
+			const formRef = createRef();
+			const radioButtonGroupName = 'dummy_radiobutton_group';
+			const defaultValue = 'two';
+
+			await act(async () => {
+				render(
+					<RadioButtonGroupTestForm radioButtonGroupName={radioButtonGroupName} defaultValue={defaultValue} ref={formRef} />
+				);
+			});
+
+			const expectedResult = { [radioButtonGroupName]: defaultValue };
 			const actualResult = formRef.current.getContext().getFormValues();
 
 			expect(actualResult).toStrictEqual(expectedResult);
@@ -718,6 +766,40 @@ describe('useForm hook', () => {
 				errors: {
 					...initialFormStateValue.errors,
 					[checkboxGroupName]: { dummy: 'dummy_error_message' },
+				},
+			};
+
+			expect(initialFormStateValue).toMatchObject(expectedInitialState);
+			expect(formRef.current.getContext().formStateRef.current).toMatchObject(expectedUpdatedState);
+		});
+	});
+
+	describe('validateRadioButtonGroup', () => {
+		it('should update formState.errors field for the specified radioButtonGroup with new validation results.', async () => {
+			const formRef = createRef();
+			const radioButtonGroupName = 'dummy-radiobutton-group';
+			const dummyValidator = jest.fn().mockReturnValue('dummy_error_message');
+
+			let initialFormStateValue;
+
+			await act(async () => {
+				render(
+					<RadioButtonGroupTestForm radioButtonGroupName={radioButtonGroupName} validationRules={{ dummy: dummyValidator }} ref={formRef} />
+				);
+
+				initialFormStateValue = JSON.parse(JSON.stringify({ ...formRef.current.getContext().formStateRef.current }));
+				formRef.current.getContext().validateRadioButtonGroup(true)(radioButtonGroupName);
+			});
+
+			const expectedInitialState = {
+				errors: {},
+			};
+
+			const expectedUpdatedState = {
+				...initialFormStateValue,
+				errors: {
+					...initialFormStateValue.errors,
+					[radioButtonGroupName]: { dummy: 'dummy_error_message' },
 				},
 			};
 

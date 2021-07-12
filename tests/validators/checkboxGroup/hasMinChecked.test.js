@@ -1,5 +1,5 @@
-import { hasMinChecked } from '../../src/validators';
-import logger from '../../src/utils/logger';
+import { hasMinChecked } from '../../../src/validators';
+import logger from '../../../src/utils/logger';
 
 describe('hasMinChecked', () => {
 	afterEach(() => {

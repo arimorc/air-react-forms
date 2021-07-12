@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { useCheckboxGroup, useFieldArray, useForm, Validators, FormProvider } from 'air-react-forms';
+import { useCheckboxGroup, useFieldArray, useRadioButtonGroup, useForm, Validators, FormProvider } from 'air-react-forms';
 
 /**
  * @name SimpleForm
@@ -25,6 +25,13 @@ const SimpleForm = () => {
 		rules: {
 			maxChecked: Validators.hasMaxChecked(3, 'You can only select up to 3 options'),
 			minChecked: Validators.hasMinChecked(1, 'Please select at least one option'),
+		},
+	}, formContext);
+
+	const { register: registerRadioButton } = useRadioButtonGroup({
+		name: 'delivery',
+		rules: {
+			required: Validators.rdbGroupIsRequired('Please select a delivery method'),
 		},
 	}, formContext);
 
@@ -69,12 +76,6 @@ const SimpleForm = () => {
 		checkbox1: {
 			name: 'checkbox1',
 			id: 'checkbox1',
-			rules: {},
-			type: 'checkbox',
-		},
-		checkbox2: {
-			name: 'checkbox2',
-			id: 'checkbox2',
 			rules: {},
 			type: 'checkbox',
 		},
@@ -137,10 +138,6 @@ const SimpleForm = () => {
 					<label htmlFor="checkbox1">checkbox 1</label>
 					<input type="checkbox" {...register(formFields.checkbox1)} />
 				</>
-				<>
-					<label htmlFor="checkbox2">checkbox 2</label>
-					<input type="checkbox" {...register(formFields.checkbox2)} />
-				</>
 
 				<fieldset style={{ marginTop: '2em', marginBottom: '2em' }}>
 					<legend>Checkbox group</legend>
@@ -163,6 +160,21 @@ const SimpleForm = () => {
 					<div>
 						{errors.proteinSource?.minChecked && <span>{errors.proteinSource?.minChecked}</span>}
 						{errors.proteinSource?.maxChecked && <span>{errors.proteinSource?.maxChecked}</span>}
+					</div>
+				</fieldset>
+
+				<fieldset style={{ marginTop: '2em', marginBottom: '2em' }}>
+					<legend>Delivery method</legend>
+					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
+						<input {...registerRadioButton({ value: 'delivery' })} />
+						<label htmlFor="delivery-delivery" style={{ margin: 0 }}>Delivery</label>
+					</div>
+					<div style={{ display: 'flex', alignItems: 'center', gridGap: '12px' }}>
+						<input {...registerRadioButton({ value: 'takeout' })} />
+						<label htmlFor="delivery-takeout" style={{ margin: 0 }}>Takeout</label>
+					</div>
+					<div>
+						{errors.delivery?.required && <span>{errors.delivery?.required}</span>}
 					</div>
 				</fieldset>
 
