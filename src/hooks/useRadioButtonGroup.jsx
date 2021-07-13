@@ -65,7 +65,7 @@ const useRadioButtonGroup = ({ defaultValue = undefined, name: radioButtonGroupN
 	/**
 	 * @function
 	 * @name register
-	 * @description Method used to register a radio typed input to its parent group and form. It will its name, options and a ref callback method.
+	 * @description Method used to register a radio typed input to its parent group and form. It return will its name, options and a ref callback method.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
