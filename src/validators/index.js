@@ -1,8 +1,9 @@
+import hasMinChecked from './checkboxGroup/hasMinChecked';
+import hasMaxChecked from './checkboxGroup/hasMaxChecked';
 import isRequired from './isRequired';
-import hasMinChecked from './hasMinChecked';
 import hasMinLength from './hasMinLength';
-import hasMaxChecked from './hasMaxChecked';
 import hasMaxLength from './hasMaxLength';
+import rdbGroupIsRequired from './radioButtonGroup/isRequired';
 
 export {
 	isRequired,
@@ -10,4 +11,5 @@ export {
 	hasMaxLength,
 	hasMinChecked,
 	hasMinLength,
+	rdbGroupIsRequired,
 };

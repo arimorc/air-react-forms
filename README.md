@@ -10,6 +10,7 @@ A react-based library that helps you create controlled forms using hooks.
   * [Toggle fields on and off](#toggle-fields-on-and-off)
   * [Using dynamic field arrays](#Using-dynamic-field-arrays)
   * [Using checkbox groups](#Using-checkbox-groups)
+  * [Using radio button groups](#Using-radio-button-groups)
 * [API reference](#api-reference)
 
 --- 
@@ -351,6 +352,47 @@ The result forwarded to your submit callback method will have the following shap
     olives: true,
   }
 }
+```
+
+---
+
+### Using radio button groups
+To use radio buttons, you can use the `useRadioButtonGroup` hook, which allows you to apply validation on radio buttons as a group. Here's an example of how to achieve that :
+
+```js
+import { FormProvider, useRadioButtonGroup, useForm, Validators } from 'air-react-forms';
+
+const myForm = () => {
+  const { formContext, formState: { errors }, handleSubmit } = useForm();
+
+  const { register } = useRadioButtonGroup({
+    name: 'deliveryMethod',
+    rules: {
+      required: Validators.rdbGroupIsRequired('Please select a delivery method'),
+    },
+  }, formContext);
+
+  return (
+    <FormProvider context={formContext}>
+      <form onSubmit={handleSubmit(console.log)}>
+        <fieldset>
+          <legend>Delivery method</legend>
+          <div>
+            <label htmlFor="deliveryMethod-delivery">Delivery</label>
+            <input {...register({ value: 'delivery' })} />
+          </div>
+          <div>
+            <label htmlFor="deliveryMethod-takeout">Take out</label>
+            <input {...register({ value: 'takeout' })} />
+          </div>
+          {errors.deliveryMethod?.required && <span>{errors.deliveryMethod?.required}</span>}
+        </fieldset>
+
+        <input type="submit">Submit</input>
+      </form>
+    </FormProvider>
+  )
+};
 ```
 
 ---

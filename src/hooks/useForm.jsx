@@ -92,7 +92,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
-	 * @getCheckboxGroupValues
+	 * @name getCheckboxGroupValues
 	 * @description Returns the values of a checkbox group in a format that can be used with Object.fromEntries().
 	 *
 	 * @author Timothée Simon-Franza
@@ -117,6 +117,27 @@ const useForm = ({ validateOnChange = false } = {}) => {
 
 	/**
 	 * @function
+	 * @name getRadioButtonGroupValue
+	 * @description Returns the checked value inside the group in a format that can be used with Object.fromEntries().
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {object} radioButtonGroup The radio button group reference to retrieve the value from.
+	 *
+	 * @return {array}
+	 */
+	const getRadioButtonGroupValue = (radioButtonGroup) => {
+		const { isRadioButtonGroup, name, rules, ...fields } = radioButtonGroup;
+
+		const values = Object.values(fields)
+			.filter(({ ref }) => ref)
+			.filter(({ ref: { checked } }) => checked);
+
+		return [name, values[0]?.ref.value || undefined];
+	};
+
+	/**
+	 * @function
 	 * @name getFormValues
 	 * @description Returns the value of all controlled fields as an object.
 	 *
@@ -130,13 +151,17 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	const getFormValues = useCallback(() => {
 		const formValues = Object.values(inputsRefs.current)
 			.filter((ref) => ref) // To ignore fields that are yet to be registered or garbage collected.
-			.map(({ isFieldArray, isCheckboxGroup, ...fieldRef }) => {
+			.map(({ isFieldArray, isCheckboxGroup, isRadioButtonGroup, ...fieldRef }) => {
 				if (isFieldArray) {
 					return getFieldArrayValues(fieldRef);
 				}
 
 				if (isCheckboxGroup) {
 					return getCheckboxGroupValues(fieldRef);
+				}
+
+				if (isRadioButtonGroup) {
+					return getRadioButtonGroupValue(fieldRef);
 				}
 
 				return getFieldValue(fieldRef);
@@ -283,7 +308,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @author Timothée Simon-Franza
 	 *
 	 * @param {string}	checkboxGroupName	The name of the checkbox group to perform validation on.
-	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done
+	 * @param {bool}	shouldUpdateState	Whether the validation should update the form's state object to match the ref version after validation is done.
 	 */
 	const validateCheckboxGroup = useCallback((shouldUpdateState) => (checkboxGroupName) => {
 		if (!formStateRef.current.errors[checkboxGroupName]) {
@@ -300,6 +325,37 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		});
 
 		formStateRef.current.errors[checkboxGroupName] = Object.fromEntries(Object.entries(fieldErrors));
+
+		if (shouldUpdateState) {
+			syncStateWithRef();
+		}
+	}, [formStateRef, syncStateWithRef]);
+
+	/**
+	 * @function
+	 * @name validateRadioButtonGroup
+	 * @description A callback method used to perform validation checks on a specific radio button group.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {string}	radioButtonGroupName	The name of the radio button group to perform validation on.
+	 * @param {bool}	shouldUpdateState		Whether the validation should update the form's state object to match the ref version after validation is done.
+	 */
+	const validateRadioButtonGroup = useCallback((shouldUpdateState) => (radioButtonGroupName) => {
+		if (!formStateRef.current.errors[radioButtonGroupName]) {
+			formStateRef.current.errors[radioButtonGroupName] = {};
+		}
+
+		const fieldErrors = {};
+
+		const radioButtonGroupRef = inputsRefs.current?.[radioButtonGroupName];
+		const { isRadioButtonGroup, name, rules, ...fields } = radioButtonGroupRef;
+
+		Object.entries(rules).forEach(([rule, validator]) => {
+			fieldErrors[rule] = validator(fields) || undefined;
+		});
+
+		formStateRef.current.errors[radioButtonGroupName] = Object.fromEntries(Object.entries(fieldErrors));
 
 		if (shouldUpdateState) {
 			syncStateWithRef();
@@ -346,18 +402,20 @@ const useForm = ({ validateOnChange = false } = {}) => {
 	 * @author Timothée Simon-Franza
 	 */
 	const validateForm = useCallback(() => {
-		Object.values(inputsRefs.current).forEach(({ isCheckboxGroup, isFieldArray, name }) => {
+		Object.values(inputsRefs.current).forEach(({ isCheckboxGroup, isFieldArray, isRadioButtonGroup, name }) => {
 			if (isFieldArray) {
 				validateFieldArray(false)(name);
 			} else if (isCheckboxGroup) {
 				validateCheckboxGroup(false)(name);
+			} else if (isRadioButtonGroup) {
+				validateRadioButtonGroup(false)(name);
 			} else {
 				validateField(false)(name);
 			}
 		});
 
 		syncStateWithRef();
-	}, [syncStateWithRef, validateCheckboxGroup, validateField, validateFieldArray]);
+	}, [syncStateWithRef, validateCheckboxGroup, validateField, validateFieldArray, validateRadioButtonGroup]);
 
 	/**
 	 * @function
@@ -543,6 +601,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			validateField: validateField(true),
 			validateFieldArrayInput,
 			validateCheckboxGroup,
+			validateRadioButtonGroup,
 		},
 		formState,
 		getFieldsRefs,
@@ -556,6 +615,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 		unitTestingExports: {
 			getCheckboxGroupValues,
 			getFieldArrayValues,
+			getRadioButtonGroupValue,
 			validate,
 		},
 	};
