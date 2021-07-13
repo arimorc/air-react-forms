@@ -1,5 +1,5 @@
-import { hasMaxChecked } from '../../src/validators';
-import logger from '../../src/utils/logger';
+import { hasMaxChecked } from '../../../src/validators';
+import logger from '../../../src/utils/logger';
 
 describe('hasMaxChecked', () => {
 	afterEach(() => {
