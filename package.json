@@ -34,7 +34,7 @@
 		"install-all": "yarn install && cd playground && yarn install",
 		"test": "jest",
 		"eslint": "eslint --color --ext js,jsx src/ tests/ playground/src/",
-		"release": "npm login && np",
+		"release": "npm login && yarn login && np",
 		"prepare": "yarn build",
 		"prepack": "yarn build"
 	},
