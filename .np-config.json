@@ -1,5 +1,7 @@
 {
     "branch": "main",
+	"anyBranch": true,
 	"yarn": true,
-	"contents": "dist"
+	"contents": "dist",
+	"2fa": false
 }
