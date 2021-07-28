@@ -35,8 +35,7 @@
 		"test": "jest",
 		"eslint": "eslint --color --ext js,jsx src/ tests/ playground/src/",
 		"release": "npm login && yarn login && np",
-		"prepare": "yarn build",
-		"prepack": "yarn build"
+		"prepack": "sleep 1 && yarn build"
 	},
 	"eslintConfig": {
 		"extends": [
