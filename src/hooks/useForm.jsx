@@ -602,6 +602,7 @@ const useForm = ({ validateOnChange = false } = {}) => {
 			validateFieldArrayInput,
 			validateCheckboxGroup,
 			validateRadioButtonGroup,
+			register,
 		},
 		formState,
 		getFieldsRefs,
