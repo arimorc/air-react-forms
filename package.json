@@ -2,7 +2,7 @@
 	"name": "air-react-forms",
 	"description": "A react library for forms validation",
 	"author": "RolRom",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/arimorc/air-react-forms/"
@@ -35,7 +35,8 @@
 		"test": "jest",
 		"eslint": "eslint --color --ext js,jsx src/ tests/ playground/src/",
 		"release": "npm login && yarn login && np",
-		"prepack": "sleep 1 && yarn build"
+		"prepack": "yarn build",
+		"postversion": "yarn build"
 	},
 	"eslintConfig": {
 		"extends": [
