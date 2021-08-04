@@ -72,10 +72,11 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules =
 	 *
 	 * @param {string}	value				The value of the input to register.
 	 * @param {bool}	[defaultChecked]	Whether the checkbox should be checked by default.
+	 * @param {bool}	[shouldRerender]	Whether the registration should re-render the current component once it's done, defaults to true.
 	 *
 	 * @returns {object} The props to provide to the field instigating the call to this method.
 	 */
-	const register = useCallback(({ value, defaultChecked = false, ...additionalProps } = {}) => {
+	const register = useCallback(({ value, defaultChecked = false, ...additionalProps } = {}, shouldRerender = true) => {
 		if (value === null || value === undefined) {
 			return undefined;
 		}
@@ -143,7 +144,7 @@ const useCheckboxGroup = ({ defaultValues = {}, name: checkboxGroupName, rules =
 		 * 	so that the ref can be properly managed on mount and re-renders. The fields state
 		 *  is used by the form to acknowledge the existence of a field that needs to be rendered.
 		 */
-		if (!fields[value]) {
+		if (shouldRerender && !fields[value]) {
 			setFields({ ...fields, [value]: { id: inputId, value } });
 		}
 
