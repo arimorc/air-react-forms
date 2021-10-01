@@ -8,6 +8,8 @@ module.exports = {
 		'airbnb',
 		'plugin:react/recommended',
 		'plugin:react-hooks/recommended',
+		'plugin:@typescript-eslint/eslint-recommended',
+		'plugin:@typescript-eslint/recommended',
 	],
 	parserOptions: {
 		ecmaFeatures: {
@@ -18,15 +20,21 @@ module.exports = {
 	},
 	plugins: [
 		'react',
+		'@typescript-eslint',
 	],
 	settings: {
 		'import/resolver': {
 			node: {
 				paths: ['src'],
+				extensions: ['.js', '.jsx', '.ts', '.tsx'],
 			},
 		},
 	},
 	rules: {
+		// note you must disable the base rule as it can report incorrect errors
+		'no-use-before-define': 'off',
+		'@typescript-eslint/no-use-before-define': ['error'],
+		'lines-between-class-members': 'off',
 		'import/no-unresolved': [2, { ignore: ['^air-react-forms$'] }],
 		'arrow-parens': ['error', 'always'],
 		'comma-dangle': ['error', {
@@ -45,6 +53,16 @@ module.exports = {
 		}],
 		'react/jsx-indent': ['error', 'tab'],
 		'import/no-cycle': 'error',
+		'import/extensions': [
+			'error',
+			'ignorePackages',
+			{
+				js: 'never',
+				jsx: 'never',
+				ts: 'never',
+				tsx: 'never',
+			},
+		],
 		'max-len': ['warn', 180],
 		'no-console': 'warn',
 		'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 0, maxEOF: 0 }],

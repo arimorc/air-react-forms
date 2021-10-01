@@ -1,4 +1,4 @@
-import useForm from './hooks/useForm';
+import useForm from './hooks/useForm.tsx';
 import useCheckboxGroup from './hooks/useCheckboxGroup';
 import useFieldArray from './hooks/useFieldArray';
 import useRadioButtonGroup from './hooks/useRadioButtonGroup';

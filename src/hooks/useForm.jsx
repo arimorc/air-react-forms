@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import isEmpty from 'lodash.isempty';
+import { isEmpty } from 'lodash';
 import logger from '../utils/logger';
 import { getDefaultValueByInputType, isCheckbox } from '../utils/inputTypeUtils';
 

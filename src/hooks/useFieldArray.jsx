@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import isEqual from 'lodash.isequal';
+import { isEqual } from 'lodash';
 import FormContext from '../FormContext';
 import { getDefaultValueByInputType } from '../utils/inputTypeUtils';
 import logger from '../utils/logger';

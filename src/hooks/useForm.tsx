@@ -1,0 +1,190 @@
+import * as React from 'react';
+import { MutableRefObject, useCallback, useRef, useState } from 'react';
+import { Field, FieldElement, IField, ValidationResults } from 'types/field';
+import { FieldProps, FormData, useFormReturnType } from 'types/useForm';
+
+/**
+ * @name useForm
+ * @returns
+ */
+const useForm = ({ validateOnChange = false } = {}): useFormReturnType => {
+	const fields: MutableRefObject<{ [key: string]: Field }> = useRef({});
+	const formErrorsRef: MutableRefObject<{ [key: string]: ValidationResults }> = useRef({});
+	const [formState, setFormState] = useState({
+		errors: {},
+	});
+
+	/**
+	 * @function
+	 * @name updateFormState
+	 * @description Updates the formState field with the latest data.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	const updateFormState = useCallback(() => {
+		setFormState({ errors: formErrorsRef.current });
+	}, []);
+
+	/**
+	 * @function
+	 * @name validateField
+	 * @description Performs validation checks on the provided field.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {bool}	shouldUpdateFormState	If set to true, the state will be updated after the validation process.
+	 * @param {Field}	field					The field to perform the validation check on.
+	 */
+	const validateField = useCallback((shouldUpdateFormState = false) => (field: Field): void => {
+		if (!fields?.current?.[field.name]) {
+			return;
+		}
+		field.validate();
+		formErrorsRef.current[field.name] = field.errors;
+
+		if (shouldUpdateFormState) {
+			updateFormState();
+		}
+	}, [updateFormState]);
+
+	/**
+	 * @function
+	 * @name registerField
+	 * @description Registers a field's reference.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {Field}			field	The field to update the reference of.
+	 * @param {FieldElement}	ref		The element to update the field's reference with.
+	 */
+	const registerField = useCallback((field: Field, ref: FieldElement): void => {
+		if (field.name) {
+			fields.current[field.name] = field;
+			fields.current[field.name].ref.current = ref;
+			validateField(false)(field);
+		}
+	}, [fields, validateField]);
+
+	/**
+	 * @function
+	 * @name unregisterField
+	 * @description Removes the provided field from the list of controlled fields.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {Field} field The field to remove.
+	 */
+	const unregisterField = useCallback((field: Field): void => {
+		if (fields?.current?.[field.name]) {
+			delete fields.current[field.name];
+		}
+	}, [fields]);
+
+	/**
+	 * @function
+	 * @name register
+	 * @description The method to pass down to a React JSX input to register it in the controlled form.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {IField} fieldData The data to use in order to register the field.
+	 *
+	 * @returns {FieldProps}
+	 */
+	const register = useCallback((fieldData: IField) => {
+		const field = fields?.current?.[fieldData.name] ?? new Field(fieldData);
+
+		if (!fields?.current?.[field.name]) {
+			fields.current[field.name] = field;
+		}
+
+		const returnedProps: FieldProps = {
+			...field,
+			ref: (ref: FieldElement) => (ref ? registerField(field, ref) : unregisterField(field)),
+		};
+
+		if (validateOnChange) {
+			returnedProps.onChange = () => validateField(true)(field);
+		}
+
+		return returnedProps;
+	}, [registerField, unregisterField, validateField, validateOnChange]);
+
+	/**
+	 * @function
+	 * @name getFormValues
+	 * @description Returns the values of all registered fields as an object.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @returns {FormData}
+	 */
+	const getFormValues = useCallback(() => (
+		Object.values(fields.current)
+			.filter((ref) => ref)
+			.reduce((values, field) => ({ ...values, [field.name]: field.value }), {})
+	), []);
+
+	/**
+	 * @function
+	 * @name validateForm
+	 * @description Triggers a validation check on each registered element of the form.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	const validateForm = useCallback(() => {
+		Object.values(fields.current).forEach((field) => {
+			validateField(false)(field);
+		});
+	}, [validateField]);
+
+	/**
+	 * @function
+	 * @name isFormValid
+	 * @description Returns whether or not the form is valid.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @returns {bool} False if one or more fields are invalid. True otherwise.
+	 */
+	const isFormValid = useCallback(() => {
+		const invalidFields = Object.values(fields.current)
+			.reduce((acc, field) => (
+				field.isValid() ? acc : acc + 1
+			), 0);
+
+		return invalidFields === 0;
+	}, []);
+
+	/**
+	 * @function
+	 * @name handleSubmit
+	 * @description A handled method which triggers validation checks on the registered fields and calls the provided callback method if the form is valid.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {Function} callback The method to call if the form is valid.
+	 */
+	const handleSubmit = useCallback((callback: (formData: FormData) => void) => (event: React.FormEvent) => {
+		event?.preventDefault();
+		validateForm();
+
+		if (isFormValid()) {
+			callback(getFormValues());
+		}
+	}, [getFormValues, isFormValid, validateForm]);
+
+	return {
+		formContext: {
+			fields: fields.current,
+			formState,
+			register,
+			getFormValues,
+			isFormValid,
+		},
+		register,
+		handleSubmit,
+	};
+};
+
+export default useForm;

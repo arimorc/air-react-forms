@@ -4,6 +4,8 @@ import external from 'rollup-plugin-peer-deps-external';
 import del from 'rollup-plugin-delete';
 import extensions from 'rollup-plugin-extensions';
 import generatePackageJson from 'rollup-plugin-generate-package-json';
+import typescript from '@rollup/plugin-typescript';
+import commonjs from '@rollup/plugin-commonjs';
 import pkg from './package.json';
 
 export default {
@@ -14,6 +16,9 @@ export default {
 	],
 	plugins: [
 		nodeResolve(),
+		commonjs({
+			include: 'node_modules/**',
+		}),
 		external(),
 		babel({
 			babelHelpers: 'runtime',
@@ -23,9 +28,10 @@ export default {
 		}),
 		del({ targets: ['dist/*'] }),
 		extensions({
-			extensions: ['.jsx', '.js'],
+			extensions: ['.jsx', '.js', '.tsx', '.ts'],
 			resolveIndex: true,
 		}),
+		typescript({ lib: ['es5', 'es6', 'dom'], target: 'es5' }),
 		generatePackageJson({
 			baseContents: {
 				name: pkg.name,

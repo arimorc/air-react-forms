@@ -1,4 +1,4 @@
-import isEqual from 'lodash.isequal';
+import { isEqual } from 'lodash';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import FormContext from '../FormContext';
 import logger from '../utils/logger';
