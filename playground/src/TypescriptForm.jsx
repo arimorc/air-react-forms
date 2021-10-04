@@ -8,9 +8,8 @@ import { useCallback, useState } from 'react';
  * @author Timothée Simon-Franza
  */
 const TypescriptForm = () => {
-	const { formContext: { fields, formState }, register, handleSubmit } = useForm({ validateOnChange: true });
+	const { formContext: { fields }, formState: { errors }, register, handleSubmit } = useForm({ validateOnChange: true });
 
-	console.log(formState.errors);
 	const logFields = useCallback(() => {
 		Object.keys(fields).forEach((fieldName) => {
 			console.log(fieldName, fields[fieldName].value, fields[fieldName].errors);
@@ -41,7 +40,7 @@ const TypescriptForm = () => {
 			type: 'text',
 			rules: {
 				required: Validators.isRequired('This field is required'),
-				customValidator: (value) => (value.trim().length === 0 ? 'custom validator error message' : ''),
+				maxLength: Validators.hasMaxLength(8, 'Please provide a value of 8 or less characters'),
 			},
 		},
 	};
@@ -50,13 +49,19 @@ const TypescriptForm = () => {
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<h2>Simple form (single file)</h2>
 			{toggle && (
-				<>
+				<div>
 					<label htmlFor="firstName">First name</label>
 					<input {...register(formFields.firstName)} />
-				</>
+					{errors.firstName?.required && <span>{errors.firstName.required}</span>}
+					{errors.firstName?.maxLength && <span>{errors.firstName.maxLength}</span>}
+				</div>
 			)}
-			<label htmlFor="lastName">Last name</label>
-			<input {...register(formFields.lastName)} />
+			<div>
+				<label htmlFor="lastName">Last name</label>
+				<input {...register(formFields.lastName)} />
+				{errors.lastName?.required && <span>{errors.lastName.required}</span>}
+				{errors.lastName?.maxLength && <span>{errors.lastName.maxLength}</span>}
+			</div>
 
 			<button type="button" onClick={() => setToggle(!toggle)}>toggle</button>
 			<button type="button" onClick={() => logFields()}>Log fields</button>

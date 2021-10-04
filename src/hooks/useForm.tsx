@@ -1,13 +1,19 @@
 import * as React from 'react';
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { Field, FieldElement, IField, ValidationResults } from 'types/field';
-import { FieldProps, FormData, useFormReturnType } from 'types/useForm';
+import { FieldProps, FormData, UseFormReturnType } from 'types/useForm';
 
 /**
  * @name useForm
- * @returns
+ * @description A hook providing several methods to help controlling forms.
+ *
+ * @author Timothée Simon-Franza
+ *
+ * @param {boolean} [validateOnChange] Whether or not fields should trigger a validation check on change.
+ *
+ * @returns {UseFormReturnType}
  */
-const useForm = ({ validateOnChange = false } = {}): useFormReturnType => {
+const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 	const fields: MutableRefObject<{ [key: string]: Field }> = useRef({});
 	const formErrorsRef: MutableRefObject<{ [key: string]: ValidationResults }> = useRef({});
 	const [formState, setFormState] = useState({
@@ -16,12 +22,12 @@ const useForm = ({ validateOnChange = false } = {}): useFormReturnType => {
 
 	/**
 	 * @function
-	 * @name updateFormState
+	 * @name refreshFormState
 	 * @description Updates the formState field with the latest data.
 	 *
 	 * @author Timothée Simon-Franza
 	 */
-	const updateFormState = useCallback(() => {
+	const refreshFormState = useCallback(() => {
 		setFormState({ errors: formErrorsRef.current });
 	}, []);
 
@@ -32,20 +38,20 @@ const useForm = ({ validateOnChange = false } = {}): useFormReturnType => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {bool}	shouldUpdateFormState	If set to true, the state will be updated after the validation process.
+	 * @param {boolean}	shouldRefreshFormState	If set to true, the state will be updated after the validation process.
 	 * @param {Field}	field					The field to perform the validation check on.
 	 */
-	const validateField = useCallback((shouldUpdateFormState = false) => (field: Field): void => {
+	const validateField = useCallback((shouldRefreshFormState = false) => (field: Field): void => {
 		if (!fields?.current?.[field.name]) {
 			return;
 		}
 		field.validate();
 		formErrorsRef.current[field.name] = field.errors;
 
-		if (shouldUpdateFormState) {
-			updateFormState();
+		if (shouldRefreshFormState) {
+			refreshFormState();
 		}
-	}, [updateFormState]);
+	}, [refreshFormState]);
 
 	/**
 	 * @function
@@ -145,7 +151,7 @@ const useForm = ({ validateOnChange = false } = {}): useFormReturnType => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @returns {bool} False if one or more fields are invalid. True otherwise.
+	 * @returns {boolean} False if one or more fields are invalid. True otherwise.
 	 */
 	const isFormValid = useCallback(() => {
 		const invalidFields = Object.values(fields.current)
@@ -177,11 +183,12 @@ const useForm = ({ validateOnChange = false } = {}): useFormReturnType => {
 	return {
 		formContext: {
 			fields: fields.current,
-			formState,
 			register,
 			getFormValues,
 			isFormValid,
+			refreshFormState,
 		},
+		formState,
 		register,
 		handleSubmit,
 	};

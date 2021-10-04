@@ -4,14 +4,15 @@ export type FormData = {
 	[key: string]: number | string,
 }
 
-export interface useFormReturnType {
+export interface UseFormReturnType {
 	formContext: {
 		fields: { [key: string]: Field },
-		formState: { errors: FormData },
 		getFormValues: () => FormData,
 		isFormValid: () => boolean,
 		register: (field: IField) => void,
+		refreshFormState: () => void,
 	},
+	formState: { errors: FormData },
 	register: (field: IField) => void,
 	handleSubmit: (callback: (formData: FormData) => void) => void,
 }
