@@ -51,6 +51,7 @@ module.exports = {
 			ignoredNodes: ['JSXElement'],
 			SwitchCase: 1,
 		}],
+		'no-underscore-dangle': ['error', { allow: ['_errors'] }],
 		'react/jsx-indent': ['error', 'tab'],
 		'import/no-cycle': 'error',
 		'import/extensions': [
@@ -72,7 +73,7 @@ module.exports = {
 		'prefer-promise-reject-errors': 'off',
 		'react/forbid-prop-types': [1, { forbid: ['any', 'array'] }],
 		'react/jsx-filename-extension': ['error', {
-			extensions: ['.spec.js', '.test.js', '.jsx'],
+			extensions: ['.spec.js', '.test.js', '.test.tsx', '.jsx'],
 		}],
 		'react/jsx-indent-props': [1, 'tab'],
 		'react/jsx-props-no-spreading': ['warn', {

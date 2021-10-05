@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { Field, FieldElement, IField, ValidationResults } from 'types/field';
-import { FieldProps, FormData, UseFormReturnType } from 'types/useForm';
+import { Field, FieldProps, IField } from 'types/field';
+import { FieldElement } from 'types/formElement';
+import { FieldRegistrationData, FormData, UseFormReturnType } from 'types/useForm';
+import { FieldErrors } from 'types/validation';
 
 /**
  * @name useForm
@@ -15,7 +17,9 @@ import { FieldProps, FormData, UseFormReturnType } from 'types/useForm';
  */
 const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 	const fields: MutableRefObject<{ [key: string]: Field }> = useRef({});
-	const formErrorsRef: MutableRefObject<{ [key: string]: ValidationResults }> = useRef({});
+
+	const formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }> = useRef({});
+
 	const [formState, setFormState] = useState({
 		errors: {},
 	});
@@ -93,11 +97,11 @@ const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {IField} fieldData The data to use in order to register the field.
+	 * @param {FieldRegistrationData} fieldData The data to use in order to register the field.
 	 *
 	 * @returns {FieldProps}
 	 */
-	const register = useCallback((fieldData: IField) => {
+	const register = useCallback((fieldData: FieldRegistrationData): FieldProps => {
 		const field = fields?.current?.[fieldData.name] ?? new Field(fieldData);
 
 		if (!fields?.current?.[field.name]) {
@@ -105,7 +109,7 @@ const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 		}
 
 		const returnedProps: FieldProps = {
-			...field,
+			...Field.extractFieldProps(field),
 			ref: (ref: FieldElement) => (ref ? registerField(field, ref) : unregisterField(field)),
 		};
 

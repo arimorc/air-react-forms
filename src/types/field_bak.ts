@@ -1,33 +1,43 @@
 import { createRef, MutableRefObject } from 'react';
 import { isEmpty } from 'lodash';
+import { FieldProps } from './useForm';
+import { ValidationRules, ValidationValue } from './validation';
 
-import { FieldElement, FieldValue, FormElement, IFormElement, InputValue } from './formElement';
-import { FieldRegistrationData } from './useForm';
+export type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
-export interface IField extends IFormElement {
+type FieldValue = number | string | null;
+
+export type FieldErrors = { [key: string]: ValidationValue }
+
+export interface IField {
+	id: string;
+	name: string;
 	ref?: MutableRefObject<FieldElement | undefined>;
+	rules: ValidationRules;
+	errors?: FieldErrors;
 	type?: string;
-	defaultValue?: InputValue;
+	defaultValue?: string | number;
 }
 
-export interface FieldProps extends Omit<Field, 'errors' | 'isValid' | 'ref' | 'value' | 'validate'> {
-	ref: (ref: FieldElement) => void,
-	onChange?: (params?: unknown) => void,
-}
-
-export class Field extends FormElement implements IField {
-	ref?: MutableRefObject<FieldElement | undefined>;
+export class Field implements IField {
+	id: string;
+	name: string;
+	ref: MutableRefObject<FieldElement | undefined>;
+	rules: ValidationRules;
+	errors: FieldErrors;
 	type?: string;
-	defaultValue?: InputValue;
+	defaultValue?: string | number;
 
 	/**
 	 *
-	 * @param field
 	 */
-	constructor(field: FieldRegistrationData) {
-		super(field as Field);
+	constructor(field: IField) {
+		this.name = field.name;
+		this.id = field.id;
 		this.ref = field.ref ?? createRef<FieldElement>();
 		this.type = field.type ?? 'string';
+		this.rules = field.rules ?? {};
+		this.errors = field.errors ?? Object.keys(field.rules).reduce((obj, key) => ({ ...obj, [key]: undefined }), {});
 		this.defaultValue = field.defaultValue ?? '';
 	}
 
@@ -59,6 +69,23 @@ export class Field extends FormElement implements IField {
 	 */
 	get value(): FieldValue | undefined {
 		return this.ref?.current?.value ?? undefined;
+	}
+
+	/**
+	 * @function
+	 * @name isValid
+	 * @description Indicates if the field is valid based on its last validation check.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @returns {boolean} True if no validation error is present, false otherwise.
+	 */
+	isValid = (): boolean => {
+		const foundErrors = Object.values(this.errors).reduce((acc, value) => (
+			value !== undefined ? acc + 1 : acc
+		), 0);
+
+		return foundErrors === 0;
 	}
 
 	/**

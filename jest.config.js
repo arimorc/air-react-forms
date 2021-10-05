@@ -6,7 +6,13 @@ module.exports = {
 	moduleFileExtensions: [
 		'js',
 		'jsx',
+		'ts',
+		'tsx',
 		'json',
+	],
+	modulePathIgnorePatterns: [
+		'<rootDir>/dist',
+		'<rootDir>/playground',
 	],
 	modulePaths: [
 		'<rootDir>',

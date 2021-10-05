@@ -71,6 +71,7 @@
 		"@rollup/plugin-node-resolve": "^11.2.1",
 		"@rollup/plugin-typescript": "^8.2.5",
 		"@types/enzyme": "^3.10.9",
+		"@types/enzyme-adapter-react-16": "^1.0.6",
 		"@types/jest": "^27.0.2",
 		"@types/lodash": "^4.14.175",
 		"@types/react-dom": "^17.0.9",
@@ -93,7 +94,7 @@
 		"rollup-plugin-extensions": "^0.1.0",
 		"rollup-plugin-generate-package-json": "^3.2.0",
 		"rollup-plugin-peer-deps-external": "^2.2.4",
-		"ts-jest": "^27.0.5"
+		"ts-jest": "26.5.6"
 	},
 	"peerDependencies": {
 		"react": "^16.8.3 || ^17.0.0-0"
