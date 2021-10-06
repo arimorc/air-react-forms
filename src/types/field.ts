@@ -27,7 +27,7 @@ export class Field extends FormElement implements IField {
 	constructor(field: FieldRegistrationData) {
 		super(field as Field);
 		this.ref = field.ref ?? createRef<FieldElement>();
-		this.type = field.type ?? 'string';
+		this.type = field.type ?? 'text';
 		this.defaultValue = field.defaultValue ?? '';
 	}
 

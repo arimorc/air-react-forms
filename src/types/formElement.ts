@@ -16,6 +16,10 @@ export interface IFormElement {
 	isValid(): boolean;
 }
 
+export interface FormElementRegistration extends Omit<IFormElement, 'value' | 'errors' | 'validate' | 'isValid'> {
+	errors?: FieldErrors,
+}
+
 export abstract class FormElement implements IFormElement {
 	id: string;
 	name: string;
@@ -26,7 +30,7 @@ export abstract class FormElement implements IFormElement {
 	 *
 	 * @param formElement
 	 */
-	constructor(formElement: IFormElement) {
+	constructor(formElement: FormElementRegistration) {
 		this.name = formElement.name;
 		this.id = formElement.id;
 		this.rules = formElement.rules ?? {};
@@ -76,6 +80,10 @@ export abstract class FormElement implements IFormElement {
 	 * @returns {boolean} True if no validation error is present, false otherwise.
 	 */
 	isValid = (): boolean => {
+		if (Object.keys(this.rules).length === 0) {
+			return true;
+		}
+
 		const foundErrors = Object.values(this.errors).reduce((acc, value) => (
 			value !== undefined ? acc + 1 : acc
 		), 0);
