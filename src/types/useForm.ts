@@ -1,4 +1,6 @@
+import { MutableRefObject } from 'react';
 import { Field, FieldProps, IField } from './field';
+import { FieldErrors } from './validation';
 
 export type FormData = {
 	[key: string]: number | string,
@@ -9,10 +11,12 @@ export type FieldRegistrationData = Pick<IField, 'id' | 'name' | 'rules' | 'ref'
 export interface UseFormReturnType {
 	formContext: {
 		fields: { [key: string]: Field },
+		formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }>,
 		getFormValues: () => FormData,
 		isFormValid: () => boolean,
 		register: (field: FieldRegistrationData) => void,
 		refreshFormState: () => void,
+		validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
 	},
 	formState: { errors: FormData },
 	register: (field: FieldRegistrationData) => FieldProps,

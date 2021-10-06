@@ -10,7 +10,7 @@ export interface IField extends IFormElement {
 	defaultValue?: InputValue;
 }
 
-export interface FieldProps extends Omit<Field, 'errors' | 'isValid' | 'ref' | 'value' | 'validate'> {
+export interface FieldProps extends Omit<Field, 'errors' | 'isValid' | 'ref' | 'value' | 'validate' | 'focus'> {
 	ref: (ref: FieldElement) => void,
 	onChange?: (params?: unknown) => void,
 }
@@ -46,6 +46,17 @@ export class Field extends FormElement implements IField {
 		Object.entries(this.rules).forEach(([rule, validator]) => {
 			this.errors[rule] = validator(this.ref?.current?.value) || undefined;
 		});
+	}
+
+	/**
+	 * @function
+	 * @name focus
+	 * @description Focuses the field's HTMLElement.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	focus = (): void => {
+		this.ref?.current?.focus();
 	}
 
 	/**

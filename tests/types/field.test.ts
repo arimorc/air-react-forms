@@ -86,4 +86,12 @@ describe('Field class', () => {
 			expect(sut.errors).toEqual({});
 		});
 	});
+
+	describe('focus', () => {
+		it('should focus the field\'s HTMLElement ref', () => {
+			sut.ref.current.focus = jest.fn();
+			sut.focus();
+			expect(sut.ref.current.focus).toHaveBeenCalledTimes(1);
+		});
+	});
 });

@@ -3,6 +3,7 @@ import { FieldValue, FormElement } from '../../src/types/formElement';
 
 class FormElementSpec extends FormElement {
 	get value(): FieldValue | undefined { return undefined || this.id; }
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	validate = (): void => {};
 }
 
