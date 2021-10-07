@@ -2,7 +2,7 @@ import * as React from 'react';
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { Field, FieldProps } from 'types/field';
 import { FieldElement, FormElementRegistration } from 'types/formElement';
-import { FieldRegistrationData, FormData, UseFormReturnType } from 'types/useForm';
+import { FormData, UseFormReturnType } from 'types/useForm';
 import { FieldErrors } from 'types/validation';
 
 /**
@@ -193,6 +193,7 @@ const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 			isFormValid,
 			refreshFormState,
 			validateField,
+			validateOnChange,
 		},
 		formState,
 		register,

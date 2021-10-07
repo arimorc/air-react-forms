@@ -94,4 +94,19 @@ describe('Field class', () => {
 			expect(sut.ref.current.focus).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('extractFieldProps', () => {
+		it('should return expected values', () => {
+			const expectedResult = {
+				id: defaultFieldCreationParams.id,
+				name: defaultFieldCreationParams.name,
+				rules: defaultFieldCreationParams.rules,
+				type: defaultFieldCreationParams.type,
+				defaultValue: defaultFieldCreationParams.defaultValue,
+				ref: undefined as (ref: FieldElement) => void,
+			};
+
+			expect(Field.extractFieldProps(sut)).toEqual(expectedResult);
+		});
+	});
 });

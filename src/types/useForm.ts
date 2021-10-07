@@ -19,6 +19,7 @@ export interface FormContext {
 	register: (field: FormElementRegistration) => void,
 	refreshFormState: () => void,
 	validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
+	validateOnChange: boolean,
 }
 
 export interface UseFormReturnType {

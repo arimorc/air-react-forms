@@ -19,17 +19,8 @@ export class FieldArray extends FormElement implements IFieldArray {
 	constructor(fieldArray: FormElementRegistration) {
 		super(fieldArray);
 		this.fields = {};
-		this.type = fieldArray.type ?? 'string';
+		this.type = fieldArray.type ?? 'text';
 		this.defaultValue = fieldArray.defaultValue ?? '';
-	}
-
-	/**
-	 * @function
-	 * @name validate
-	 * @description Performs a validation check on the current fieldarray's children, using its rules field's validators.
-	 */
-	validate = (): void => {
-		Object.values(this.fields).forEach((field: IField) => field.validate());
 	}
 
 	/**
@@ -42,7 +33,7 @@ export class FieldArray extends FormElement implements IFieldArray {
 	 * @returns {FieldValue | undefined}
 	 */
 	get value(): FieldValue | undefined {
-		return Object.values(this.fields)?.reduce((values, field: IField) => ({ ...values, [field.name]: field.value }), {}) ?? undefined;
+		return Object.values(this.fields)?.reduce((values, field: IField) => ({ ...values, [field.name]: field.value }), {});
 	}
 
 	/**
@@ -56,6 +47,32 @@ export class FieldArray extends FormElement implements IFieldArray {
 	 */
 	get errors(): FieldErrors {
 		return Object.values(this.fields).reduce((values, field: IField) => ({ ...values, [field.name]: field.errors }), {});
+	}
+
+	/**
+	 * @function
+	 * @name validate
+	 * @description Performs a validation check on the current fieldarray's children, using its rules field's validators.
+	 */
+	validate = (): void => {
+		Object.values(this.fields).forEach((field: IField) => field.validate());
+	}
+
+	/**
+	 * @function
+	 * @name isValid
+	 * @description Checks if fields registered inside this field array are all valid.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @returns {boolean} True if all children are valid, false otherwise.
+	 */
+	isValid = (): boolean => {
+		if (Object.keys(this.rules).length === 0) {
+			return true;
+		}
+
+		return !Object.values(this.fields).some((field: FormElement) => field.isValid() === false);
 	}
 
 	/**

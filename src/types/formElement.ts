@@ -80,7 +80,7 @@ export abstract class FormElement implements IFormElement {
 	 *
 	 * @returns {boolean} True if no validation error is present, false otherwise.
 	 */
-	isValid = (): boolean => {
+	isValid(): boolean {
 		if (Object.keys(this.rules).length === 0) {
 			return true;
 		}

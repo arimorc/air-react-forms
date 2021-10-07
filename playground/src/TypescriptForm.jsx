@@ -9,12 +9,13 @@ import { Fragment, useCallback, useState } from 'react';
  */
 const TypescriptForm = () => {
 	const { formContext, formState: { errors }, register, handleSubmit } = useForm({ validateOnChange: true });
-	const { append, fields: fieldArrayFields, register: registerArrayField } = useFieldArray({
+	const { append, fields: fieldArrayFields, register: registerArrayField, remove } = useFieldArray({
 		name: 'field-array',
-		rules: {},
+		rules: {
+			required: Validators.isRequired('This field is required'),
+		},
 	}, formContext);
 
-	console.log(formContext.fields);
 	const onSubmit = useCallback((formData) => {
 		console.log(formData);
 	}, []);
@@ -69,8 +70,9 @@ const TypescriptForm = () => {
 						<label htmlFor={field.id}>{field.name}</label>
 						<div style={{ display: 'flex' }}>
 							<input {...registerArrayField(field)} />
+							<button type="button" onClick={() => remove(field)}>remove</button>
 						</div>
-						{errors.test?.[field.name]?.required && <span>{errors.test?.[field.name]?.required}</span>}
+						{field.errors?.required && <span>{field.errors.required}</span>}
 					</Fragment>
 				))}
 				<br />
