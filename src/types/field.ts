@@ -25,7 +25,7 @@ export class Field extends FormElement implements IField {
 	 * @param field
 	 */
 	constructor(field: FieldRegistrationData) {
-		super(field as Field);
+		super(field);
 		this.ref = field.ref ?? createRef<FieldElement>();
 		this.type = field.type ?? 'text';
 		this.defaultValue = field.defaultValue ?? '';
@@ -79,11 +79,12 @@ export class Field extends FormElement implements IField {
 	 * @description Extracts data from a Field object to create a FieldProps object.
 	 *
 	 * @author Timothée Simon-Franza
-	 * @param {Field} field	The field instance to extract data from.
+	 *
+	 * @param {IField} field	The field instance to extract data from.
 	 *
 	 * @returns {FieldProps}
 	 */
-	static extractFieldProps = (field: Field): FieldProps => ({
+	static extractFieldProps = (field: IField): FieldProps => ({
 		id: field.id,
 		name: field.name,
 		rules: field.rules,

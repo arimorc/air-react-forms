@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { Field, FieldProps } from 'types/field';
-import { FieldElement } from 'types/formElement';
+import { FieldElement, FormElementRegistration } from 'types/formElement';
 import { FieldRegistrationData, FormData, UseFormReturnType } from 'types/useForm';
 import { FieldErrors } from 'types/validation';
 
@@ -97,11 +97,11 @@ const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {FieldRegistrationData} fieldData The data to use in order to register the field.
+	 * @param {FormElementRegistration} fieldData The data to use in order to register the field.
 	 *
 	 * @returns {FieldProps}
 	 */
-	const register = useCallback((fieldData: FieldRegistrationData): FieldProps => {
+	const register = useCallback((fieldData: FormElementRegistration): FieldProps => {
 		const field = fields?.current?.[fieldData.name] ?? new Field(fieldData);
 
 		if (!fields?.current?.[field.name]) {

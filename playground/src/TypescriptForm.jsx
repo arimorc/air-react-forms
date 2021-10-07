@@ -1,5 +1,5 @@
-import { useForm, Validators } from 'air-react-forms';
-import { useCallback, useState } from 'react';
+import { useFieldArray, useForm, Validators } from 'air-react-forms';
+import { Fragment, useCallback, useState } from 'react';
 
 /**
  * @name TypescriptForm
@@ -8,14 +8,13 @@ import { useCallback, useState } from 'react';
  * @author Timothée Simon-Franza
  */
 const TypescriptForm = () => {
-	const { formContext: { fields }, formState: { errors }, register, handleSubmit } = useForm({ validateOnChange: true });
+	const { formContext, formState: { errors }, register, handleSubmit } = useForm({ validateOnChange: true });
+	const { append, fields: fieldArrayFields, register: registerArrayField } = useFieldArray({
+		name: 'field-array',
+		rules: {},
+	}, formContext);
 
-	const logFields = useCallback(() => {
-		Object.keys(fields).forEach((fieldName) => {
-			console.log(fieldName, fields[fieldName].value, fields[fieldName].errors);
-		});
-	}, [fields]);
-
+	console.log(formContext.fields);
 	const onSubmit = useCallback((formData) => {
 		console.log(formData);
 	}, []);
@@ -63,8 +62,21 @@ const TypescriptForm = () => {
 				{errors.lastName?.maxLength && <span>{errors.lastName.maxLength}</span>}
 			</div>
 
+			<fieldset style={{ marginTop: '2em', marginBottom: '2em' }}>
+				<legend>Dynamic field array</legend>
+				{Object.values(fieldArrayFields).map((field) => (
+					<Fragment key={field.id}>
+						<label htmlFor={field.id}>{field.name}</label>
+						<div style={{ display: 'flex' }}>
+							<input {...registerArrayField(field)} />
+						</div>
+						{errors.test?.[field.name]?.required && <span>{errors.test?.[field.name]?.required}</span>}
+					</Fragment>
+				))}
+				<br />
+				<button type="button" onClick={append}>Add field</button>
+			</fieldset>
 			<button type="button" onClick={() => setToggle(!toggle)}>toggle</button>
-			<button type="button" onClick={() => logFields()}>Log fields</button>
 			<button type="submit">Submit form</button>
 		</form>
 	);

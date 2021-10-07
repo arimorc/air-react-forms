@@ -1,24 +1,29 @@
 import { MutableRefObject } from 'react';
-import { Field, FieldProps, IField } from './field';
+import { Field, FieldProps } from './field';
+import { FieldElement, FormElementRegistration } from './formElement';
 import { FieldErrors } from './validation';
 
 export type FormData = {
 	[key: string]: number | string,
 }
 
-export type FieldRegistrationData = Pick<IField, 'id' | 'name' | 'rules' | 'ref' | 'type' | 'defaultValue' >;
+export interface FieldRegistrationData extends FormElementRegistration {
+	ref?: MutableRefObject<FieldElement | undefined>;
+}
+
+export interface FormContext {
+	fields: { [key: string]: Field },
+	formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }>,
+	getFormValues: () => FormData,
+	isFormValid: () => boolean,
+	register: (field: FormElementRegistration) => void,
+	refreshFormState: () => void,
+	validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
+}
 
 export interface UseFormReturnType {
-	formContext: {
-		fields: { [key: string]: Field },
-		formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }>,
-		getFormValues: () => FormData,
-		isFormValid: () => boolean,
-		register: (field: FieldRegistrationData) => void,
-		refreshFormState: () => void,
-		validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
-	},
+	formContext: FormContext,
 	formState: { errors: FormData },
-	register: (field: FieldRegistrationData) => FieldProps,
+	register: (field: FormElementRegistration) => FieldProps,
 	handleSubmit: (callback: (formData: FormData) => void) => (event: React.FormEvent) => void,
 }

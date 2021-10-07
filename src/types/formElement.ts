@@ -1,4 +1,3 @@
-import { MutableRefObject } from 'react';
 import { FieldErrors, ValidationRules } from './validation';
 
 export type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -17,7 +16,9 @@ export interface IFormElement {
 }
 
 export interface FormElementRegistration extends Omit<IFormElement, 'value' | 'errors' | 'validate' | 'isValid'> {
+	defaultValue?: string,
 	errors?: FieldErrors,
+	type?: string,
 }
 
 export abstract class FormElement implements IFormElement {
@@ -90,15 +91,4 @@ export abstract class FormElement implements IFormElement {
 
 		return foundErrors === 0;
 	}
-}
-
-export interface IField<TFieldElement = FieldElement> extends IFormElement {
-	ref?: MutableRefObject<TFieldElement | undefined>;
-	type?: string;
-	defaultValue?: string | number;
-}
-
-export interface IFieldArray<TFieldElement = FieldElement> extends IFormElement {
-	fields: IField<TFieldElement>[],
-	type?: string;
 }
