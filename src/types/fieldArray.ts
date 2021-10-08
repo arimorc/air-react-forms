@@ -1,6 +1,17 @@
-import { FieldValue, FormElement, FormElementRegistration, IFormElement } from './formElement';
-import { Field, IField } from './field';
+import { FieldValue, FormElement, IFormElementProps, IFormElement } from './formElement';
+import { Field, IFieldReturnProps, IField, IFieldProps } from './field';
 import { FieldErrors } from './validation';
+
+export interface IUseFieldArrayProps extends IFormElementProps {
+	type?: string;
+}
+
+export interface IUseFieldArrayReturn {
+	append: () => IFieldReturnProps,
+	fields: { [key: string]: Field };
+	register: (field: IFieldProps) => IFieldReturnProps,
+	remove: (field: Field) => void,
+}
 
 export interface IFieldArray extends IFormElement {
 	fields: { [key: string]: Field },
@@ -16,7 +27,7 @@ export class FieldArray extends FormElement implements IFieldArray {
 	/**
 	 * @param fieldArray
 	 */
-	constructor(fieldArray: FormElementRegistration) {
+	constructor(fieldArray: IFormElementProps) {
 		super(fieldArray);
 		this.fields = {};
 		this.type = fieldArray.type ?? 'text';

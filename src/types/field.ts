@@ -1,8 +1,7 @@
 import { createRef, MutableRefObject } from 'react';
 import { isEmpty } from 'lodash';
 
-import { FieldElement, FieldValue, FormElement, IFormElement, InputValue } from './formElement';
-import { FieldRegistrationData } from './useForm';
+import { FieldElement, FormElement, IFormElement, IFormElementProps, InputValue } from './formElement';
 
 export interface IField extends IFormElement {
 	ref?: MutableRefObject<FieldElement | undefined>;
@@ -10,7 +9,11 @@ export interface IField extends IFormElement {
 	defaultValue?: InputValue;
 }
 
-export interface FieldProps extends Omit<Field, 'errors' | 'isValid' | 'ref' | 'value' | 'validate' | 'focus'> {
+export interface IFieldProps extends Omit<IFormElementProps, 'isValid' | 'ref' | 'value' | 'validate' > {
+	ref?: MutableRefObject<FieldElement | undefined>;
+}
+
+export interface IFieldReturnProps extends Omit<IFieldProps, 'ref'> {
 	ref: (ref: FieldElement) => void,
 	onChange?: (params?: unknown) => void,
 }
@@ -24,7 +27,7 @@ export class Field extends FormElement implements IField {
 	 *
 	 * @param field
 	 */
-	constructor(field: FieldRegistrationData) {
+	constructor(field: IFieldProps) {
 		super(field);
 		this.ref = field.ref ?? createRef<FieldElement>();
 		this.type = field.type ?? 'text';
@@ -62,14 +65,29 @@ export class Field extends FormElement implements IField {
 	/**
 	 * @property
 	 * @name value
-	 * @description The value of the field's linked reference.
+	 * @description Returns the value of the field's linked reference.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @returns {FieldValue | undefined}
+	 * @returns {InputValue | undefined}
 	 */
-	get value(): FieldValue | undefined {
+	get value(): InputValue | undefined {
 		return this.ref?.current?.value ?? undefined;
+	}
+
+	/**
+	 * @property
+	 * @name value
+	 * @description Sets the field's linked reference's value with the one provided in parameter.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {InputValue} value The value to set.
+	 */
+	set value(value: InputValue) {
+		if (this.ref?.current) {
+			this.ref.current.value = value;
+		}
 	}
 
 	/**
@@ -82,9 +100,9 @@ export class Field extends FormElement implements IField {
 	 *
 	 * @param {IField} field	The field instance to extract data from.
 	 *
-	 * @returns {FieldProps}
+	 * @returns {IFieldReturnProps}
 	 */
-	static extractFieldProps = (field: IField): FieldProps => ({
+	static extractFieldProps = (field: IField): IFieldReturnProps => ({
 		id: field.id,
 		name: field.name,
 		rules: field.rules,

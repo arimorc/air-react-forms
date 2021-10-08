@@ -1,4 +1,4 @@
-type FieldValue = number | string | null;
+import { FieldValue } from './formElement';
 
 /**
  * @type

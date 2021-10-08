@@ -55,6 +55,15 @@ describe('Field class', () => {
 		});
 	});
 
+	describe('set value', () => {
+		it('should set the field\'s ref\'s current value to the one provided.', () => {
+			const initialValue = fakeFieldElement.value;
+			sut.value = 'new value';
+			expect(sut.value).not.toEqual(initialValue);
+			expect(sut.ref?.current?.value).toEqual(sut.value);
+		});
+	});
+
 	describe('validate', () => {
 		beforeEach(() => {
 			sut = new Field({

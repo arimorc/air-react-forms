@@ -1,22 +1,17 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import update from 'immutability-helper';
 import defaultFormContext from 'defaultFormContext';
-import { Field, FieldProps } from 'types/field';
-import { FieldArray } from 'types/fieldArray';
-import { FieldElement, FormElementRegistration } from 'types/formElement';
-import { UseFieldArrayReturnType } from 'types/useFieldArray';
-import { FormContext } from 'types/useForm';
-
-interface FieldArrayDataRegistration extends FormElementRegistration {
-	type?: string;
-}
+import { Field, IFieldReturnProps } from 'types/field';
+import { FieldArray, IUseFieldArrayProps, IUseFieldArrayReturn } from 'types/fieldArray';
+import { FieldElement, IFormElementProps } from 'types/formElement';
+import { IFormContext } from 'types/form';
 
 /**
  *
  * @param param0
  * @param context
  */
-const useFieldArray = (registrationOptions: FieldArrayDataRegistration, context: FormContext): UseFieldArrayReturnType => {
+const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormContext): IUseFieldArrayReturn => {
 	const formContext = useContext(defaultFormContext) ?? context;
 	const indexRef = useRef(0);
 
@@ -97,11 +92,11 @@ const useFieldArray = (registrationOptions: FieldArrayDataRegistration, context:
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {FormElementRegistration} fieldData The data to use in order to register the field.
+	 * @param {IFormElementProps} fieldData The data to use in order to register the field.
 	 *
-	 * @returns {FieldProps}
+	 * @returns {IFieldReturnProps}
 	 */
-	const register = useCallback((fieldData: FormElementRegistration): FieldProps => {
+	const register = useCallback((fieldData: IFormElementProps): IFieldReturnProps => {
 		const fieldName = fieldData.name ?? `${fieldArray.name}-${indexRef.current}`;
 		if (!fieldData.name) {
 			indexRef.current++;
@@ -112,7 +107,7 @@ const useFieldArray = (registrationOptions: FieldArrayDataRegistration, context:
 			fieldArray.addField(field);
 		}
 
-		const returnedProps: FieldProps = {
+		const returnedProps: IFieldReturnProps = {
 			...Field.extractFieldProps(field),
 			ref: (ref: FieldElement) => (ref ? registerField(field, ref) : unregisterField(field)),
 		};
@@ -135,9 +130,9 @@ const useFieldArray = (registrationOptions: FieldArrayDataRegistration, context:
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @returns {FieldProps}
+	 * @returns {IFieldReturnProps}
 	 */
-	const append = useCallback((): FieldProps => {
+	const append = useCallback((): IFieldReturnProps => {
 		const fieldName = `${fieldArray.name}-${indexRef.current}`;
 		indexRef.current++;
 

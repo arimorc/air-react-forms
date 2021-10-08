@@ -1,30 +1,30 @@
 import { MutableRefObject } from 'react';
-import { Field, FieldProps } from './field';
-import { FieldElement, FormElementRegistration } from './formElement';
+import { Field, IFieldReturnProps } from './field';
+import { FormElement, IFormElementProps } from './formElement';
 import { FieldErrors } from './validation';
 
 export type FormData = {
 	[key: string]: number | string,
 }
 
-export interface FieldRegistrationData extends FormElementRegistration {
-	ref?: MutableRefObject<FieldElement | undefined>;
+export interface IUseFormProps {
+	validateOnChange?: boolean,
 }
 
-export interface FormContext {
-	fields: { [key: string]: Field },
+export interface IFormContext {
+	fields: { [key: string]: FormElement },
 	formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }>,
 	getFormValues: () => FormData,
 	isFormValid: () => boolean,
-	register: (field: FormElementRegistration) => void,
+	register: (field: IFormElementProps) => void,
 	refreshFormState: () => void,
 	validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
 	validateOnChange: boolean,
 }
 
-export interface UseFormReturnType {
-	formContext: FormContext,
+export interface IUseFormReturnType {
+	formContext: IFormContext,
 	formState: { errors: FormData },
-	register: (field: FormElementRegistration) => FieldProps,
+	register: (field: IFormElementProps) => IFieldReturnProps,
 	handleSubmit: (callback: (formData: FormData) => void) => (event: React.FormEvent) => void,
 }

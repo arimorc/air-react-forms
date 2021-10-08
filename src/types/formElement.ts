@@ -1,13 +1,13 @@
 import { FieldErrors, ValidationRules } from './validation';
 
 export type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-export type InputValue = number | string | null;
+export type InputValue = string | null;
 export type FieldValue = InputValue | InputValue[] | { [key: string]: InputValue };
 
 export interface IFormElement {
 	id: string;
 	name: string;
-	rules: ValidationRules;
+	rules?: ValidationRules;
 
 	get value(): FieldValue | undefined;
 	get errors(): FieldErrors;
@@ -15,7 +15,7 @@ export interface IFormElement {
 	isValid(): boolean;
 }
 
-export interface FormElementRegistration extends Omit<IFormElement, 'value' | 'errors' | 'validate' | 'isValid'> {
+export interface IFormElementProps extends Omit<IFormElement, 'value' | 'errors' | 'validate' | 'isValid'> {
 	defaultValue?: string,
 	errors?: FieldErrors,
 	type?: string,
@@ -31,7 +31,7 @@ export abstract class FormElement implements IFormElement {
 	 *
 	 * @param formElement
 	 */
-	constructor(formElement: FormElementRegistration) {
+	constructor(formElement: IFormElementProps) {
 		this.name = formElement.name;
 		this.id = formElement.id;
 		this.rules = formElement.rules ?? {};

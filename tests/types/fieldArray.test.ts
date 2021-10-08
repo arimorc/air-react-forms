@@ -1,6 +1,7 @@
 import { Field } from '../../src/types/field';
 import { FieldArray } from '../../src/types/fieldArray';
 import { FieldElement, FieldValue, FormElement } from '../../src/types/formElement';
+import { ValidationRules } from '../../src/types/validation';
 
 describe('FieldArray class', () => {
 	let sut: FieldArray;
@@ -99,7 +100,7 @@ describe('FieldArray class', () => {
 	});
 
 	describe('isValid', () => {
-		const dummyRules = {
+		const dummyRules: ValidationRules = {
 			error: (value: FieldValue) => ((value as string).trim().length === 0 ? 'error' : undefined),
 		};
 

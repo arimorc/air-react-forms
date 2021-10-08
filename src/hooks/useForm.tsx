@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { Field, FieldProps } from 'types/field';
-import { FieldElement, FormElementRegistration } from 'types/formElement';
-import { FormData, UseFormReturnType } from 'types/useForm';
+import { Field, IFieldReturnProps } from 'types/field';
+import { FormData, IUseFormProps, IUseFormReturnType } from 'types/form';
+import { FieldElement, IFormElementProps } from 'types/formElement';
 import { FieldErrors } from 'types/validation';
 
 /**
@@ -13,9 +13,9 @@ import { FieldErrors } from 'types/validation';
  *
  * @param {boolean} [validateOnChange] Whether or not fields should trigger a validation check on change.
  *
- * @returns {UseFormReturnType}
+ * @returns {IUseFormReturnType}
  */
-const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
+const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormReturnType => {
 	const fields: MutableRefObject<{ [key: string]: Field }> = useRef({});
 
 	const formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }> = useRef({});
@@ -97,28 +97,28 @@ const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 	 *
 	 * @author Timothée Simon-Franza
 	 *
-	 * @param {FormElementRegistration} fieldData The data to use in order to register the field.
+	 * @param {IFormElementProps} fieldData The data to use in order to register the field.
 	 *
-	 * @returns {FieldProps}
+	 * @returns {IFieldReturnProps}
 	 */
-	const register = useCallback((fieldData: FormElementRegistration): FieldProps => {
+	const register = useCallback((fieldData: IFormElementProps): IFieldReturnProps => {
 		const field = fields?.current?.[fieldData.name] ?? new Field(fieldData);
 
 		if (!fields?.current?.[field.name]) {
 			fields.current[field.name] = field;
 		}
 
-		const returnedProps: FieldProps = {
+		const returnedProps: IFieldReturnProps = {
 			...Field.extractFieldProps(field),
 			ref: (ref: FieldElement) => (ref ? registerField(field, ref) : unregisterField(field)),
 		};
 
-		if (validateOnChange) {
+		if (props.validateOnChange) {
 			returnedProps.onChange = () => validateField(true)(field);
 		}
 
 		return returnedProps;
-	}, [registerField, unregisterField, validateField, validateOnChange]);
+	}, [props.validateOnChange, registerField, unregisterField, validateField]);
 
 	/**
 	 * @function
@@ -193,7 +193,7 @@ const useForm = ({ validateOnChange = false } = {}): UseFormReturnType => {
 			isFormValid,
 			refreshFormState,
 			validateField,
-			validateOnChange,
+			validateOnChange: props.validateOnChange,
 		},
 		formState,
 		register,
