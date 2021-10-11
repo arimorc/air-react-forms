@@ -18,14 +18,21 @@ export interface IFieldReturnProps extends Omit<IFieldProps, 'ref'> {
 	onChange?: (params?: unknown) => void,
 }
 
+/**
+ * @class
+ * @name field
+ * @description Class used to represent a controlled form's field, usually an input.
+ * @extends FormElement
+ */
 export class Field extends FormElement implements IField {
 	ref?: MutableRefObject<FieldElement | undefined>;
 	type?: string;
 	defaultValue?: InputValue;
 
 	/**
-	 *
-	 * @param field
+	 * @constructor
+	 * @author Timothée Simon-Franza
+	 * @param {IFieldProps} field
 	 */
 	constructor(field: IFieldProps) {
 		super(field);

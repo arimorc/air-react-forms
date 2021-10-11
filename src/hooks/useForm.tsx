@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { Field, IFieldReturnProps } from 'types/field';
-import { FormData, IUseFormProps, IUseFormReturnType } from 'types/form';
+import { FormData, IUseFormProps, IUseFormReturn } from 'types/form';
 import { FieldElement, IFormElementProps } from 'types/formElement';
 import { FieldErrors } from 'types/validation';
 
@@ -13,9 +13,9 @@ import { FieldErrors } from 'types/validation';
  *
  * @param {boolean} [validateOnChange] Whether or not fields should trigger a validation check on change.
  *
- * @returns {IUseFormReturnType}
+ * @returns {IUseFormReturn}
  */
-const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormReturnType => {
+const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormReturn => {
 	const fields: MutableRefObject<{ [key: string]: Field }> = useRef({});
 
 	const formErrorsRef: MutableRefObject<{ [key: string]: FieldErrors }> = useRef({});

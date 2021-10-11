@@ -22,7 +22,7 @@ export interface IFormContext {
 	validateOnChange: boolean,
 }
 
-export interface IUseFormReturnType {
+export interface IUseFormReturn {
 	formContext: IFormContext,
 	formState: { errors: FormData },
 	register: (field: IFormElementProps) => IFieldReturnProps,

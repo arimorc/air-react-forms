@@ -19,13 +19,21 @@ export interface IFieldArray extends IFormElement {
 	defaultValue?: FieldValue;
 }
 
+/**
+ * @class
+ * @name FieldArray
+ * @description The class representing an array of fields.
+ * @extends FormElement
+ */
 export class FieldArray extends FormElement implements IFieldArray {
 	fields: { [key: string]: Field };
 	type?: string;
 	defaultValue?: FieldValue;
 
 	/**
-	 * @param fieldArray
+	 * @constructor
+	 * @author Timothée Simon-Franza
+	 * @param {IFormElementProps} fieldArray
 	 */
 	constructor(fieldArray: IFormElementProps) {
 		super(fieldArray);

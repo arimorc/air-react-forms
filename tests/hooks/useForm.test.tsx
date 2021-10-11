@@ -5,11 +5,11 @@ import userEvent from '@testing-library/user-event';
 import renderHook from '../testUtils/renderHook';
 import { useForm } from '../../src';
 import { Field } from '../../src/types/field';
-import { FormData, UseFormReturnType } from '../../src/types/useForm';
+import { FormData, IUseFormReturn } from '../../src/types/form';
 import { FormElement } from '../../src/types/formElement';
 
 describe('useFormHook', () => {
-	let sut: UseFormReturnType;
+	let sut: IUseFormReturn;
 	const isRequiredValidator = jest.fn().mockImplementation((value) => (value.trim().length === 0 ? 'required' : ''));
 
 	beforeEach(() => {
@@ -81,7 +81,7 @@ describe('useFormHook', () => {
 			expect(updatedFields).toMatchObject({ firstname: expect.any(Field) });
 		});
 
-		it('should return a FieldProps object', () => {
+		it('should return an IFieldReturnProps object', () => {
 			const fieldData = { id: 'firstname', name: 'firstname', rules: {}, type: 'text', defaultValue: 'john' };
 
 			const result = sut.register(fieldData);
@@ -163,7 +163,7 @@ describe('useFormHook', () => {
 		it('should call the provided field\'s validate method if it has been registered', () => {
 			const fieldData = { id: 'firstname', name: 'firstname', rules: {}, type: 'text' };
 			sut.register(fieldData);
-			const field = sut.formContext.fields[fieldData.name];
+			const field = sut.formContext.fields[fieldData.name] as Field;
 			const validateSpy = jest.spyOn(field, 'validate');
 
 			sut.formContext.validateField(false)(field);
@@ -177,7 +177,7 @@ describe('useFormHook', () => {
 
 			render(<input {...sut.register(fieldData)} />);
 
-			sut.formContext.validateField(false)(sut.formContext.fields[fieldData.name]);
+			sut.formContext.validateField(false)(sut.formContext.fields[fieldData.name] as Field);
 			const currentFormErrorsRefValue = sut.formContext.formErrorsRef.current;
 
 			expect(initialFormErrorsRefValue).not.toEqual(currentFormErrorsRefValue);
@@ -195,7 +195,7 @@ describe('useFormHook', () => {
 			render(<input {...sut.register(fieldData)} />);
 
 			act(() => {
-				sut.formContext.validateField(true)(sut.formContext.fields[fieldData.name]);
+				sut.formContext.validateField(true)(sut.formContext.fields[fieldData.name] as Field);
 			});
 
 			expect(sut.formState).not.toEqual(initialFormState);
@@ -212,7 +212,7 @@ describe('useFormHook', () => {
 			const fieldsData = [
 				{ id: 'firstname', name: 'firstname', rules: {}, type: 'text', defaultValue: 'john' },
 				{ id: 'lastname', name: 'lastname', rules: {}, type: 'text', defaultValue: 'doe' },
-				{ id: 'age', name: 'age', rules: {}, type: 'number', defaultValue: 35 },
+				{ id: 'age', name: 'age', rules: {}, type: 'number', defaultValue: '35' },
 			];
 
 			mount(

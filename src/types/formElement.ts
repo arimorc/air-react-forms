@@ -21,6 +21,12 @@ export interface IFormElementProps extends Omit<IFormElement, 'value' | 'errors'
 	type?: string,
 }
 
+/**
+ * @abstract
+ * @class
+ * @name FormElement
+ * @description Abstract class used to represent a controlled form's element.
+ */
 export abstract class FormElement implements IFormElement {
 	id: string;
 	name: string;
@@ -28,8 +34,9 @@ export abstract class FormElement implements IFormElement {
 	private _errors?: FieldErrors;
 
 	/**
-	 *
-	 * @param formElement
+	 * @constructor
+	 * @author Timothée Simon-Franza
+	 * @param {IFormElementProps} formElement
 	 */
 	constructor(formElement: IFormElementProps) {
 		this.name = formElement.name;

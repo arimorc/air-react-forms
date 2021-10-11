@@ -7,16 +7,34 @@ import { FieldElement, IFormElementProps } from 'types/formElement';
 import { IFormContext } from 'types/form';
 
 /**
+ * @function
+ * @name useFieldArray
+ * @description A hook used to control dynamic array of a same field.
  *
- * @param param0
- * @param context
+ * @author Timothée Simon-Franza
+ *
+ * @param {IUseFieldArrayProps}	registrationOptions	The data to identify and configure the fieldArray with.
+ * @param {IFormContext}		context				The context of the form that encloses the field array.
+ *
+ * @returns {IUseFieldArrayReturn}
  */
 const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormContext): IUseFieldArrayReturn => {
 	const formContext = useContext(defaultFormContext) ?? context;
 	const indexRef = useRef(0);
 
+	// Note: this state is used to ensure any changes to the fields triggers a re-render.
+	// Any manipulation on the fieldArray's children fields should be executed on fieldArray.fields, not this state.
 	const [fields, setFields]: [{ [key: string]: Field }, React.Dispatch<React.SetStateAction<{[key: string]: Field }>>] = useState({});
 
+	/**
+	 * @constant
+	 * @name fieldArray
+	 * @description The reference to the current field array inside the formContext's "fields" constant.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @returns {FieldArray}
+	 */
 	const fieldArray: FieldArray = useMemo(() => {
 		if (!formContext.fields[registrationOptions.name]) {
 			formContext.fields[registrationOptions.name] = new FieldArray(registrationOptions);
@@ -117,7 +135,7 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 		}
 
 		if (!fields[fieldName]) {
-			setFields({ ...fields, [fieldName]: field });
+			setFields((prevState) => ({ ...prevState, [fieldName]: field }));
 		}
 
 		return returnedProps;
