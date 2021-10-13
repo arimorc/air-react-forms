@@ -71,9 +71,8 @@ const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormRe
 		if (field.name) {
 			fields.current[field.name] = field;
 			fields.current[field.name].ref.current = ref;
-			validateField(false)(field);
 		}
-	}, [fields, validateField]);
+	}, [fields]);
 
 	/**
 	 * @function
@@ -106,6 +105,7 @@ const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormRe
 
 		if (!fields?.current?.[field.name]) {
 			fields.current[field.name] = field;
+			formErrorsRef.current[field.name] = undefined;
 		}
 
 		const returnedProps: IFieldReturnProps = {

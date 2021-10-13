@@ -7,7 +7,7 @@ import logger from '../../src/utils/logger';
 import { useForm, useFieldArray } from '../../src';
 import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
 
-describe('useFieldArray hook', () => {
+describe.skip('useFieldArray hook', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
 	});

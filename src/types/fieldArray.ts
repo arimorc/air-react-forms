@@ -11,6 +11,7 @@ export interface IUseFieldArrayReturn {
 	fields: { [key: string]: Field };
 	register: (field: IFieldProps) => IFieldReturnProps,
 	remove: (field: Field) => void,
+	validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
 }
 
 export interface IFieldArray extends IFormElement {

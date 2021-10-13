@@ -45,39 +45,6 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 
 	/**
 	 * @function
-	 * @name registerField
-	 * @description A callback method used by a fieldArray input to register itself to its parent.
-	 *
-	 * @author Timothée Simon-Franza
-	 *
-	 * @param {Field}			field	The field to update the reference of.
-	 * @param {FieldElement}	ref		The element to update the field's reference with.
-	 */
-	const registerField = useCallback((field: Field, ref: FieldElement): void => {
-		if (field.name) {
-			fieldArray.fields[field.name] = field;
-			fieldArray.fields[field.name].ref.current = ref;
-			formContext.validateField(false)(field);
-		}
-	}, [fieldArray.fields, formContext]);
-
-	/**
-	 * @function
-	 * @name unregisterField
-	 * @description A callback method used by a fieldArray input to unregister itself from its parent.
-	 *
-	 * @author Timothée Simon-Franza
-	 *
-	 * @param {Field} field The field to remove.
-	 */
-	const unregisterField = useCallback((field: Field): void => {
-		if (fieldArray.fields[field.name]) {
-			delete fieldArray.fields[field.name];
-		}
-	}, [fieldArray.fields]);
-
-	/**
-	 * @function
 	 * @name validateField
 	 * @description Performs validation checks on the provided field.
 	 *
@@ -102,6 +69,38 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 			formContext.refreshFormState();
 		}
 	}, [formContext, registrationOptions.name]);
+
+	/**
+	 * @function
+	 * @name registerField
+	 * @description A callback method used by a fieldArray input to register itself to its parent.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {Field}			field	The field to update the reference of.
+	 * @param {FieldElement}	ref		The element to update the field's reference with.
+	 */
+	const registerField = useCallback((field: Field, ref: FieldElement): void => {
+		if (field.name) {
+			fieldArray.fields[field.name] = field;
+			fieldArray.fields[field.name].ref.current = ref;
+		}
+	}, [fieldArray.fields]);
+
+	/**
+	 * @function
+	 * @name unregisterField
+	 * @description A callback method used by a fieldArray input to unregister itself from its parent.
+	 *
+	 * @author Timothée Simon-Franza
+	 *
+	 * @param {Field} field The field to remove.
+	 */
+	const unregisterField = useCallback((field: Field): void => {
+		if (fieldArray.fields[field.name]) {
+			delete fieldArray.fields[field.name];
+		}
+	}, [fieldArray.fields]);
 
 	/**
 	 * @function
@@ -182,6 +181,7 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 		fields,
 		register,
 		remove,
+		validateField,
 	};
 };
 

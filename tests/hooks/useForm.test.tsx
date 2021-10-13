@@ -81,6 +81,16 @@ describe('useFormHook', () => {
 			expect(updatedFields).toMatchObject({ firstname: expect.any(Field) });
 		});
 
+		it('should add a new entry to the formErrorsRef object', () => {
+			const fieldData = { id: 'firstname', name: 'firstname', rules: {}, type: 'text' };
+			const initialFormErrorsRef = JSON.parse(JSON.stringify({ ...sut.formContext.formErrorsRef.current }));
+
+			mount(<input {...sut.register(fieldData)} />);
+
+			expect(initialFormErrorsRef).toEqual({});
+			expect(sut.formContext.formErrorsRef.current).toMatchObject({ firstname: undefined });
+		});
+
 		it('should return an IFieldReturnProps object', () => {
 			const fieldData = { id: 'firstname', name: 'firstname', rules: {}, type: 'text', defaultValue: 'john' };
 

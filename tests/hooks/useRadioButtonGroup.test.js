@@ -5,7 +5,7 @@ import logger from '../../src/utils/logger';
 import testHook from '../testUtils/hookTestUtils';
 import RadioButtonGroupTestForm from '../testUtils/RadioButtonGroupTestForm';
 
-describe('useRadioButtonGroup hook', () => {
+describe.skip('useRadioButtonGroup hook', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
 	});

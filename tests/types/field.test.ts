@@ -62,6 +62,13 @@ describe('Field class', () => {
 			expect(sut.value).not.toEqual(initialValue);
 			expect(sut.ref?.current?.value).toEqual(sut.value);
 		});
+
+		it('should not update the field\'s ref\'s current value if its ref field is undefined.', () => {
+			sut = new Field({ ...defaultFieldCreationParams, ref: undefined });
+			expect(sut.value).toEqual(undefined);
+			sut.value = 'abcd';
+			expect(sut.value).toEqual(undefined);
+		});
 	});
 
 	describe('validate', () => {

@@ -48,7 +48,7 @@ export class Field extends FormElement implements IField {
 	 *
 	 * @author Timothée Simon-Franza
 	 */
-	validate = (): void => {
+	validate(): void {
 		if (isEmpty(this.rules) || this.ref?.current?.value === undefined) {
 			return;
 		}

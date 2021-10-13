@@ -8,7 +8,7 @@ import { useForm } from '../../src';
 import * as inputTypeUtils from '../../src/utils/inputTypeUtils';
 import RadioButtonGroupTestForm from '../testUtils/RadioButtonGroupTestForm';
 
-describe('useForm hook', () => {
+describe.skip('useForm hook', () => {
 	let sut;
 
 	beforeEach(() => {

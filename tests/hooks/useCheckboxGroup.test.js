@@ -5,7 +5,7 @@ import { useForm, useCheckboxGroup } from '../../src';
 import testHook from '../testUtils/hookTestUtils';
 import CheckboxGroupTestForm from '../testUtils/CheckboxGroupTestForm';
 
-describe('useCheckboxGroup hook', () => {
+describe.skip('useCheckboxGroup hook', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
 	});
