@@ -1,3 +1,4 @@
+import { Checkbox } from './checkbox';
 import { FieldValue } from './formElement';
 
 /**
@@ -15,5 +16,7 @@ export type ValidationValue = string | undefined;
  * @author Timothée Simon-Franza
  */
 export type ValidationRules = { [key: string]: (value: FieldValue) => ValidationValue }
+
+export type CheckboxGroupValidationRules = { [key: string]: (value: Checkbox | { [key: string]: Checkbox }) => ValidationValue }
 
 export type FieldErrors = { [key: string]: ValidationValue }

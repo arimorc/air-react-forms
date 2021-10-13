@@ -39,8 +39,6 @@ describe('useFieldArray Hook', () => {
 		jest.restoreAllMocks();
 	});
 
-	// @TODO: test the append method
-
 	describe('fields', () => {
 		it('should mirror the fieldArray\'s "field" field\'s value', () => {
 			act(() => {

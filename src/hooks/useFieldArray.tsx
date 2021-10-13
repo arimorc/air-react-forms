@@ -105,7 +105,7 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 	/**
 	 * @function
 	 * @name register
-	 * @description The method to pass down to a React JSX input to register it in the controlled form.
+	 * @description The method to pass down to a React JSX input to register it as part of a field array.
 	 *
 	 * @author Timothée Simon-Franza
 	 *

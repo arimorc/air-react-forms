@@ -1,13 +1,13 @@
-import { FieldErrors, ValidationRules } from './validation';
+import { CheckboxGroupValidationRules, FieldErrors, ValidationRules } from './validation';
 
 export type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-export type InputValue = string | null;
+export type InputValue = string | boolean | null;
 export type FieldValue = InputValue | InputValue[] | { [key: string]: InputValue };
 
 export interface IFormElement {
 	id: string;
 	name: string;
-	rules?: ValidationRules;
+	rules?: ValidationRules | CheckboxGroupValidationRules;
 
 	get value(): FieldValue | undefined;
 	get errors(): FieldErrors;
@@ -30,7 +30,7 @@ export interface IFormElementProps extends Omit<IFormElement, 'value' | 'errors'
 export abstract class FormElement implements IFormElement {
 	id: string;
 	name: string;
-	rules: ValidationRules;
+	rules: ValidationRules | CheckboxGroupValidationRules;
 	private _errors?: FieldErrors;
 
 	/**

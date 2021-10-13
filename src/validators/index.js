@@ -1,5 +1,5 @@
-import hasMinChecked from './checkboxGroup/hasMinChecked';
-import hasMaxChecked from './checkboxGroup/hasMaxChecked';
+import hasMinChecked from './checkboxGroup/hasMinChecked.ts';
+import hasMaxChecked from './checkboxGroup/hasMaxChecked.ts';
 import isRequired from './isRequired';
 import hasMinLength from './hasMinLength';
 import hasMaxLength from './hasMaxLength';

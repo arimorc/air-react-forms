@@ -93,7 +93,7 @@ export class Field extends FormElement implements IField {
 	 */
 	set value(value: InputValue) {
 		if (this.ref?.current) {
-			this.ref.current.value = value;
+			this.ref.current.value = value.toString();
 		}
 	}
 
@@ -101,7 +101,7 @@ export class Field extends FormElement implements IField {
 	 * @static
 	 * @function
 	 * @name extractFieldProps
-	 * @description Extracts data from a Field object to create a FieldProps object.
+	 * @description Extracts data from a Field object to create an IFieldReturnProps object.
 	 *
 	 * @author Timothée Simon-Franza
 	 *
@@ -114,7 +114,7 @@ export class Field extends FormElement implements IField {
 		name: field.name,
 		rules: field.rules,
 		type: field.type,
-		defaultValue: field.defaultValue,
+		defaultValue: field.defaultValue.toString(),
 		ref: undefined,
 	})
 }
