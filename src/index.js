@@ -1,6 +1,6 @@
 import useForm from './hooks/useForm.tsx';
-import useCheckboxGroup from './hooks/useCheckboxGroup.tsx';
-import useFieldArray from './hooks/useFieldArray.tsx';
+import useCheckboxGroup from './hooks/useCheckboxGroup';
+import useFieldArray from './hooks/useFieldArray';
 import useRadioButtonGroup from './hooks/useRadioButtonGroup';
 import * as Validators from './validators';
 import FormContext from './FormContext';
