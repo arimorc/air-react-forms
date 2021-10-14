@@ -9,20 +9,14 @@ import { ValidationValue } from 'types/validation';
  *
  * @author Timothée Simon-Franza
  *
- * @param {array}			checkboxGroup		The checkbox group to perform the validation on.
+ * @param {CheckboxGroup}	checkboxGroup		The checkbox group to perform the validation on.
  * @param {number}			minCheckedAmount	The minimum amount of checkboxes that must be checked.
  * @param {string}			message				The message to return if the validation fails.
  *
- * @returns {string | undefined}
+ * @returns {ValidationValue}
  */
 const hasMinChecked = (minCheckedAmount: number, message: string) => (checkboxGroup: CheckboxGroup): ValidationValue => {
 	if (Object.values(checkboxGroup.fields).length === 0) {
-		return undefined;
-	}
-
-	if (minCheckedAmount > Object.values(checkboxGroup.fields).length) {
-		// logger.warn(`tried to check if the ${name} checkbox group has at least ${minCheckedAmount} inputs checked even though it only has ${fieldsAmount} checkboxes.`);
-
 		return undefined;
 	}
 

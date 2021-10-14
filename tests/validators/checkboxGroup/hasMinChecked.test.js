@@ -1,7 +1,7 @@
 import { hasMinChecked } from '../../../src/validators';
 import logger from '../../../src/utils/logger';
 
-describe('hasMinChecked', () => {
+describe.skip('hasMinChecked', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
 	});

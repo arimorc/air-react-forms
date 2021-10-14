@@ -35,23 +35,6 @@ export class CheckboxGroup extends FormElement implements ICheckboxGroup {
 	}
 
 	/**
-	 * @function
-	 * @name validate
-	 * @description Performs a validation check on the checkbox group's fields as a whole, using its rules field's validators.
-	 *
-	 * @author Timothée Simon-Franza
-	 */
-	validate(): void {
-		if (isEmpty(this.rules)) {
-			return;
-		}
-
-		Object.entries(this.rules).forEach(([rule, validator]) => {
-			this.errors[rule] = validator(this) || undefined;
-		});
-	}
-
-	/**
 	 * @property
 	 * @name value
 	 * @description The values of the checkboxGroup's children, bundled into an object.
@@ -62,6 +45,23 @@ export class CheckboxGroup extends FormElement implements ICheckboxGroup {
 	 */
 	get value(): FieldValue | undefined {
 		return Object.values(this.fields)?.reduce((values, field: Checkbox) => ({ ...values, [field.value]: field.checked }), {});
+	}
+
+	/**
+	 * @function
+	 * @name validate
+	 * @description Performs a validation check on the checkbox group's fields as a whole, using its rules field's validators.
+	 *
+	 * @author Timothée Simon-Franza
+	 */
+	validate(): void {
+		if (isEmpty(this.rules) || isEmpty(this.fields)) {
+			return;
+		}
+
+		Object.entries(this.rules).forEach(([rule, validator]) => {
+			this.errors[rule] = validator(this) || undefined;
+		});
 	}
 
 	/**

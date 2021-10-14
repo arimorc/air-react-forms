@@ -9,20 +9,14 @@ import { ValidationValue } from 'types/validation';
  *
  * @author Timothée Simon-Franza
  *
- * @param {array}			checkboxGroup		The checkbox group to perform the validation on.
+ * @param {CheckboxGroup}	checkboxGroup		The checkbox group to perform the validation on.
  * @param {number}			maxCheckedAmount	The maximum allowed amount of checked checkboxes.
  * @param {string}			message				The message to return if the validation fails.
  *
- * @returns {string | undefined}
+ * @returns {ValidationValue}
  */
 const hasMaxChecked = (maxCheckedAmount: number, message: string) => (checkboxGroup: CheckboxGroup): ValidationValue => {
 	if (Object.values(checkboxGroup.fields).length === 0) {
-		return undefined;
-	}
-
-	if (maxCheckedAmount > Object.values(checkboxGroup.fields).length) {
-		// logger.warn(`tried to check if the ${name} checkbox group has at most ${maxCheckedAmount} inputs checked even though it only has ${fieldsAmount} checkboxes.`);
-
 		return undefined;
 	}
 

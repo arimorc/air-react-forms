@@ -42,7 +42,7 @@ export abstract class FormElement implements IFormElement {
 		this.name = formElement.name;
 		this.id = formElement.id;
 		this.rules = formElement.rules ?? {};
-		this._errors = formElement.errors ?? Object.keys(formElement.rules).reduce((obj, key) => ({ ...obj, [key]: undefined }), {});
+		this._errors = formElement.errors ?? Object.keys(this.rules).reduce((obj, key) => ({ ...obj, [key]: undefined }), {});
 	}
 
 	/**
