@@ -122,6 +122,7 @@ const useCheckboxGroup = (registrationOptions: IUseCheckboxGroupProps, context: 
 
 	return {
 		register,
+		validateCheckboxGroup,
 	};
 };
 

@@ -9,6 +9,7 @@ export interface IUseCheckboxGroupProps extends IFormElementProps {
 
 export interface IUseCheckboxGroupReturn {
 	register: (field: IFieldProps) => IFieldReturnProps,
+	validateCheckboxGroup: (shouldRefreshFormState: boolean) => void,
 }
 
 export interface ICheckboxGroup extends IFormElement {
@@ -25,12 +26,12 @@ export class CheckboxGroup extends FormElement implements ICheckboxGroup {
 	/**
 	 * @constructor
 	 * @author Timothée Simon-Franza
-	 * @param {IFormElementProps} fieldArray
+	 * @param {IFormElementProps} checkboxGroupProps
 	 */
-	constructor(fieldArray: IFormElementProps) {
-		super(fieldArray);
+	constructor(checkboxGroupProps: IFormElementProps) {
+		super(checkboxGroupProps);
 		this.fields = {};
-		this.defaultValue = fieldArray.defaultValue ?? '';
+		this.defaultValue = checkboxGroupProps.defaultValue ?? false;
 	}
 
 	/**
