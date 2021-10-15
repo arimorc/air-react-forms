@@ -18,6 +18,12 @@ export interface ICheckboxGroup extends IFormElement {
 	defaultValue?: FieldValue;
 }
 
+/**
+ * @class
+ * @name CheckboxGroup
+ * @description The class representing a checkbox group.
+ * @extends FormElement
+ */
 export class CheckboxGroup extends FormElement implements ICheckboxGroup {
 	fields: { [key: string]: Checkbox };
 	type: 'checkbox';

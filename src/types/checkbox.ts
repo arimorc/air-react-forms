@@ -21,6 +21,11 @@ export interface ICheckboxReturnProps extends Omit<ICheckboxProps, 'checked' | '
 	onChange?: (params?: unknown) => void,
 }
 
+/**
+ * @class
+ * @name Checkbox
+ * @description Class used to represent a controlled form's checkbox field.
+ */
 export class Checkbox implements ICheckbox {
 	id: string;
 	name: string;
@@ -32,7 +37,7 @@ export class Checkbox implements ICheckbox {
 	/**
 	 * @constructor
 	 * @author Timothée Simon-Franza
-	 * @param {IFormElementProps} formElement
+	 * @param {ICheckboxProps} checkbox
 	 */
 	constructor(checkbox: ICheckboxProps) {
 		this.id = checkbox.id;

@@ -1,39 +1,39 @@
 import React from 'react';
-import { Checkbox, ICheckboxReturnProps } from '../../src/types/checkbox';
+import { RadioButton, IRadioButtonReturnProps } from '../../src/types/radioButton';
 
-describe('Checkbox class', () => {
-	let sut: Checkbox;
+describe('RadioButton class', () => {
+	let sut: RadioButton;
 
 	const fakeInput = { value: 'dummy_value', checked: false } as HTMLInputElement;
 
-	const defaultCheckboxProps = {
+	const defaultRadioButtonProps = {
 		id: 'dummy_field',
 		name: 'dummy_field',
 		value: fakeInput.value,
 		checked: fakeInput.checked,
 		defaultChecked: fakeInput.checked,
 		ref: { current: fakeInput },
-		type: 'checkbox',
+		type: 'radio',
 	};
 
 	beforeEach(() => {
-		sut = new Checkbox(defaultCheckboxProps);
+		sut = new RadioButton(defaultRadioButtonProps);
 	});
 
 	describe('constructor', () => {
 		it('should call react.createRef<FieldElement> if no ref is provided', () => {
 			const createRefSpy = jest.spyOn(React, 'createRef');
-			sut = new Checkbox({ ...defaultCheckboxProps, ref: undefined });
+			sut = new RadioButton({ ...defaultRadioButtonProps, ref: undefined });
 			expect(createRefSpy).toHaveBeenCalledTimes(1);
 		});
 
-		it('should set the type field to checkbox', () => {
-			sut = new Checkbox({ ...defaultCheckboxProps, type: 'text' });
-			expect(sut.type).toEqual('checkbox');
+		it('should set the type field to radio', () => {
+			sut = new RadioButton({ ...defaultRadioButtonProps, type: 'text' });
+			expect(sut.type).toEqual('radio');
 		});
 
 		it('should set the defaultChecked field to a false if no defaultChecked is provided', () => {
-			sut = new Checkbox({ ...defaultCheckboxProps, defaultChecked: undefined });
+			sut = new RadioButton({ ...defaultRadioButtonProps, defaultChecked: undefined });
 			expect(sut.defaultChecked).toEqual(false);
 		});
 	});
@@ -58,25 +58,25 @@ describe('Checkbox class', () => {
 		});
 
 		it('should not update the field\'s ref\'s current checked if its ref field is undefined.', () => {
-			sut = new Checkbox({ ...defaultCheckboxProps, ref: undefined });
+			sut = new RadioButton({ ...defaultRadioButtonProps, ref: undefined });
 			expect(sut.checked).toEqual(false);
 			sut.checked = true;
 			expect(sut.checked).toEqual(false);
 		});
 	});
 
-	describe('extractCheckboxProps', () => {
+	describe('extractRadioButtonProps', () => {
 		it('should return expected values', () => {
-			const expectedResult: ICheckboxReturnProps = {
-				id: defaultCheckboxProps.id,
-				name: defaultCheckboxProps.name,
-				type: defaultCheckboxProps.type,
-				defaultChecked: defaultCheckboxProps.defaultChecked,
-				value: defaultCheckboxProps.value,
+			const expectedResult: IRadioButtonReturnProps = {
+				id: defaultRadioButtonProps.id,
+				name: defaultRadioButtonProps.name,
+				type: defaultRadioButtonProps.type,
+				defaultChecked: defaultRadioButtonProps.defaultChecked,
+				value: defaultRadioButtonProps.value,
 				ref: undefined,
 			};
 
-			expect(Checkbox.extractCheckboxProps(sut)).toEqual(expectedResult);
+			expect(RadioButton.extractCheckboxProps(sut)).toEqual(expectedResult);
 		});
 	});
 });

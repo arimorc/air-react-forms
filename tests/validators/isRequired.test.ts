@@ -14,7 +14,7 @@ describe('isRequired', () => {
 	});
 
 	it('should return the provided message if the value is null or undefined.', () => {
-		const value = undefined;
+		const value: string = undefined;
 
 		expect(isRequired(errorMessage)(value)).toEqual(errorMessage);
 	});

@@ -26,11 +26,11 @@ describe('hasMinChecked validator', () => {
 		jest.restoreAllMocks();
 	});
 
-	it('should return undefined if the provided checkboxGroup has no field', () => {
+	it('should return the errorMessage if the provided checkboxGroup has no field', () => {
 		checkboxGroup = new CheckboxGroup(defaultCheckboxGroupProps);
 		const maxCheckedAmount = 1;
 
-		expect(hasMinChecked(maxCheckedAmount, errorMessage)(checkboxGroup)).toEqual(undefined);
+		expect(hasMinChecked(maxCheckedAmount, errorMessage)(checkboxGroup)).toEqual(errorMessage);
 	});
 
 	it('should return the provided message if there are less checked checkboxes than allowed by the provided criteria.', () => {

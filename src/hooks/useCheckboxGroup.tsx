@@ -12,9 +12,9 @@ import { Checkbox, ICheckboxProps, ICheckboxReturnProps } from 'types/checkbox';
  * @author Timothée Simon-Franza
  *
  * @param {IUseCheckboxGroupProps}	registrationOptions	The data to identify and configure the checkbox group with.
- * @param {IFormContext}			context				The context of the form that encloses the field array.
+ * @param {IFormContext}			context				The context of the form that encloses the checkbox group.
  *
- * @returns {IUseFieldArrayReturn}
+ * @returns {IUseCheckboxGroupReturn}
  */
 const useCheckboxGroup = (registrationOptions: IUseCheckboxGroupProps, context: IFormContext): IUseCheckboxGroupReturn => {
 	const formContext = useContext(defaultFormContext) ?? context;

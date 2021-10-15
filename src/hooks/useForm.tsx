@@ -144,7 +144,7 @@ const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormRe
 	 */
 	const validateForm = useCallback(() => {
 		Object.values(fields.current).forEach((field) => {
-			validateField(false)(field);
+			validateField(true)(field);
 		});
 	}, [validateField]);
 

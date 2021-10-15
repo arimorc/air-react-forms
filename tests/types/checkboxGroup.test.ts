@@ -3,7 +3,7 @@ import { Checkbox } from '../../src/types/checkbox';
 import { CheckboxGroup } from '../../src/types/checkboxGroup';
 import { FormElement } from '../../src/types/formElement';
 
-describe('FieldArray class', () => {
+describe('CheckboxGroup class', () => {
 	let sut: CheckboxGroup;
 
 	const fakeInput = { value: 'dummy_value', checked: false } as HTMLInputElement;

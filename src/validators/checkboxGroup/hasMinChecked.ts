@@ -17,7 +17,7 @@ import { ValidationValue } from 'types/validation';
  */
 const hasMinChecked = (minCheckedAmount: number, message: string) => (checkboxGroup: CheckboxGroup): ValidationValue => {
 	if (Object.values(checkboxGroup.fields).length === 0) {
-		return undefined;
+		return message;
 	}
 
 	const checkedAmount = Object.values(checkboxGroup.fields)
