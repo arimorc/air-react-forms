@@ -73,7 +73,7 @@ module.exports = {
 		'prefer-promise-reject-errors': 'off',
 		'react/forbid-prop-types': [1, { forbid: ['any', 'array'] }],
 		'react/jsx-filename-extension': ['error', {
-			extensions: ['.spec.js', '.test.js', '.test.tsx', '.jsx'],
+			extensions: ['.spec.js', '.test.js', '.test.tsx', '.jsx', '.tsx'],
 		}],
 		'react/jsx-indent-props': [1, 'tab'],
 		'react/jsx-props-no-spreading': ['warn', {
