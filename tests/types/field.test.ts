@@ -1,6 +1,6 @@
 import React from 'react';
 import { Field } from '../../src/types/field';
-import { FieldElement, FormElement } from '../../src/types/formElement';
+import { FieldValue, FieldElement, FormElement } from '../../src/types/formElement';
 
 describe('Field class', () => {
 	let sut: Field;
@@ -76,7 +76,7 @@ describe('Field class', () => {
 			sut = new Field({
 				...defaultFieldCreationParams,
 				rules: {
-					error: (value) => ((value as string).trim().length === 0 ? 'error' : ''),
+					error: (value: FieldValue) => ((value as string).trim().length === 0 ? 'error' : ''),
 				},
 			});
 		});
