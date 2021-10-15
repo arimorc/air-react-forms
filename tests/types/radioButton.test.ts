@@ -76,7 +76,7 @@ describe('RadioButton class', () => {
 				ref: undefined,
 			};
 
-			expect(RadioButton.extractCheckboxProps(sut)).toEqual(expectedResult);
+			expect(RadioButton.extractRadioButtonProps(sut)).toEqual(expectedResult);
 		});
 	});
 });

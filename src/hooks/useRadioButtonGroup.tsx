@@ -1,5 +1,5 @@
-import defaultFormContext from 'defaultFormContext';
 import { useCallback, useContext, useMemo } from 'react';
+import defaultFormContext from 'FormContext';
 import { IFormContext } from 'types/form';
 import { IRadioButtonProps, IRadioButtonReturnProps, RadioButton } from 'types/radioButton';
 import { IUseRadioButtonGroupProps, IUseRadioButtonGroupReturn, RadioButtonGroup } from 'types/radioButtonGroup';
@@ -98,7 +98,7 @@ const useRadioButtonGroup = (registrationOptions: IUseRadioButtonGroupProps, con
 		}
 
 		const returnedProps: IRadioButtonReturnProps = {
-			...RadioButton.extractCheckboxProps(radioButton),
+			...RadioButton.extractRadioButtonProps(radioButton),
 			ref: (ref: HTMLInputElement) => (ref ? registerRadioButton(radioButton, ref) : unregisterRadioButton(radioButton)),
 		};
 

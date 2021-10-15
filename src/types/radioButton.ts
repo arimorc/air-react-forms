@@ -88,7 +88,7 @@ export class RadioButton implements IRadioButton {
 	 *
 	 * @returns {IRadioButtonReturnProps}
 	 */
-	static extractCheckboxProps = (radioButton: IRadioButton): IRadioButtonReturnProps => ({
+	static extractRadioButtonProps = (radioButton: IRadioButton): IRadioButtonReturnProps => ({
 		id: radioButton.id,
 		name: radioButton.name,
 		type: radioButton.type,
