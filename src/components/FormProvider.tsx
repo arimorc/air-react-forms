@@ -1,4 +1,6 @@
+import { FC } from 'react';
 import PropTypes from 'prop-types';
+import { FormProviderProps } from 'types/formProviderProps';
 import FormContext from '../FormContext';
 
 /**
@@ -9,7 +11,7 @@ import FormContext from '../FormContext';
  *
  * @param {object} context The form context given by useForm
  */
-const FormProvider = ({ context, children }) => (
+const FormProvider: FC<FormProviderProps> = ({ context, children }) => (
 	<FormContext.Provider value={context}>
 		{children}
 	</FormContext.Provider>

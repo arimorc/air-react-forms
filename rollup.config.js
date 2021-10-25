@@ -1,13 +1,19 @@
-import babel from '@rollup/plugin-babel';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import external from 'rollup-plugin-peer-deps-external';
-import del from 'rollup-plugin-delete';
-import extensions from 'rollup-plugin-extensions';
-import generatePackageJson from 'rollup-plugin-generate-package-json';
-import commonjs from '@rollup/plugin-commonjs';
+import update from 'immutability-helper';
+
 import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
+
+import del from 'rollup-plugin-delete';
+import generatePackageJson from 'rollup-plugin-generate-package-json';
+
 import pkg from './package.json';
+import tsconfig from './tsconfig.json';
+
+const external = [
+	...Object.keys(pkg.dependencies || {}),
+	...Object.keys(pkg.peerDependencies || {}),
+	'react/jsx-runtime',
+];
 
 export default [
 	{
@@ -17,25 +23,8 @@ export default [
 			{ file: pkg.module, format: 'esm', sourcemap: true },
 		],
 		plugins: [
-			nodeResolve(),
-			commonjs({
-				include: 'node_modules/**',
-			}),
-			external(),
-			babel({
-				babelHelpers: 'runtime',
-				exclude: [
-					'node_modules/**',
-				],
-			}),
 			del({ targets: ['dist/*'] }),
-			extensions({
-				extensions: ['.jsx', '.js', '.tsx', '.ts'],
-				resolveIndex: true,
-			}),
 			typescript({
-				lib: ['es5', 'es6', 'dom'],
-				target: 'es5',
 				tsconfig: './tsconfig.json',
 			}),
 			generatePackageJson({
@@ -47,23 +36,32 @@ export default [
 					respository: pkg.repository,
 					license: pkg.license,
 					keywords: pkg.keywords,
-					types: pkg.types,
+					types: 'index.d.ts',
 					main: pkg.main.replace('dist/', ''),
 					module: pkg.module.replace('dist/', ''),
+					peerDependencies: pkg.peerDependencies,
 				},
 			}),
 		],
-		external: [
-			...Object.keys(pkg.dependencies || {}),
-			...Object.keys(pkg.peerDependencies || {}),
-		],
+		external,
 	},
 	{
-		input: 'src/index.ts',
-		plugins: [dts()],
+		input: 'dist/types/index.d.ts',
+		plugins: [
+			dts(update(tsconfig, {
+				compilerOptions: {
+					baseUrl: { $set: 'dist/types' },
+				},
+			})),
+			del({
+				targets: ['dist/types'],
+				hook: 'buildEnd',
+			}),
+		],
 		output: {
 			file: pkg.types,
 			format: 'esm',
 		},
+		external,
 	},
 ];
