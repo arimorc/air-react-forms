@@ -1,5 +1,8 @@
 {
 	"compilerOptions": {
+		// "declaration": true,
+		// "declarationDir": "types",
+		// "emitDeclarationOnly": true,
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
@@ -12,10 +15,9 @@
 		"outDir": "./dist",
 		"allowJs": true,
 		"preserveConstEnums": true,
-		"target": "es2020",
-		"incremental": true, // Enable incremental compilation by reading/writing information from prior compilations to a file on disk
+		"target": "es6",
 		"lib": [
-			"es2020",
+			"es6",
 			"dom"
 		],
 	},
