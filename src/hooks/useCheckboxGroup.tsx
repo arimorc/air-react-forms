@@ -33,7 +33,7 @@ const useCheckboxGroup = (registrationOptions: IUseCheckboxGroupProps, context: 
 			formContext.fields[registrationOptions.name] = new CheckboxGroup(registrationOptions);
 		}
 
-		return formContext.fields[registrationOptions.name];
+		return formContext.fields[registrationOptions.name] as CheckboxGroup;
 	}, [formContext, registrationOptions]);
 
 	/**

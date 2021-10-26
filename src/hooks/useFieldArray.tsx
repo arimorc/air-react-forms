@@ -40,7 +40,7 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 			formContext.fields[registrationOptions.name] = new FieldArray(registrationOptions);
 		}
 
-		return formContext.fields[registrationOptions.name];
+		return formContext.fields[registrationOptions.name] as FieldArray;
 	}, [formContext, registrationOptions]);
 
 	/**
@@ -54,7 +54,7 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 	 * @param {Field}	field					The field to perform the validation check on.
 	 */
 	const validateField = useCallback((shouldRefreshFormState = false) => (field: Field): void => {
-		if (!formContext.fields?.[registrationOptions.name]?.fields?.[field.name]) {
+		if (!fieldArray.fields?.[field.name]) {
 			return;
 		}
 
@@ -68,7 +68,7 @@ const useFieldArray = (registrationOptions: IUseFieldArrayProps, context: IFormC
 		if (shouldRefreshFormState) {
 			formContext.refreshFormState();
 		}
-	}, [formContext, registrationOptions.name]);
+	}, [fieldArray, formContext, registrationOptions.name]);
 
 	/**
 	 * @function

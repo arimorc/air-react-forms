@@ -19,4 +19,4 @@ export type ValidationRules = { [key: string]: (value: FieldValue) => Validation
 
 export type CheckboxGroupValidationRules = { [key: string]: (value: Checkbox | { [key: string]: Checkbox }) => ValidationValue }
 
-export type FieldErrors = { [key: string]: ValidationValue }
+export type FieldErrors = { [key: string]: ValidationValue | FieldErrors }

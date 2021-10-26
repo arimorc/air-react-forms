@@ -33,7 +33,7 @@ const useRadioButtonGroup = (registrationOptions: IUseRadioButtonGroupProps, con
 			formContext.fields[registrationOptions.name] = new RadioButtonGroup(registrationOptions);
 		}
 
-		return formContext.fields[registrationOptions.name];
+		return formContext.fields[registrationOptions.name] as RadioButtonGroup;
 	}, [formContext.fields, registrationOptions]);
 
 	/**

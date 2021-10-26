@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import PropTypes from 'prop-types';
 import { FormProviderProps } from 'types/formProviderProps';
 import FormContext from '../FormContext';
 
@@ -9,21 +8,14 @@ import FormContext from '../FormContext';
  *
  * @author Yann Hodiesne
  *
- * @param {object} context The form context given by useForm
+ * @param {FormProviderProps}	props			The props to pass to this component.
+ * @param {IFormContext}		props.context	The form context given by useForm
+ * @param {*}					props.children	The component's children.
  */
-const FormProvider: FC<FormProviderProps> = ({ context, children }) => (
+const FormProvider: FC<FormProviderProps> = ({ context, children }: FormProviderProps) => (
 	<FormContext.Provider value={context}>
 		{children}
 	</FormContext.Provider>
 );
-
-FormProvider.propTypes = {
-	context: PropTypes.object.isRequired,
-	children: PropTypes.node,
-};
-
-FormProvider.defaultProps = {
-	children: <></>,
-};
 
 export default FormProvider;

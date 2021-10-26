@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { FormContext } from './formContext';
+import { IFormContext } from './form';
 
 export type FormProviderProps = {
-    context: FormContext,
+    context: IFormContext,
     children?: ReactNode,
 };

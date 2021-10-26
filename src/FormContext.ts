@@ -1,6 +1,6 @@
 import { createContext } from 'react';
-import { FormContext } from 'types/formContext';
+import { IFormContext } from 'types/form';
 
-const FormContext = createContext<FormContext>(null);
+const FormContext = createContext<IFormContext>(null);
 
 export default FormContext;

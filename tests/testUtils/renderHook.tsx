@@ -4,7 +4,7 @@ import { mount } from 'enzyme';
  * @name TestHook
  * @description An component calling the callback in parameter allowing us to test hooks.
  */
-const TestHook = ({ callback }) => {
+const TestHook = ({ callback } : { callback: () => void }): null => {
 	callback();
 
 	return null;
@@ -17,7 +17,7 @@ const TestHook = ({ callback }) => {
  *
  * @param {*} hookUnderTest
  */
-const renderHook = (hookUnderTest) => {
+const renderHook = (hookUnderTest: () => void): void => {
 	mount(<TestHook callback={hookUnderTest} />);
 };
 
