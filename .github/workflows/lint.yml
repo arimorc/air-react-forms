@@ -23,7 +23,7 @@ jobs:
                 key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
           - name: Install modules
-            run: yarn run install-all
+            run: yarn install && yarn run install-all
 
           - name: Run ESLint
             run: yarn run eslint

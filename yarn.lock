@@ -4206,7 +4206,6 @@ __metadata:
     eslint-plugin-react-hooks: ^4.2.0
     immutability-helper: ^3.1.1
     jest: 26.6.0
-    jest-prop-type-error: ^1.1.0
     lodash: ^4.17.21
     np: ^7.5.0
     npm-run-all: ^4.1.5
@@ -11350,13 +11349,6 @@ fsevents@^1.2.7:
     jest-resolve:
       optional: true
   checksum: bd85dcc0e76e0eb0c3d56382ec140f08d25ff4068cda9d0e360bb78fb176cb726d0beab82dc0e8694cafd09f55fee7622b8bcb240afa5fad301f4ed3eebb4f47
-  languageName: node
-  linkType: hard
-
-"jest-prop-type-error@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "jest-prop-type-error@npm:1.1.0"
-  checksum: a1ba7e478b825b23143e17553129eb0a019dbda273d84ad544ef3e7a33a93c81c9589e1b6b18ca62c327361ec7f76244ecd65144d01c455044c8e14b172153bb
   languageName: node
   linkType: hard
 
