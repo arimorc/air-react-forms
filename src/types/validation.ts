@@ -1,4 +1,4 @@
-import { Checkbox } from './checkbox';
+import { CheckboxGroup } from './checkboxGroup';
 import { FieldValue } from './formElement';
 
 /**
@@ -17,6 +17,6 @@ export type ValidationValue = string | undefined;
  */
 export type ValidationRules = { [key: string]: (value: FieldValue) => ValidationValue }
 
-export type CheckboxGroupValidationRules = { [key: string]: (value: Checkbox | { [key: string]: Checkbox }) => ValidationValue }
+export type CheckboxGroupValidationRules = { [key: string]: (value: CheckboxGroup) => ValidationValue }
 
 export type FieldErrors = { [key: string]: ValidationValue | FieldErrors }

@@ -1,3 +1,5 @@
+import { FieldValue } from 'types/formElement';
+
 /**
  * @function
  * @name hasMaxLength
@@ -5,14 +7,14 @@
  *
  * @author Timothée Simon-Franza
  *
- * @param {string|number}	value			The input's current value.
- * @param {number}			maxLength		The maximal required length.
- * @param {string}			errormessage	The message to return if the validation fails.
+ * @param {FieldValue}	value			The input's current value.
+ * @param {number}		maxLength		The maximal required length.
+ * @param {string}		errormessage	The message to return if the validation fails.
  *
  * @returns {string | undefined}
  */
-const hasMaxLength = (maxLength: number, errorMessage: string) => (value: string | number): string | undefined => {
-	if (!value || value.toString().trim().length > maxLength) {
+const hasMaxLength = (maxLength: number, errorMessage: string) => (value: FieldValue): string | undefined => {
+	if (value && value.toString().trim().length > maxLength) {
 		return errorMessage;
 	}
 

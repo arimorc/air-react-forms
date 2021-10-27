@@ -1,6 +1,6 @@
 import { CheckboxGroupValidationRules, FieldErrors, ValidationRules } from './validation';
 
-export type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+export type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
 export type InputValue = string | boolean | null;
 export type FieldValue = InputValue | InputValue[] | { [key: string]: InputValue };
 

@@ -1,10 +1,12 @@
-import { createRef, MutableRefObject } from 'react';
+import React, { createRef, MutableRefObject } from 'react';
 import { isEmpty } from 'lodash';
 
 import { FieldElement, FormElement, IFormElement, IFormElementProps, InputValue } from './formElement';
+import { ValidationRules } from './validation';
 
 export interface IField extends IFormElement {
 	ref?: MutableRefObject<FieldElement | undefined>;
+	rules?: ValidationRules;
 	type?: string;
 	defaultValue?: InputValue;
 }
@@ -14,7 +16,7 @@ export interface IFieldProps extends Omit<IFormElementProps, 'isValid' | 'ref' |
 }
 
 export interface IFieldReturnProps extends Omit<IFieldProps, 'ref'> {
-	ref: (ref: FieldElement) => void,
+	ref: React.RefCallback<FieldElement>,
 	onChange?: (params?: unknown) => void,
 }
 
@@ -26,6 +28,7 @@ export interface IFieldReturnProps extends Omit<IFieldProps, 'ref'> {
  */
 export class Field extends FormElement implements IField {
 	ref?: MutableRefObject<FieldElement | undefined>;
+	rules: ValidationRules;
 	type?: string;
 	defaultValue?: InputValue;
 

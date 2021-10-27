@@ -110,7 +110,7 @@ const useForm = (props: IUseFormProps = { validateOnChange: false }): IUseFormRe
 
 		const returnedProps: IFieldReturnProps = {
 			...Field.extractFieldProps(field),
-			ref: (ref: FieldElement) => (ref ? registerField(field, ref) : unregisterField(field)),
+			ref: (instance: FieldElement) => (instance ? registerField(field, instance) : unregisterField(field)),
 		};
 
 		if (props.validateOnChange) {

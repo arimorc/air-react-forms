@@ -32,6 +32,8 @@ module.exports = {
 	},
 	rules: {
 		// note you must disable the base rule as it can report incorrect errors
+		'no-shadow': 'off',
+		'@typescript-eslint/no-shadow': ['error'],
 		'no-use-before-define': 'off',
 		'@typescript-eslint/no-use-before-define': ['error'],
 		'lines-between-class-members': 'off',

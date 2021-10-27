@@ -17,7 +17,7 @@ export interface IRadioButtonProps extends Omit<IRadioButton, 'checked'> {
 }
 
 export interface IRadioButtonReturnProps extends Omit<IRadioButtonProps, 'checked' | 'ref'> {
-	ref: (ref: HTMLInputElement) => void,
+	ref: React.RefCallback<HTMLInputElement>,
 	onChange?: (params?: unknown) => void,
 }
 

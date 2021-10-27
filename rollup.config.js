@@ -36,7 +36,7 @@ export default [
 					respository: pkg.repository,
 					license: pkg.license,
 					keywords: pkg.keywords,
-					types: 'index.d.ts',
+					types: pkg.types.replace('dist/', ''),
 					main: pkg.main.replace('dist/', ''),
 					module: pkg.module.replace('dist/', ''),
 					peerDependencies: pkg.peerDependencies,

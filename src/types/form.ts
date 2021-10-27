@@ -19,7 +19,7 @@ export interface IFormContext {
 	register: (field: IFormElementProps) => void,
 	refreshFormState: () => void,
 	validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
-	validateOnChange: boolean,
+	validateOnChange: boolean, // @TODO: update to a validationMode enum to handle onBlur and onSubmit cases
 }
 
 export interface IUseFormReturn {

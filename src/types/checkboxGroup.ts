@@ -2,6 +2,7 @@ import { isEmpty } from 'lodash';
 import { FieldValue, FormElement, IFormElement, IFormElementProps } from './formElement';
 import { Checkbox } from './checkbox';
 import { IFieldProps, IFieldReturnProps } from './field';
+import { CheckboxGroupValidationRules } from './validation';
 
 export interface IUseCheckboxGroupProps extends IFormElementProps {
 	type: 'checkbox';
@@ -14,6 +15,7 @@ export interface IUseCheckboxGroupReturn {
 
 export interface ICheckboxGroup extends IFormElement {
 	fields: { [key: string]: Checkbox },
+	rules?: CheckboxGroupValidationRules;
 	type: 'checkbox';
 	defaultValue?: FieldValue;
 }
@@ -26,6 +28,7 @@ export interface ICheckboxGroup extends IFormElement {
  */
 export class CheckboxGroup extends FormElement implements ICheckboxGroup {
 	fields: { [key: string]: Checkbox };
+	rules: CheckboxGroupValidationRules;
 	type: 'checkbox';
 	defaultValue?: FieldValue;
 

@@ -17,7 +17,7 @@ export interface ICheckboxProps extends Omit<ICheckbox, 'checked'> {
 }
 
 export interface ICheckboxReturnProps extends Omit<ICheckboxProps, 'checked' | 'ref'> {
-	ref: (ref: HTMLInputElement) => void,
+	ref: React.RefCallback<HTMLInputElement>,
 	onChange?: (params?: unknown) => void,
 }
 

@@ -4,8 +4,8 @@ describe('hasMaxLength', () => {
 	const errorMessage = 'dummy_error_message';
 	const maxLength = 8;
 
-	it('should return the provided error message if the value is undefined', () => {
-		expect(hasMaxLength(maxLength, errorMessage)(undefined)).toEqual(errorMessage);
+	it('should return undefined if the value is undefined', () => {
+		expect(hasMaxLength(maxLength, errorMessage)(undefined)).toEqual(undefined);
 	});
 
 	it('should return the provided message if the value has more length than the provided criteria.', () => {
