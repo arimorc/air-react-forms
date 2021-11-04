@@ -1,16 +1,13 @@
-import { Field, IField, IFieldProps, IFieldReturnProps } from './field';
+import { Field, IField, IFieldReturnProps } from './field';
 import { FieldValue, FormElement, IFormElement, IFormElementProps } from './formElement';
 import { FieldErrors } from './validation';
 
-export interface IUseFielsetProps extends IFormElementProps {
-	type?: string;
-}
+export type IUseFieldsetProps = Omit<IFormElement, 'errors' | 'isValid' | 'rules' | 'validate' | 'value'>;
 
 export interface IUseFieldsetReturn {
-	registerField: () => IFieldReturnProps,
-	fields: { [key: string]: Field };
-	registerFieldset: (field: IFieldProps) => IFieldReturnProps,
-	validateField: (shouldRefreshFormState: boolean) => (field: Field) => void,
+	fields: { [key: string]: Field },
+	register: (fieldData: IFormElementProps) => IFieldReturnProps,
+	validateFieldset: (shouldRefreshFormState: boolean) => void,
 }
 
 export interface IFieldArray extends IFormElement {
@@ -80,13 +77,7 @@ export class Fieldset extends FormElement implements IFieldArray {
 	 *
 	 * @returns {boolean} True if all children are valid, false otherwise.
 	 */
-	isValid = (): boolean => {
-		if (Object.keys(this.rules).length === 0) {
-			return true;
-		}
-
-		return !Object.values(this.fields).some((field: FormElement) => field.isValid() === false);
-	}
+	isValid = (): boolean => !Object.values(this.fields).some((field: FormElement) => field.isValid() === false);
 
 	/**
 	 * @function

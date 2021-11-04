@@ -8,7 +8,7 @@ export interface IField extends IFormElement {
 	ref?: MutableRefObject<FieldElement | undefined>;
 	rules?: ValidationRules;
 	type?: string;
-	defaultValue?: InputValue;
+	defaultValue?: string;
 }
 
 export interface IFieldProps extends Omit<IFormElementProps, 'isValid' | 'ref' | 'value' | 'validate' > {
@@ -30,7 +30,7 @@ export class Field extends FormElement implements IField {
 	ref?: MutableRefObject<FieldElement | undefined>;
 	rules: ValidationRules;
 	type?: string;
-	defaultValue?: InputValue;
+	defaultValue?: string;
 
 	/**
 	 * @constructor
