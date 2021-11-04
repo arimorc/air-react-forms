@@ -1,5 +1,4 @@
-import AdvancedForm from './AdvancedForm';
-import SimpleForm from './SimpleForm';
+import TypescriptForm from './TypescriptForm';
 
 /**
  * @name App
@@ -10,8 +9,7 @@ import SimpleForm from './SimpleForm';
 const App = () => (
 	<>
 		<h1>air-react-forms</h1>
-		<SimpleForm />
-		<AdvancedForm />
+		<TypescriptForm />
 	</>
 );
 

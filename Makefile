@@ -6,7 +6,7 @@ help: ## Display this message
 	@egrep '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 init: ## Initializes the project
-	@yarn run install-all
+	@yarn install && yarn run install-all
 	@echo
 	@echo You\'re good to go! You can start the project with \`make start\`
 
